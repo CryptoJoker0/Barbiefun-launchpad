@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "fqs82U_Nn8xOdYE12MTrR"
+uri = "file://barbie-fun-demo.tar.gz"
+type = "unspecified"
+title = "Barbie Fun — Demo Source (tar.gz)"
