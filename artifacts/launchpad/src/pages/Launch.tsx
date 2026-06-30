@@ -135,7 +135,7 @@ export default function Launch() {
               <AlertCircle className="w-5 h-5 text-primary mt-0.5 shrink-0" />
               <div className="text-primary-foreground/80">
                 <strong className="text-primary block mb-1">Fair Launch Warning</strong>
-                All launches on FerryPump are fair launches. 100% of the initial supply will be added to the liquidity pool. Ownership will be renounced immediately.
+                All launches on Barbie Fun are fair launches. 100% of the initial supply will be added to the liquidity pool. Ownership will be renounced immediately.
               </div>
             </div>
           </CardContent>
