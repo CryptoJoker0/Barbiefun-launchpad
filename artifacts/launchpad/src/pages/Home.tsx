@@ -76,20 +76,53 @@ export default function Home() {
               </div>
             </div>
 
-            <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight mb-3 leading-tight">
-              <span className="bg-gradient-to-r from-pink-500 via-red-400 to-pink-600 bg-clip-text text-transparent">
-                WE INTRODUCE
-              </span>
-              <br />
-              <span className="text-foreground">BARBIE FUN</span>
-            </h1>
+            {/* Main headline */}
+            <div className="mb-4">
+              <p className="text-xs sm:text-sm font-black uppercase tracking-[0.3em] text-pink-400 mb-2">
+                ✦ We Introduce ✦
+              </p>
+              <h1 className="text-5xl sm:text-6xl font-black leading-none tracking-tight mb-1">
+                <span
+                  className="block"
+                  style={{
+                    background: "linear-gradient(135deg, #ec4899 0%, #f43f5e 40%, #fb923c 70%, #ec4899 100%)",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                    backgroundClip: "text",
+                    filter: "drop-shadow(0 2px 8px rgba(236,72,153,0.35))",
+                  }}
+                >
+                  BARBIE
+                </span>
+                <span
+                  className="block"
+                  style={{
+                    background: "linear-gradient(135deg, #be185d 0%, #ec4899 50%, #f43f5e 100%)",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                    backgroundClip: "text",
+                    filter: "drop-shadow(0 2px 12px rgba(244,63,94,0.4))",
+                    letterSpacing: "0.08em",
+                  }}
+                >
+                  FUN ✨
+                </span>
+              </h1>
+            </div>
 
-            <p className="text-sm sm:text-base text-pink-700 font-semibold mb-1">
-              OWN BY NOBODY, ZERO TEAM ONLY BARBIE&apos;S.
+            <p className="text-sm text-pink-600/80 font-semibold mb-4 italic">
+              Own by nobody &mdash; zero team, only Barbie&apos;s.
             </p>
-            <p className="text-xl sm:text-2xl font-extrabold text-pink-500 mb-7 tracking-wide">
-              START LAUNCHING 🚀
-            </p>
+
+            {/* START LAUNCHING stylised */}
+            <div className="relative inline-block mb-7">
+              <div className="absolute inset-0 bg-gradient-to-r from-pink-400 to-red-400 rounded-2xl blur-md opacity-40 scale-105" />
+              <div className="relative bg-gradient-to-r from-pink-500 via-red-400 to-pink-500 rounded-2xl px-5 py-2.5 shadow-lg">
+                <span className="text-white font-black text-lg sm:text-xl tracking-widest uppercase drop-shadow">
+                  🚀 Start Launching
+                </span>
+              </div>
+            </div>
 
             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3">
               <Link href="/launch">
@@ -98,18 +131,6 @@ export default function Home() {
                   Launch a Token
                 </Button>
               </Link>
-              <a href="https://t.me" target="_blank" rel="noopener noreferrer">
-                <Button size="default" variant="outline" className="border-2 border-pink-300 text-pink-600 hover:bg-pink-50 font-bold rounded-full">
-                  <svg viewBox="0 0 24 24" className="w-4 h-4 mr-1.5 fill-[#229ED9]"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
-                  Telegram
-                </Button>
-              </a>
-              <a href="https://x.com" target="_blank" rel="noopener noreferrer">
-                <Button size="default" variant="outline" className="border-2 border-pink-300 text-pink-600 hover:bg-pink-50 font-bold rounded-full">
-                  <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 mr-1.5 fill-current"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.261 5.636 5.903-5.636zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-                  Follow on X
-                </Button>
-              </a>
             </div>
           </div>
 
