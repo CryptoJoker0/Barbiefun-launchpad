@@ -1,221 +1,230 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { AreaChart, Area, ResponsiveContainer, Tooltip, YAxis } from "recharts";
 import { mockTokens, mockTrades, formatCurrency, formatPercent, type Token } from "@/lib/mock-data";
-import { TrendingUp, TrendingDown, Zap } from "lucide-react";
+import { TrendingUp, TrendingDown, Zap, Wifi } from "lucide-react";
+import { useTopBscPairs, type DexPair } from "@/lib/dexscreener";
 
 function seededRand(seed: number) {
   const x = Math.sin(seed + 1) * 10000;
   return x - Math.floor(x);
 }
 
-function generateSparkline(token: Token, points = 40) {
+function generateSparkline(basePrice: number, change: number, points = 40) {
   const data: { t: number; v: number }[] = [];
-  let price = token.price * (1 - token.priceChange24h / 100);
+  let price = basePrice * (1 - change / 200);
   for (let i = 0; i < points; i++) {
-    const change = (seededRand(token.price * i * 7.3 + i) - 0.48) * token.price * 0.04;
-    price = Math.max(price + change, token.price * 0.1);
+    const delta = (seededRand(basePrice * i * 7.3 + i) - 0.48) * basePrice * 0.03 + (change / 100 / points) * basePrice;
+    price = Math.max(price + delta, basePrice * 0.1);
     data.push({ t: i, v: price });
   }
-  data.push({ t: points, v: token.price });
+  data.push({ t: points, v: basePrice });
   return data;
 }
 
-const TRENDING = [...mockTokens]
-  .sort((a, b) => b.volume24h - a.volume24h)
-  .slice(0, 5);
-
-const SPARKLINES = Object.fromEntries(
-  TRENDING.map((t) => [t.id, generateSparkline(t)])
+const MOCK_TRENDING = [...mockTokens].sort((a, b) => b.volume24h - a.volume24h).slice(0, 5);
+const MOCK_SPARKLINES = Object.fromEntries(
+  MOCK_TRENDING.map((t) => [t.id, generateSparkline(t.price, t.priceChange24h)])
 );
 
-function TerminalTrade({ trade, visible }: { trade: typeof mockTrades[0]; visible: boolean }) {
-  return (
-    <div
-      className={`flex items-center justify-between py-1 px-2 rounded-lg text-xs font-mono transition-all duration-500 ${visible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-1"} ${trade.type === "buy" ? "bg-green-50" : "bg-red-50"}`}
-    >
-      <span className="text-gray-400 truncate w-24">{trade.wallet}</span>
-      <span className={`font-bold px-1.5 py-0.5 rounded text-[10px] ${trade.type === "buy" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-600"}`}>
-        {trade.type === "buy" ? "BUY" : "SELL"}
-      </span>
-      <span className="text-gray-700 font-semibold">{trade.amount.toLocaleString()} <span className="text-pink-500">{trade.tokenId}</span></span>
-      <span className="text-gray-500">{formatCurrency(trade.price * trade.amount)}</span>
-    </div>
-  );
+type LiveItem = {
+  id: string;
+  name: string;
+  ticker: string;
+  price: number;
+  change: number;
+  volume: number;
+  sparkline: { t: number; v: number }[];
+  isLive: boolean;
+  pairUrl?: string;
+};
+
+function pairToLiveItem(pair: DexPair): LiveItem {
+  const price = parseFloat(pair.priceUsd || pair.priceNative || "0");
+  const change = pair.priceChange?.h24 ?? 0;
+  return {
+    id: pair.pairAddress,
+    name: pair.baseToken.name,
+    ticker: pair.baseToken.symbol,
+    price,
+    change,
+    volume: pair.volume?.h24 ?? 0,
+    sparkline: generateSparkline(price, change),
+    isLive: true,
+    pairUrl: pair.url,
+  };
+}
+
+function mockToLiveItem(t: Token): LiveItem {
+  return {
+    id: t.id,
+    name: t.name,
+    ticker: t.ticker,
+    price: t.price,
+    change: t.priceChange24h,
+    volume: t.volume24h,
+    sparkline: MOCK_SPARKLINES[t.id],
+    isLive: false,
+  };
 }
 
 export default function LiveTerminal() {
-  const [selected, setSelected] = useState<Token>(TRENDING[0]);
-  const [prices, setPrices] = useState<Record<string, number>>(
-    Object.fromEntries(TRENDING.map((t) => [t.id, t.price]))
-  );
-  const [changes, setChanges] = useState<Record<string, "up" | "down" | "">>(
-    Object.fromEntries(TRENDING.map((t) => [t.id, ""]))
-  );
-  const [trades, setTrades] = useState(mockTrades.slice(0, 6));
-  const [tradeVisible, setTradeVisible] = useState(true);
-  const tickRef = useRef(0);
+  const { data: bscPairs, isLoading } = useTopBscPairs();
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [prices, setPrices] = useState<Record<string, number>>({});
+  const [ticks, setTicks] = useState(0);
 
+  const items: LiveItem[] = bscPairs && bscPairs.length > 0
+    ? bscPairs.slice(0, 5).map(pairToLiveItem)
+    : MOCK_TRENDING.map(mockToLiveItem);
+
+  const selected = items.find((i) => i.id === selectedId) ?? items[0];
+
+  // Simulated price flicker every 2s
   useEffect(() => {
-    const interval = setInterval(() => {
-      tickRef.current++;
+    const id = setInterval(() => {
+      setTicks((t) => t + 1);
       setPrices((prev) => {
         const next = { ...prev };
-        const newChanges: Record<string, "up" | "down" | ""> = {};
-        for (const token of TRENDING) {
-          const noise = (seededRand(token.price * tickRef.current * 3.7 + tickRef.current) - 0.48) * token.price * 0.006;
-          const updated = Math.max(prev[token.id] + noise, token.price * 0.5);
-          newChanges[token.id] = updated > prev[token.id] ? "up" : "down";
-          next[token.id] = updated;
-        }
-        setChanges(newChanges);
-        setTimeout(() => setChanges(Object.fromEntries(TRENDING.map((t) => [t.id, ""]))), 600);
+        items.forEach((item) => {
+          const drift = (Math.random() - 0.499) * item.price * 0.002;
+          next[item.id] = (prev[item.id] ?? item.price) + drift;
+        });
         return next;
       });
+    }, 2000);
+    return () => clearInterval(id);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [items.length]);
 
-      if (tickRef.current % 4 === 0) {
-        setTradeVisible(false);
-        setTimeout(() => {
-          setTrades((prev) => {
-            const next = [...prev];
-            const shifted = next.shift()!;
-            next.push(shifted);
-            return next;
-          });
-          setTradeVisible(true);
-        }, 300);
-      }
-    }, 1200);
-    return () => clearInterval(interval);
-  }, []);
-
-  const chartData = SPARKLINES[selected.id].map((d) => ({ ...d }));
-  const isUp = selected.priceChange24h >= 0;
+  const getPrice = (item: LiveItem) => prices[item.id] ?? item.price;
+  const isPositive = selected ? (selected.change ?? 0) >= 0 : true;
 
   return (
-    <div className="w-full rounded-2xl border border-pink-200 bg-white shadow-xl overflow-hidden flex flex-col">
+    <div className="bg-white/80 backdrop-blur border border-pink-100 rounded-2xl shadow-lg overflow-hidden">
       {/* Terminal header */}
-      <div className="flex items-center justify-between px-4 py-2.5 bg-gradient-to-r from-pink-500 to-red-400">
+      <div className="flex items-center justify-between px-4 py-2.5 bg-gradient-to-r from-pink-500/10 to-transparent border-b border-pink-100">
         <div className="flex items-center space-x-2">
-          <Zap className="w-4 h-4 text-white" />
-          <span className="text-white font-bold text-sm tracking-wide">LIVE TERMINAL</span>
+          <div className="flex space-x-1">
+            <span className="w-2.5 h-2.5 rounded-full bg-red-400" />
+            <span className="w-2.5 h-2.5 rounded-full bg-yellow-400" />
+            <span className="w-2.5 h-2.5 rounded-full bg-green-400" />
+          </div>
+          <span className="text-[11px] font-bold text-pink-500 uppercase tracking-widest ml-1">
+            Live Terminal
+          </span>
         </div>
         <div className="flex items-center space-x-1.5">
-          <span className="w-2.5 h-2.5 rounded-full bg-red-300 animate-pulse" />
-          <span className="text-pink-100 text-xs font-mono">LIVE</span>
+          <div className={`w-1.5 h-1.5 rounded-full ${isLoading ? "bg-yellow-400" : bscPairs?.length ? "bg-green-400" : "bg-orange-400"} animate-pulse`} />
+          <span className="text-[10px] text-pink-400 font-semibold">
+            {bscPairs?.length ? "BSCScan LIVE" : isLoading ? "Connecting…" : "Mock data"}
+          </span>
+          {bscPairs?.length ? <Wifi className="w-3 h-3 text-green-500" /> : null}
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row divide-y sm:divide-y-0 sm:divide-x divide-pink-100">
-        {/* Left: trending list */}
-        <div className="sm:w-56 shrink-0 p-3 space-y-1">
-          <p className="text-[10px] font-bold text-pink-400 uppercase tracking-widest mb-2 px-1">Trending 🔥</p>
-          {TRENDING.map((token) => {
-            const live = prices[token.id];
-            const flash = changes[token.id];
-            const isSelected = selected.id === token.id;
-            return (
-              <button
-                key={token.id}
-                onClick={() => setSelected(token)}
-                className={`w-full flex items-center justify-between px-2 py-2 rounded-xl text-left transition-all ${isSelected ? "bg-pink-50 border border-pink-200" : "hover:bg-pink-50/50"}`}
-              >
-                <div className="flex items-center space-x-2 min-w-0">
-                  <div
-                    className="w-7 h-7 rounded-full shrink-0 border border-pink-100"
-                    style={{ background: token.logo }}
-                  />
-                  <div className="min-w-0">
-                    <div className="font-bold text-xs text-gray-800 truncate">{token.ticker}</div>
-                    <div className="text-[10px] text-gray-400 truncate">{token.name}</div>
-                  </div>
-                </div>
-                <div className="text-right shrink-0 ml-2">
-                  <div
-                    className={`text-xs font-mono font-bold transition-colors duration-300 ${
-                      flash === "up" ? "text-green-500" : flash === "down" ? "text-red-500" : "text-gray-700"
-                    }`}
-                  >
-                    {formatCurrency(live)}
-                  </div>
-                  <div className={`text-[10px] font-semibold ${token.priceChange24h >= 0 ? "text-green-500" : "text-red-500"}`}>
-                    {formatPercent(token.priceChange24h)}
-                  </div>
-                </div>
-              </button>
-            );
-          })}
-        </div>
+      <div className="grid grid-cols-5 text-[11px] font-mono border-b border-pink-50 bg-pink-50/40">
+        <div className="col-span-2 px-3 py-1.5 text-pink-400 font-bold">TOKEN</div>
+        <div className="px-2 py-1.5 text-pink-400 font-bold text-right">PRICE</div>
+        <div className="px-2 py-1.5 text-pink-400 font-bold text-right">24H</div>
+        <div className="px-2 py-1.5 text-pink-400 font-bold text-right">CHART</div>
+      </div>
 
-        {/* Right: chart + trades */}
-        <div className="flex-1 flex flex-col min-w-0">
-          {/* Selected token header */}
-          <div className="px-4 pt-3 pb-1 flex items-center justify-between">
+      {/* Token rows */}
+      <div className="divide-y divide-pink-50">
+        {items.map((item) => {
+          const livePrice = getPrice(item);
+          const up = (item.change ?? 0) >= 0;
+          const isSelected = (selected?.id ?? items[0]?.id) === item.id;
+          return (
+            <button
+              key={item.id}
+              onClick={() => setSelectedId(item.id)}
+              className={`w-full grid grid-cols-5 text-xs font-mono py-2 px-2 hover:bg-pink-50/60 transition-colors text-left ${isSelected ? "bg-pink-50/80 border-l-2 border-pink-400" : ""}`}
+            >
+              <div className="col-span-2 flex items-center space-x-2 min-w-0">
+                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-pink-200 to-red-200 shrink-0 flex items-center justify-center text-[9px] font-black text-pink-600">
+                  {item.ticker.slice(0, 2)}
+                </div>
+                <div className="min-w-0">
+                  <div className="font-bold text-gray-800 truncate text-[11px]">{item.ticker}</div>
+                  {item.isLive && <div className="text-[9px] text-green-500 font-bold">LIVE</div>}
+                </div>
+              </div>
+              <div className="px-1 py-0 flex items-center justify-end">
+                <span className="text-gray-700 font-semibold text-[10px]">
+                  {livePrice < 0.001 ? livePrice.toExponential(2) : livePrice < 1 ? `$${livePrice.toFixed(6)}` : `$${livePrice.toFixed(4)}`}
+                </span>
+              </div>
+              <div className={`flex items-center justify-end px-1 text-[10px] font-bold ${up ? "text-green-500" : "text-red-500"}`}>
+                {up ? "▲" : "▼"} {Math.abs(item.change ?? 0).toFixed(1)}%
+              </div>
+              <div className="px-1">
+                <ResponsiveContainer width="100%" height={28}>
+                  <AreaChart data={item.sparkline}>
+                    <defs>
+                      <linearGradient id={`sg-${item.id}`} x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor={up ? "#22c55e" : "#ef4444"} stopOpacity={0.3} />
+                        <stop offset="95%" stopColor={up ? "#22c55e" : "#ef4444"} stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <YAxis domain={["dataMin", "dataMax"]} hide />
+                    <Area type="monotone" dataKey="v" stroke={up ? "#22c55e" : "#ef4444"}
+                      strokeWidth={1.5} fill={`url(#sg-${item.id})`} dot={false} />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Selected token detail */}
+      {selected && (
+        <div className="border-t border-pink-100 p-3 bg-gradient-to-r from-pink-50/60 to-transparent">
+          <div className="flex items-center justify-between mb-2">
             <div className="flex items-center space-x-2">
-              <div
-                className="w-8 h-8 rounded-full border border-pink-100"
-                style={{ background: selected.logo }}
-              />
-              <div>
-                <Link href={`/token/${selected.id}`}>
-                  <span className="font-extrabold text-sm text-gray-800 hover:text-pink-500 transition-colors cursor-pointer">
-                    {selected.name}
-                  </span>
-                </Link>
-                <div className="text-[10px] text-gray-400 font-mono">${selected.ticker}</div>
+              <Zap className="w-3.5 h-3.5 text-pink-500" />
+              <span className="font-bold text-sm text-gray-800">${selected.ticker}</span>
+              <span className="text-xs text-gray-400">{selected.name}</span>
+              {selected.isLive && <span className="text-[9px] bg-green-50 text-green-600 border border-green-200 px-1.5 py-0.5 rounded-full font-bold">LIVE</span>}
+            </div>
+            <div className={`text-xs font-bold ${isPositive ? "text-green-500" : "text-red-500"}`}>
+              {isPositive ? <TrendingUp className="w-3.5 h-3.5 inline mr-0.5" /> : <TrendingDown className="w-3.5 h-3.5 inline mr-0.5" />}
+              {formatPercent(selected.change ?? 0)}
+            </div>
+          </div>
+          <div className="grid grid-cols-3 gap-2 text-[10px]">
+            <div>
+              <div className="text-pink-400 font-semibold">PRICE</div>
+              <div className="font-mono font-bold text-gray-800">
+                {selected.price < 0.001 ? `$${selected.price.toExponential(3)}` : formatCurrency(getPrice(selected))}
               </div>
             </div>
-            <div className="text-right">
-              <div className="font-mono font-bold text-base text-gray-800">{formatCurrency(prices[selected.id])}</div>
-              <div className={`text-xs font-bold flex items-center justify-end space-x-0.5 ${isUp ? "text-green-500" : "text-red-500"}`}>
-                {isUp ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                <span>{formatPercent(selected.priceChange24h)}</span>
-              </div>
+            <div>
+              <div className="text-pink-400 font-semibold">VOLUME 24H</div>
+              <div className="font-mono font-bold text-gray-800">{formatCurrency(selected.volume)}</div>
+            </div>
+            <div>
+              <div className="text-pink-400 font-semibold">CHAIN</div>
+              <div className="font-mono font-bold text-gray-800">🟡 BSC</div>
             </div>
           </div>
 
-          {/* Sparkline */}
-          <div className="h-20 px-2">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="termGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={isUp ? "#22c55e" : "#ef4444"} stopOpacity={0.3} />
-                    <stop offset="95%" stopColor={isUp ? "#22c55e" : "#ef4444"} stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <YAxis domain={["dataMin", "dataMax"]} hide />
-                <Tooltip
-                  content={({ active, payload }) =>
-                    active && payload?.length ? (
-                      <div className="bg-white border border-pink-200 rounded-lg px-2 py-1 text-xs font-mono shadow-md text-gray-700">
-                        {formatCurrency(payload[0].value as number)}
-                      </div>
-                    ) : null
-                  }
-                />
-                <Area
-                  type="monotone"
-                  dataKey="v"
-                  stroke={isUp ? "#22c55e" : "#ef4444"}
-                  strokeWidth={2}
-                  fill="url(#termGrad)"
-                  dot={false}
-                  isAnimationActive={false}
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-
-          {/* Live trades */}
-          <div className="px-3 pb-3 space-y-1 border-t border-pink-50 pt-2">
-            <p className="text-[10px] font-bold text-pink-400 uppercase tracking-widest mb-1.5">Recent Trades</p>
-            {trades.slice(0, 4).map((trade, i) => (
-              <TerminalTrade key={i} trade={trade} visible={tradeVisible} />
+          {/* Live trades feed (mock) */}
+          <div className="mt-2 space-y-1">
+            {mockTrades.slice(0, 3).map((trade, i) => (
+              <div key={i}
+                className={`flex items-center justify-between py-0.5 px-2 rounded text-[10px] font-mono ${trade.type === "buy" ? "bg-green-50" : "bg-red-50"}`}
+              >
+                <span className="text-gray-400 truncate w-20">{trade.wallet.slice(0, 8)}…</span>
+                <span className={`font-bold ${trade.type === "buy" ? "text-green-600" : "text-red-600"}`}>{trade.type.toUpperCase()}</span>
+                <span className="text-gray-600">{formatCurrency(trade.price * trade.amount)}</span>
+              </div>
             ))}
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

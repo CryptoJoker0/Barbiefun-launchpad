@@ -1,0 +1,1 @@
+- [Wagmi v2 dependency setup](wagmi-setup.md) — wagmi/viem must be in devDependencies (not dependencies) in launchpad; pin exact versions 2.19.5/2.53.1 to avoid v3 conflict.
