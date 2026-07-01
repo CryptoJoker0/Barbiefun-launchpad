@@ -13,7 +13,26 @@ export type Token = {
   description: string;
   contractAddress: string;
   totalSupply: number;
+  /** Liquidity target to "graduate" to a DEX, in USD */
+  graduationTarget: number;
+  /** How much of the bonding curve pool has been filled, in USD */
+  bondingRaised: number;
 };
+
+export const GRADUATION_DEX: Record<string, string> = {
+  bsc: "PancakeSwap",
+  ethereum: "Uniswap",
+  xlayer: "OKX DEX",
+  core: "SushiSwap",
+};
+
+export function getBondingProgress(token: Token): number {
+  return Math.min(100, (token.bondingRaised / token.graduationTarget) * 100);
+}
+
+export function isGraduated(token: Token): boolean {
+  return token.bondingRaised >= token.graduationTarget;
+}
 
 export type Trade = {
   tokenId: string;
@@ -115,6 +134,11 @@ export const mockTokens: Token[] = tokenNames.map((t, i) => {
   const isVerified = i < 6;
   const holders = Math.floor(seededRand(i * 13) * 10000) + 100;
 
+  // graduation target: $30K–$88K (themed around lucky numbers)
+  const graduationTarget = Math.round((seededRand(i * 43) * 58000 + 30000) / 1000) * 1000;
+  // How much has been raised: 0–110% of target (some tokens are graduated)
+  const bondingRaised = Math.round(seededRand(i * 47) * graduationTarget * 1.1);
+
   return {
     id: t.ticker.toLowerCase(),
     name: t.name,
@@ -130,6 +154,8 @@ export const mockTokens: Token[] = tokenNames.map((t, i) => {
     description: descriptions[i % descriptions.length],
     contractAddress: contractAddresses[i % contractAddresses.length],
     totalSupply: 1000000000,
+    graduationTarget,
+    bondingRaised,
   };
 });
 

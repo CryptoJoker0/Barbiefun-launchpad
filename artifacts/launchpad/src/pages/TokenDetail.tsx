@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { mockTokens, formatCurrency, formatPercent } from "@/lib/mock-data";
-import { CheckCircle, TrendingUp, TrendingDown, ExternalLink, Wallet, Copy } from "lucide-react";
+import { mockTokens, formatCurrency, formatPercent, getBondingProgress, isGraduated } from "@/lib/mock-data";
+import { CheckCircle, TrendingUp, TrendingDown, ExternalLink, Wallet, Copy, GraduationCap, Zap } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { useAccount } from "wagmi";
 import { useTopBscPairs } from "@/lib/dexscreener";
@@ -117,6 +117,78 @@ export default function TokenDetail() {
             </div>
           ))}
         </div>
+
+        {/* Bonding Curve Panel */}
+        {(() => {
+          const pct = getBondingProgress(token);
+          const graduated = isGraduated(token);
+          const barColor = graduated
+            ? "bg-gradient-to-r from-yellow-400 to-amber-500"
+            : pct >= 75
+            ? "bg-gradient-to-r from-orange-400 to-pink-500"
+            : "bg-gradient-to-r from-pink-300 to-pink-500";
+          return (
+            <div className={`bg-white border rounded-2xl p-5 shadow-sm ${graduated ? "border-amber-200" : "border-pink-100"}`}>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center space-x-2">
+                  {graduated
+                    ? <GraduationCap className="w-5 h-5 text-amber-500" />
+                    : <Zap className="w-5 h-5 text-pink-500" />}
+                  <h3 className="font-bold text-gray-800">
+                    {graduated ? "🎓 Graduated to DEX!" : "Bonding Curve Progress"}
+                  </h3>
+                </div>
+                <span className={`text-sm font-black ${graduated ? "text-amber-600" : pct >= 75 ? "text-orange-500" : "text-pink-500"}`}>
+                  {pct.toFixed(1)}%
+                </span>
+              </div>
+
+              {/* Track */}
+              <div className="relative h-4 w-full rounded-full bg-pink-100 overflow-hidden mb-3">
+                <div
+                  className={`h-full rounded-full transition-all duration-700 ${barColor} relative overflow-hidden`}
+                  style={{ width: `${Math.max(2, Math.min(100, pct))}%` }}
+                >
+                  {!graduated && (
+                    <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent" style={{ animation: "shimmer 2s infinite" }} />
+                  )}
+                </div>
+                {/* graduation tick */}
+                <div className="absolute right-0 top-0 h-full w-1 bg-amber-400/70 rounded-r-full" />
+              </div>
+
+              {/* Numbers row */}
+              <div className="grid grid-cols-3 gap-3">
+                <div className="bg-pink-50 rounded-xl p-3 text-center">
+                  <div className="text-[10px] text-pink-400 font-bold uppercase tracking-wide mb-1">Raised</div>
+                  <div className="font-mono font-bold text-gray-800 text-sm">{formatCurrency(token.bondingRaised)}</div>
+                </div>
+                <div className="bg-pink-50 rounded-xl p-3 text-center">
+                  <div className="text-[10px] text-pink-400 font-bold uppercase tracking-wide mb-1">Target</div>
+                  <div className="font-mono font-bold text-gray-800 text-sm">{formatCurrency(token.graduationTarget)}</div>
+                </div>
+                <div className={`${graduated ? "bg-amber-50 border border-amber-200" : "bg-pink-50"} rounded-xl p-3 text-center`}>
+                  <div className="text-[10px] text-pink-400 font-bold uppercase tracking-wide mb-1">Remaining</div>
+                  <div className={`font-mono font-bold text-sm ${graduated ? "text-amber-600" : "text-gray-800"}`}>
+                    {graduated ? "✓ Done" : formatCurrency(Math.max(0, token.graduationTarget - token.bondingRaised))}
+                  </div>
+                </div>
+              </div>
+
+              {graduated ? (
+                <div className="mt-3 bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-xl px-4 py-3 text-center">
+                  <p className="text-sm font-bold text-amber-700">
+                    🎓 This token graduated! Now trading on <span className="underline">{currentChain.id === 56 ? "PancakeSwap" : "Uniswap"}</span>.
+                  </p>
+                </div>
+              ) : (
+                <p className="mt-3 text-xs text-pink-400 text-center">
+                  When the curve fills, {formatCurrency(token.graduationTarget)} liquidity auto-deploys to {currentChain.id === 56 ? "PancakeSwap" : "Uniswap"} 🚀
+                </p>
+              )}
+            </div>
+          );
+        })()}
 
         {/* Chart */}
         <div className="bg-white border border-pink-100 rounded-2xl p-5 shadow-sm">
