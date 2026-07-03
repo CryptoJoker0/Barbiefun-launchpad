@@ -1,332 +1,178 @@
 import { useState } from "react";
-import { useParams } from "wouter";
+import { useParams, Link } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { mockTokens, formatCurrency, formatPercent, getBondingProgress, isGraduated } from "@/lib/mock-data";
-import { CheckCircle, TrendingUp, TrendingDown, ExternalLink, Wallet, Copy, GraduationCap, Zap } from "lucide-react";
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
-import { useAccount } from "wagmi";
-import { useTopBscPairs } from "@/lib/dexscreener";
+import { getLaunchById, formatSupply } from "@/lib/launches";
 import { SUPPORTED_CHAINS } from "@/lib/wagmi";
-import WalletModal from "@/components/WalletModal";
+import ChainIcon from "@/components/ChainIcon";
+import { CheckCircle, ExternalLink, Copy, Clock, Info, Rocket } from "lucide-react";
 
-function seededRand(seed: number) {
-  const x = Math.sin(seed + 1) * 10000;
-  return x - Math.floor(x);
-}
-
-const generateChartData = (basePrice: number) => {
-  let price = basePrice;
-  return Array.from({ length: 120 }).map((_, i) => {
-    const swing = Math.sin(i * 0.25) * 0.018 + Math.cos(i * 0.6) * 0.012 + (seededRand(basePrice * i * 3.7) - 0.47) * 0.025;
-    price = Math.max(price * (1 + swing), basePrice * 0.2);
-    return { t: i, price };
-  });
+const CHAIN_EXPLORERS: Record<number, string> = {
+  56: "https://bscscan.com/tx/",
+  1: "https://etherscan.io/tx/",
+  196: "https://www.okx.com/explorer/xlayer/tx/",
+  4217: "https://explore.tempo.xyz/tx/",
+  5042002: "https://testnet.arcscan.app/tx/",
+  4663: "https://robinhoodchain.blockscout.com/tx/",
 };
 
 export default function TokenDetail() {
   const { id } = useParams();
-  const token = mockTokens.find((t) => t.id === id) || mockTokens[0];
-  const { isConnected, chain } = useAccount();
-  const [walletOpen, setWalletOpen] = useState(false);
-  const [tradeMode, setTradeMode] = useState<"buy" | "sell">("buy");
-  const [amount, setAmount] = useState("");
-  const [timeframe, setTimeframe] = useState("1D");
   const [copied, setCopied] = useState(false);
+  const launch = id ? getLaunchById(id) : undefined;
 
-  const { data: bscPairs } = useTopBscPairs();
-  const livePair = bscPairs?.find((p) =>
-    p.baseToken.symbol.toLowerCase() === token.ticker.toLowerCase()
-  );
+  if (!launch) {
+    return (
+      <div className="max-w-lg mx-auto py-16 text-center">
+        <Info className="w-8 h-8 text-pink-200 mx-auto mb-3" />
+        <h2 className="text-xl font-bold text-gray-700 mb-2">Launch not found</h2>
+        <p className="text-sm text-gray-400 mb-6">This token launch record doesn&apos;t exist in this browser&apos;s history.</p>
+        <Link href="/">
+          <Button className="bg-gradient-to-r from-pink-500 to-red-500 text-white font-bold rounded-full">Back to Terminal</Button>
+        </Link>
+      </div>
+    );
+  }
 
-  const livePrice = livePair?.priceUsd ? parseFloat(livePair.priceUsd) : token.price;
-  const liveChange = livePair?.priceChange?.h24 ?? token.priceChange24h;
-  const liveVolume = livePair?.volume?.h24 ?? token.volume24h;
-  const liveMcap = livePair?.marketCap ?? token.marketCap;
+  const chainMeta = SUPPORTED_CHAINS.find((c) => c.id === launch.chainId);
+  const explorerBase = CHAIN_EXPLORERS[launch.chainId];
+  const explorerUrl = explorerBase ? `${explorerBase}${launch.feeTxHash}` : undefined;
 
-  const chartData = generateChartData(livePrice);
-  const isPositive = liveChange >= 0;
-
-  const currentChain = SUPPORTED_CHAINS.find((c) => c.id === chain?.id) || SUPPORTED_CHAINS[0];
-  const dexUrl = `${currentChain.dex}?outputCurrency=${token.contractAddress}`;
-  const explorerUrl = chain?.id === 56
-    ? `https://bscscan.com/address/${token.contractAddress}`
-    : `https://etherscan.io/address/${token.contractAddress}`;
-
-  const copy = () => {
-    navigator.clipboard.writeText(token.contractAddress);
+  const copyDeployer = () => {
+    navigator.clipboard.writeText(launch.deployer);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const estimatedOut = amount
-    ? (parseFloat(amount) / livePrice).toFixed(2)
-    : "";
-
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-in fade-in duration-500 pb-20">
-      {/* Left: Chart + info */}
       <div className="lg:col-span-2 space-y-5">
-        {/* Token Header */}
         <div className="bg-white border border-pink-100 rounded-2xl p-6 shadow-sm">
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
             <div className="flex items-start space-x-4">
-              <div className="w-16 h-16 rounded-full border-2 border-pink-100 shadow-md shrink-0" style={{ background: token.logo }} />
+              <div className="w-16 h-16 rounded-full border-2 border-pink-100 shadow-md shrink-0 bg-gradient-to-br from-pink-300 to-red-300 flex items-center justify-center text-white font-black">
+                {launch.ticker.slice(0, 2)}
+              </div>
               <div>
                 <div className="flex items-center flex-wrap gap-2 mb-1">
-                  <h1 className="text-2xl font-extrabold">{token.name}</h1>
-                  <Badge className="font-mono text-xs border-pink-200 text-pink-600 bg-pink-50">${token.ticker}</Badge>
-                  {token.isVerified && <CheckCircle className="w-5 h-5 text-pink-500" />}
-                  {livePair && <Badge className="text-[10px] bg-green-50 text-green-600 border-green-200">🔴 LIVE</Badge>}
+                  <h1 className="text-2xl font-extrabold">{launch.name}</h1>
+                  <Badge className="font-mono text-xs border-pink-200 text-pink-600 bg-pink-50">${launch.ticker}</Badge>
                 </div>
-                <div className="flex items-center space-x-2 text-xs font-mono bg-pink-50 px-3 py-1.5 rounded-lg border border-pink-100">
-                  <span className="truncate max-w-[180px] sm:max-w-xs text-gray-600">{token.contractAddress}</span>
-                  <button onClick={copy} className="text-pink-400 hover:text-pink-600">
-                    {copied ? <CheckCircle className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5" />}
-                  </button>
-                  <a href={explorerUrl} target="_blank" rel="noopener noreferrer" className="text-pink-400 hover:text-pink-600">
-                    <ExternalLink className="w-3.5 h-3.5" />
-                  </a>
-                </div>
+                {chainMeta && (
+                  <div className="flex items-center space-x-2 text-xs font-semibold text-gray-500">
+                    <ChainIcon chain={chainMeta.icon} size={16} />
+                    <span>{chainMeta.name}</span>
+                    {chainMeta.isTestnet && <span className="text-amber-500">(testnet)</span>}
+                  </div>
+                )}
               </div>
             </div>
             <div className="text-right">
-              <div className="text-3xl font-bold font-mono">{formatCurrency(livePrice)}</div>
-              <div className={`flex items-center justify-end text-sm font-semibold mt-1 ${isPositive ? "text-green-500" : "text-red-500"}`}>
-                {isPositive ? <TrendingUp className="w-4 h-4 mr-1" /> : <TrendingDown className="w-4 h-4 mr-1" />}
-                {formatPercent(liveChange)} 24h
+              <div className="text-xs text-pink-400 font-semibold mb-1 flex items-center justify-end space-x-1">
+                <Clock className="w-3 h-3" /><span>{new Date(launch.createdAt).toLocaleString()}</span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {[
-            { label: "Market Cap", value: formatCurrency(liveMcap) },
-            { label: "24h Volume", value: formatCurrency(liveVolume) },
-            { label: "Holders", value: token.holders.toLocaleString() },
-            { label: "Total Supply", value: "1B" },
-          ].map((s) => (
-            <div key={s.label} className="bg-white border border-pink-100 rounded-xl p-4 shadow-sm">
-              <div className="text-xs text-pink-400 font-semibold mb-1">{s.label}</div>
-              <div className="font-mono font-bold text-base text-gray-800">{s.value}</div>
-            </div>
-          ))}
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 flex items-start space-x-3">
+          <Info className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+          <p className="text-sm text-amber-700">
+            <strong>Contract deployment pending.</strong> This record confirms the $5 launch fee was paid on-chain.
+            Actual ERC-20 contract deployment requires a per-chain factory contract, which is the next production
+            step for Barbie Fun (see the launch summary for details).
+          </p>
         </div>
 
-        {/* Bonding Curve Panel */}
-        {(() => {
-          const pct = getBondingProgress(token);
-          const graduated = isGraduated(token);
-          const barColor = graduated
-            ? "bg-gradient-to-r from-yellow-400 to-amber-500"
-            : pct >= 75
-            ? "bg-gradient-to-r from-orange-400 to-pink-500"
-            : "bg-gradient-to-r from-pink-300 to-pink-500";
-          return (
-            <div className={`bg-white border rounded-2xl p-5 shadow-sm ${graduated ? "border-amber-200" : "border-pink-100"}`}>
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center space-x-2">
-                  {graduated
-                    ? <GraduationCap className="w-5 h-5 text-amber-500" />
-                    : <Zap className="w-5 h-5 text-pink-500" />}
-                  <h3 className="font-bold text-gray-800">
-                    {graduated ? "🎓 Graduated to DEX!" : "Bonding Curve Progress"}
-                  </h3>
-                </div>
-                <span className={`text-sm font-black ${graduated ? "text-amber-600" : pct >= 75 ? "text-orange-500" : "text-pink-500"}`}>
-                  {pct.toFixed(1)}%
-                </span>
-              </div>
-
-              {/* Track */}
-              <div className="relative h-4 w-full rounded-full bg-pink-100 overflow-hidden mb-3">
-                <div
-                  className={`h-full rounded-full transition-all duration-700 ${barColor} relative overflow-hidden`}
-                  style={{ width: `${Math.max(2, Math.min(100, pct))}%` }}
-                >
-                  {!graduated && (
-                    <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent" style={{ animation: "shimmer 2s infinite" }} />
-                  )}
-                </div>
-                {/* graduation tick */}
-                <div className="absolute right-0 top-0 h-full w-1 bg-amber-400/70 rounded-r-full" />
-              </div>
-
-              {/* Numbers row */}
-              <div className="grid grid-cols-3 gap-3">
-                <div className="bg-pink-50 rounded-xl p-3 text-center">
-                  <div className="text-[10px] text-pink-400 font-bold uppercase tracking-wide mb-1">Raised</div>
-                  <div className="font-mono font-bold text-gray-800 text-sm">{formatCurrency(token.bondingRaised)}</div>
-                </div>
-                <div className="bg-pink-50 rounded-xl p-3 text-center">
-                  <div className="text-[10px] text-pink-400 font-bold uppercase tracking-wide mb-1">Target</div>
-                  <div className="font-mono font-bold text-gray-800 text-sm">{formatCurrency(token.graduationTarget)}</div>
-                </div>
-                <div className={`${graduated ? "bg-amber-50 border border-amber-200" : "bg-pink-50"} rounded-xl p-3 text-center`}>
-                  <div className="text-[10px] text-pink-400 font-bold uppercase tracking-wide mb-1">Remaining</div>
-                  <div className={`font-mono font-bold text-sm ${graduated ? "text-amber-600" : "text-gray-800"}`}>
-                    {graduated ? "✓ Done" : formatCurrency(Math.max(0, token.graduationTarget - token.bondingRaised))}
-                  </div>
-                </div>
-              </div>
-
-              {graduated ? (
-                <div className="mt-3 bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-xl px-4 py-3 text-center">
-                  <p className="text-sm font-bold text-amber-700">
-                    🎓 This token graduated! Now trading on <span className="underline">{currentChain.id === 56 ? "PancakeSwap" : "Uniswap"}</span>.
-                  </p>
-                </div>
-              ) : (
-                <p className="mt-3 text-xs text-pink-400 text-center">
-                  When the curve fills, {formatCurrency(token.graduationTarget)} liquidity auto-deploys to {currentChain.id === 56 ? "PancakeSwap" : "Uniswap"} 🚀
-                </p>
-              )}
-            </div>
-          );
-        })()}
-
-        {/* Chart */}
-        <div className="bg-white border border-pink-100 rounded-2xl p-5 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-bold text-gray-800">Price Chart</h3>
-            <div className="flex space-x-1">
-              {["1H", "6H", "1D", "7D", "30D"].map((tf) => (
-                <button key={tf} onClick={() => setTimeframe(tf)}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${timeframe === tf ? "bg-pink-500 text-white" : "text-pink-400 hover:bg-pink-50"}`}>
-                  {tf}
-                </button>
-              ))}
-            </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          <div className="bg-white border border-pink-100 rounded-xl p-4 shadow-sm">
+            <div className="text-xs text-pink-400 font-semibold mb-1">Total Supply</div>
+            <div className="font-mono font-bold text-base text-gray-800">{formatSupply(launch.totalSupply)}</div>
           </div>
-          <ResponsiveContainer width="100%" height={240}>
-            <AreaChart data={chartData}>
-              <defs>
-                <linearGradient id="colorGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={isPositive ? "#22c55e" : "#ef4444"} stopOpacity={0.25} />
-                  <stop offset="95%" stopColor={isPositive ? "#22c55e" : "#ef4444"} stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <XAxis dataKey="t" hide />
-              <YAxis domain={["dataMin", "dataMax"]} hide />
-              <Tooltip
-                content={({ active, payload }) =>
-                  active && payload?.length ? (
-                    <div className="bg-white border border-pink-200 rounded-lg px-3 py-1.5 text-xs font-mono shadow-md">
-                      {formatCurrency(payload[0].value as number)}
-                    </div>
-                  ) : null
-                }
-              />
-              <Area type="monotone" dataKey="price" stroke={isPositive ? "#22c55e" : "#ef4444"}
-                strokeWidth={2} fill="url(#colorGrad)" dot={false} />
-            </AreaChart>
-          </ResponsiveContainer>
+          <div className="bg-white border border-pink-100 rounded-xl p-4 shadow-sm">
+            <div className="text-xs text-pink-400 font-semibold mb-1">Chain</div>
+            <div className="font-mono font-bold text-base text-gray-800">{chainMeta?.name ?? launch.chainName}</div>
+          </div>
+          <div className="bg-white border border-pink-100 rounded-xl p-4 shadow-sm">
+            <div className="text-xs text-pink-400 font-semibold mb-1">Deployer</div>
+            <button onClick={copyDeployer} className="flex items-center space-x-1 font-mono font-bold text-sm text-gray-800 hover:text-pink-600">
+              <span>{launch.deployer.slice(0, 6)}…{launch.deployer.slice(-4)}</span>
+              {copied ? <CheckCircle className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5" />}
+            </button>
+          </div>
         </div>
 
-        {/* About */}
-        <div className="bg-white border border-pink-100 rounded-2xl p-5 shadow-sm">
-          <h3 className="font-bold text-gray-800 mb-2">About {token.name}</h3>
-          <p className="text-sm text-gray-600">{token.description}</p>
-        </div>
+        {launch.description && (
+          <div className="bg-white border border-pink-100 rounded-2xl p-5 shadow-sm">
+            <h3 className="font-bold text-gray-800 mb-2">About {launch.name}</h3>
+            <p className="text-sm text-gray-600">{launch.description}</p>
+          </div>
+        )}
+
+        {(launch.website || launch.twitter || launch.telegram) && (
+          <div className="bg-white border border-pink-100 rounded-2xl p-5 shadow-sm flex flex-wrap gap-3">
+            {launch.website && (
+              <a href={launch.website} target="_blank" rel="noopener noreferrer">
+                <Button variant="outline" size="sm" className="border-pink-200 text-pink-600 rounded-full">Website</Button>
+              </a>
+            )}
+            {launch.twitter && (
+              <a href={launch.twitter} target="_blank" rel="noopener noreferrer">
+                <Button variant="outline" size="sm" className="border-pink-200 text-pink-600 rounded-full">X / Twitter</Button>
+              </a>
+            )}
+            {launch.telegram && (
+              <a href={launch.telegram} target="_blank" rel="noopener noreferrer">
+                <Button variant="outline" size="sm" className="border-pink-200 text-pink-600 rounded-full">Telegram</Button>
+              </a>
+            )}
+          </div>
+        )}
       </div>
 
-      {/* Right: Trade Panel */}
+      {/* Right: fee & chain info */}
       <div className="space-y-4">
         <div className="bg-white border border-pink-100 rounded-2xl shadow-sm overflow-hidden sticky top-20">
           <div className="bg-gradient-to-r from-pink-500 to-red-400 px-5 py-3">
-            <h3 className="font-extrabold text-white text-lg">Trade ${token.ticker}</h3>
-            <p className="text-pink-100 text-xs">{currentChain.emoji} {currentChain.name}</p>
+            <h3 className="font-extrabold text-white text-lg">Launch Record</h3>
+            {chainMeta && <p className="text-pink-100 text-xs flex items-center space-x-1"><ChainIcon chain={chainMeta.icon} size={12} /><span>{chainMeta.name}</span></p>}
           </div>
 
           <div className="p-5 space-y-4">
-            {/* Buy / Sell tabs */}
-            <div className="flex rounded-xl overflow-hidden border border-pink-100">
-              <button onClick={() => setTradeMode("buy")}
-                className={`flex-1 py-2.5 font-bold text-sm transition-all ${tradeMode === "buy" ? "bg-green-500 text-white" : "text-gray-500 hover:bg-pink-50"}`}>
-                Buy
-              </button>
-              <button onClick={() => setTradeMode("sell")}
-                className={`flex-1 py-2.5 font-bold text-sm transition-all ${tradeMode === "sell" ? "bg-red-500 text-white" : "text-gray-500 hover:bg-pink-50"}`}>
-                Sell
-              </button>
-            </div>
-
-            {/* Amount input */}
             <div>
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5 block">
-                Amount ({tradeMode === "buy" ? currentChain.symbol : `$${token.ticker}`})
-              </label>
-              <div className="relative">
-                <Input type="number" placeholder="0.00" value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  className="border-pink-200 focus:border-pink-400 pr-16 text-lg font-mono" />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-pink-400">
-                  {tradeMode === "buy" ? currentChain.symbol : token.ticker}
-                </span>
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5 block">Fee Transaction</label>
+              <div className="flex items-center justify-between bg-pink-50 border border-pink-100 rounded-xl px-3 py-2.5">
+                <span className="font-mono text-xs text-gray-600 truncate">{launch.feeTxHash}</span>
+                {explorerUrl && (
+                  <a href={explorerUrl} target="_blank" rel="noopener noreferrer" className="ml-2 shrink-0 text-pink-500 hover:text-pink-700">
+                    <ExternalLink className="w-4 h-4" />
+                  </a>
+                )}
               </div>
             </div>
 
-            {/* Quick amounts */}
-            <div className="grid grid-cols-4 gap-1.5">
-              {["0.1", "0.5", "1", "5"].map((v) => (
-                <button key={v} onClick={() => setAmount(v)}
-                  className="py-1.5 rounded-lg text-xs font-bold border border-pink-200 text-pink-500 hover:bg-pink-50 transition-colors">
-                  {v}
-                </button>
-              ))}
-            </div>
-
-            {/* Estimated output */}
-            {estimatedOut && (
-              <div className="bg-pink-50 border border-pink-100 rounded-xl p-3 text-center">
-                <p className="text-xs text-pink-400 font-semibold mb-0.5">You receive ~</p>
-                <p className="font-mono font-bold text-gray-800">{estimatedOut} ${token.ticker}</p>
-              </div>
-            )}
-
-            {/* Trade button */}
-            {isConnected ? (
-              <a href={dexUrl} target="_blank" rel="noopener noreferrer">
-                <Button className={`w-full font-extrabold text-base h-12 rounded-xl ${tradeMode === "buy" ? "bg-green-500 hover:bg-green-600" : "bg-red-500 hover:bg-red-600"} text-white`}>
+            {chainMeta && (
+              <a href={chainMeta.dex} target="_blank" rel="noopener noreferrer">
+                <Button className="w-full bg-gradient-to-r from-pink-500 to-red-500 text-white font-extrabold text-base h-12 rounded-xl">
                   <ExternalLink className="w-4 h-4 mr-2" />
-                  {tradeMode === "buy" ? "Buy" : "Sell"} on {tradeMode === "buy" && currentChain.id === 56 ? "PancakeSwap" : "DEX"}
+                  Open {chainMeta.name} DEX
                 </Button>
               </a>
-            ) : (
-              <Button onClick={() => setWalletOpen(true)}
-                className="w-full bg-gradient-to-r from-pink-500 to-red-500 text-white font-extrabold text-base h-12 rounded-xl">
-                <Wallet className="w-4 h-4 mr-2" />
-                Connect Wallet to Trade
-              </Button>
             )}
 
-            {/* Links */}
-            <div className="flex gap-2 pt-1">
-              <a href={explorerUrl} target="_blank" rel="noopener noreferrer" className="flex-1">
-                <Button variant="outline" size="sm" className="w-full text-xs border-pink-200 text-pink-500 rounded-lg">
-                  <ExternalLink className="w-3 h-3 mr-1" />Explorer
-                </Button>
-              </a>
-              <a href={dexUrl} target="_blank" rel="noopener noreferrer" className="flex-1">
-                <Button variant="outline" size="sm" className="w-full text-xs border-pink-200 text-pink-500 rounded-lg">
-                  Chart
-                </Button>
-              </a>
-            </div>
+            <Link href="/launch">
+              <Button variant="outline" className="w-full border-pink-200 text-pink-600 rounded-xl">
+                <Rocket className="w-4 h-4 mr-2" />Launch Another Token
+              </Button>
+            </Link>
 
             <div className="text-center text-xs text-pink-300 pt-1">
-              Price data powered by DexScreener
+              Fee payment verified on-chain — no fabricated data
             </div>
           </div>
         </div>
       </div>
-
-      {walletOpen && <WalletModal onClose={() => setWalletOpen(false)} />}
     </div>
   );
 }

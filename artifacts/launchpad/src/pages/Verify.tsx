@@ -13,23 +13,23 @@ export default function Verify() {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
-    // Simulate network request
+
+    // TODO: wire to a real review-queue backend/API once available.
     setTimeout(() => {
       setIsSubmitting(false);
       setIsSuccess(true);
-    }, 2000);
+    }, 1500);
   };
 
   if (isSuccess) {
     return (
       <div className="max-w-xl mx-auto py-12 animate-in slide-in-from-bottom-8 duration-500">
-        <Card className="border-primary/50 text-center py-12">
+        <Card className="border-primary/50 text-center py-12 rounded-3xl shadow-lg">
           <CardContent className="space-y-6 flex flex-col items-center">
             <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center border-4 border-primary">
               <CheckCircle2 className="w-10 h-10 text-primary" />
             </div>
-            
+
             <div className="space-y-2">
               <h2 className="text-2xl font-bold tracking-tight">Application Submitted</h2>
               <p className="text-muted-foreground">
@@ -37,7 +37,7 @@ export default function Verify() {
               </p>
             </div>
 
-            <Button variant="outline" onClick={() => setIsSuccess(false)} className="mt-4">
+            <Button variant="outline" onClick={() => setIsSuccess(false)} className="mt-4 rounded-full">
               Submit Another
             </Button>
           </CardContent>
@@ -59,22 +59,22 @@ export default function Verify() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div className="md:col-span-2">
-          <Card className="border-border">
+          <Card className="border-border rounded-3xl shadow-sm">
             <form onSubmit={handleSubmit}>
               <CardHeader>
                 <CardTitle>Verification Application</CardTitle>
                 <CardDescription>Provide details about your project to prove legitimacy.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                
+
                 <div className="space-y-4">
                   <h3 className="text-lg font-bold border-b border-border/50 pb-2">Project Basics</h3>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="address">Contract Address *</Label>
                     <Input id="address" placeholder="0x..." required className="font-mono" />
                   </div>
-                  
+
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="name">Project Name *</Label>
@@ -89,33 +89,33 @@ export default function Verify() {
 
                 <div className="space-y-4">
                   <h3 className="text-lg font-bold border-b border-border/50 pb-2">Social Presence</h3>
-                  
+
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="twitter">Twitter / X URL</Label>
-                      <Input id="twitter" type="url" placeholder="https://twitter.com/..." />
+                      <Input id="twitter" type="url" placeholder="https://x.com/Amanchain50" />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="telegram">Telegram Group</Label>
-                      <Input id="telegram" type="url" placeholder="https://t.me/..." />
+                      <Input id="telegram" type="url" placeholder="https://t.me/barbiefunv2" />
                     </div>
                   </div>
                 </div>
 
                 <div className="space-y-4">
                   <h3 className="text-lg font-bold border-b border-border/50 pb-2">Trust & Security</h3>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="audit">Audit Link (Optional but recommended)</Label>
                     <Input id="audit" type="url" placeholder="Link to Certik, Hacken, etc." />
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="details">Why should we verify you? *</Label>
-                    <Textarea 
-                      id="details" 
-                      placeholder="Tell us about the team, locked liquidity, utility, etc." 
-                      required 
+                    <Textarea
+                      id="details"
+                      placeholder="Tell us about the team, locked liquidity, utility, etc."
+                      required
                       className="min-h-[120px]"
                     />
                   </div>
@@ -123,9 +123,9 @@ export default function Verify() {
 
               </CardContent>
               <CardFooter className="bg-muted/10 border-t border-border mt-6 pt-6">
-                <Button 
-                  type="submit" 
-                  className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-bold"
+                <Button
+                  type="submit"
+                  className="w-full bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 text-white font-bold rounded-full shadow-md hover:shadow-pink-300/50 transition-all"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? "Submitting..." : "Submit Application"}
@@ -136,7 +136,7 @@ export default function Verify() {
         </div>
 
         <div className="space-y-6">
-          <Card className="bg-primary/5 border-primary/20">
+          <Card className="bg-primary/5 border-primary/20 rounded-3xl">
             <CardHeader>
               <CardTitle className="text-lg flex items-center">
                 <ShieldAlert className="w-5 h-5 mr-2 text-primary" />

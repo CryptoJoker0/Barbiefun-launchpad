@@ -1,138 +1,62 @@
 import { Link } from "wouter";
-import { Token, formatCurrency, formatPercent, getBondingProgress, isGraduated } from "@/lib/mock-data";
-import { CheckCircle, TrendingUp, TrendingDown, GraduationCap, Zap } from "lucide-react";
+import type { Launch } from "@/lib/launches";
+import { formatSupply } from "@/lib/launches";
+import ChainIcon from "@/components/ChainIcon";
+import { SUPPORTED_CHAINS } from "@/lib/wagmi";
+import { ExternalLink, Clock } from "lucide-react";
 
-function BondingBar({ token }: { token: Token }) {
-  const pct = getBondingProgress(token);
-  const graduated = isGraduated(token);
-
-  const barColor = graduated
-    ? "bg-gradient-to-r from-yellow-400 to-amber-500"
-    : pct >= 75
-    ? "bg-gradient-to-r from-orange-400 to-pink-500"
-    : pct >= 40
-    ? "bg-gradient-to-r from-pink-400 to-pink-500"
-    : "bg-gradient-to-r from-pink-300 to-rose-400";
-
-  return (
-    <div className="mt-3.5 space-y-1.5">
-      <div className="flex items-center justify-between text-[10px] font-semibold">
-        {graduated ? (
-          <span className="flex items-center space-x-1 text-amber-600">
-            <GraduationCap className="w-3 h-3" />
-            <span>Graduated to DEX 🎓</span>
-          </span>
-        ) : (
-          <span className="flex items-center space-x-1 text-pink-500">
-            <Zap className="w-3 h-3" />
-            <span>Bonding curve</span>
-          </span>
-        )}
-        <span className={graduated ? "text-amber-600 font-bold" : pct >= 75 ? "text-orange-500 font-bold" : "text-pink-400"}>
-          {graduated ? "100%" : `${pct.toFixed(1)}%`}
-        </span>
-      </div>
-
-      {/* Progress track */}
-      <div className="relative h-2 w-full rounded-full bg-pink-100 overflow-hidden">
-        <div
-          className={`h-full rounded-full transition-all duration-700 ${barColor} ${graduated ? "" : "relative"}`}
-          style={{ width: `${Math.max(2, Math.min(100, pct))}%` }}
-        >
-          {/* animated shimmer on active tokens */}
-          {!graduated && pct > 5 && (
-            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-[shimmer_2s_infinite]" />
-          )}
-        </div>
-        {/* graduation milestone tick at 100% */}
-        <div className="absolute right-0 top-0 h-full w-0.5 bg-amber-400/60" />
-      </div>
-
-      {/* Label row */}
-      <div className="flex justify-between text-[10px] text-pink-300 font-mono">
-        <span>{formatCurrency(token.bondingRaised)} raised</span>
-        <span>Target {formatCurrency(token.graduationTarget)}</span>
-      </div>
-    </div>
-  );
+function timeAgo(iso: string): string {
+  const diffMs = Date.now() - new Date(iso).getTime();
+  const mins = Math.floor(diffMs / 60000);
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  return `${Math.floor(hrs / 24)}d ago`;
 }
 
-export default function TokenCard({ token }: { token: Token }) {
-  const isPositive = token.priceChange24h >= 0;
-  const graduated = isGraduated(token);
-  const pct = getBondingProgress(token);
+export default function TokenCard({ launch }: { launch: Launch }) {
+  const chainMeta = SUPPORTED_CHAINS.find((c) => c.id === launch.chainId);
 
   return (
-    <Link href={`/token/${token.id}`}>
-      <div className={`
-        relative group cursor-pointer rounded-2xl border bg-white overflow-hidden
-        transition-all duration-300 hover:-translate-y-0.5
-        hover:shadow-lg
-        ${graduated
-          ? "border-amber-200 hover:border-amber-400 hover:shadow-amber-100"
-          : pct >= 75
-          ? "border-orange-100 hover:border-orange-300 hover:shadow-pink-100"
-          : "border-pink-100 hover:border-pink-300 hover:shadow-pink-100"}
-      `}>
-        {/* Graduated shimmer overlay */}
-        {graduated && (
-          <div className="absolute inset-0 bg-gradient-to-br from-amber-50/60 via-transparent to-yellow-50/40 pointer-events-none" />
-        )}
-
-        {/* Graduated ribbon */}
-        {graduated && (
-          <div className="absolute top-0 right-0 bg-gradient-to-bl from-amber-400 to-yellow-500 text-white text-[9px] font-black px-2 py-0.5 rounded-bl-xl tracking-wider">
-            GRADUATED
-          </div>
-        )}
-
-        {/* Near-graduation glow pulse */}
-        {!graduated && pct >= 85 && (
-          <div className="absolute top-0 right-0 bg-gradient-to-bl from-orange-400 to-pink-500 text-white text-[9px] font-black px-2 py-0.5 rounded-bl-xl tracking-wider animate-pulse">
-            🔥 CLOSE
-          </div>
-        )}
-
+    <Link href={`/token/${launch.id}`}>
+      <div className="relative group cursor-pointer rounded-2xl border border-pink-100 bg-white overflow-hidden transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:border-pink-300 hover:shadow-pink-100">
         <div className="p-4">
-          {/* Header row */}
           <div className="flex items-start justify-between mb-3">
-            <div className="flex items-center space-x-2.5">
-              <div
-                className={`w-10 h-10 rounded-full border-2 shadow-sm shrink-0 ${graduated ? "border-amber-200" : "border-pink-100"}`}
-                style={{ background: token.logo }}
-              />
-              <div>
-                <div className="flex items-center space-x-1">
-                  <h3 className="font-bold text-gray-800 text-sm leading-tight">{token.name}</h3>
-                  {token.isVerified && <CheckCircle className="w-3.5 h-3.5 text-pink-500 shrink-0" />}
-                </div>
-                <span className="text-[11px] font-mono text-pink-400 font-semibold">${token.ticker}</span>
+            <div className="flex items-center space-x-2.5 min-w-0">
+              <div className="w-10 h-10 rounded-full border-2 border-pink-100 shadow-sm shrink-0 bg-gradient-to-br from-pink-300 to-red-300 flex items-center justify-center text-white font-black text-xs">
+                {launch.ticker.slice(0, 2)}
+              </div>
+              <div className="min-w-0">
+                <h3 className="font-bold text-gray-800 text-sm leading-tight truncate">{launch.name}</h3>
+                <span className="text-[11px] font-mono text-pink-400 font-semibold">${launch.ticker}</span>
               </div>
             </div>
-
-            <div className="text-right shrink-0">
-              <div className="font-mono text-sm font-bold text-gray-800">{formatCurrency(token.price)}</div>
-              <div className={`flex items-center justify-end text-[11px] font-semibold mt-0.5 ${isPositive ? "text-green-500" : "text-red-500"}`}>
-                {isPositive ? <TrendingUp className="w-3 h-3 mr-0.5" /> : <TrendingDown className="w-3 h-3 mr-0.5" />}
-                {formatPercent(token.priceChange24h)}
+            {chainMeta && (
+              <div className="flex items-center space-x-1 shrink-0 bg-pink-50 border border-pink-100 rounded-full px-2 py-1">
+                <ChainIcon chain={chainMeta.icon} size={14} />
+                <span className="text-[10px] font-bold text-gray-600">{chainMeta.symbol}</span>
               </div>
+            )}
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 text-[11px] mb-2.5">
+            <div className="bg-pink-50 rounded-lg px-2.5 py-1.5">
+              <div className="text-pink-300 font-semibold mb-0.5">SUPPLY</div>
+              <div className="font-mono font-bold text-gray-700">{formatSupply(launch.totalSupply)}</div>
+            </div>
+            <div className="bg-pink-50 rounded-lg px-2.5 py-1.5">
+              <div className="text-pink-300 font-semibold mb-0.5">DEPLOYER</div>
+              <div className="font-mono font-bold text-gray-700 truncate">{launch.deployer.slice(0, 6)}…{launch.deployer.slice(-4)}</div>
             </div>
           </div>
 
-          {/* Stats */}
-          <div className="grid grid-cols-2 gap-2 text-[11px] mb-0.5">
-            <div className="bg-pink-50 rounded-lg px-2.5 py-1.5">
-              <div className="text-pink-300 font-semibold mb-0.5">MKT CAP</div>
-              <div className="font-mono font-bold text-gray-700">{formatCurrency(token.marketCap)}</div>
-            </div>
-            <div className="bg-pink-50 rounded-lg px-2.5 py-1.5">
-              <div className="text-pink-300 font-semibold mb-0.5">VOL 24H</div>
-              <div className="font-mono font-bold text-gray-700">{formatCurrency(token.volume24h)}</div>
-            </div>
+          <div className="flex items-center justify-between text-[10px] text-pink-300 font-mono">
+            <span className="flex items-center space-x-1"><Clock className="w-3 h-3" /><span>{timeAgo(launch.createdAt)}</span></span>
+            <span className="flex items-center space-x-1 text-pink-400 group-hover:text-pink-600 transition-colors">
+              <span>View details</span><ExternalLink className="w-3 h-3" />
+            </span>
           </div>
-
-          {/* Bonding curve bar */}
-          <BondingBar token={token} />
         </div>
       </div>
     </Link>
