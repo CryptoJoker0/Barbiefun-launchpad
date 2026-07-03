@@ -1,1 +1,2 @@
 - [Wagmi v2 dependency setup](wagmi-setup.md) — wagmi/viem must be in devDependencies (not dependencies) in launchpad; pin exact versions 2.19.5/2.53.1 to avoid v3 conflict.
+- [Multi-chain launchpad decisions](multichain-launchpad-decisions.md) — SVM/non-EVM chains excluded from wagmi config, unannounced mainnets use live testnet placeholder, treasury address is a plain env var not a secret.
