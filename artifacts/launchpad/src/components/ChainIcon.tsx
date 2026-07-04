@@ -1,3 +1,6 @@
+import robinhoodLogo from "@assets/20260703_080059_1783141834672.jpg";
+import x1Logo from "@assets/20260703_080024_1783141834739.jpg";
+
 type ChainIconProps = {
   chain: string;
   className?: string;
@@ -83,22 +86,25 @@ export default function ChainIcon({ chain, className = "", size = 28 }: ChainIco
       );
     case "x1":
       return (
-        <svg {...props}>
-          <circle cx="16" cy="16" r="16" fill="#FF6B35" />
-          <text x="16" y="21" textAnchor="middle" fontSize="12" fontWeight="800" fill="#fff" fontFamily="sans-serif">
-            X1
-          </text>
-        </svg>
+        <img
+          src={x1Logo}
+          alt="X1"
+          width={size}
+          height={size}
+          className={`${className} rounded-full object-cover`}
+          style={{ width: size, height: size }}
+        />
       );
     case "robinhood":
       return (
-        <svg {...props}>
-          <circle cx="16" cy="16" r="16" fill="#00C805" />
-          <path
-            d="M16 7c3 3.4 5.4 6.6 5.4 10 0 3-2.4 5.4-5.4 5.4S10.6 20 10.6 17c0-1.7.8-3.4 2-5-0.6 2.6.2 4.3 1.6 5.4-0.3-2.7 0.2-5.6 1.8-10.4Z"
-            fill="#fff"
-          />
-        </svg>
+        <img
+          src={robinhoodLogo}
+          alt="Robinhood Chain"
+          width={size}
+          height={size}
+          className={`${className} rounded-full object-cover`}
+          style={{ width: size, height: size }}
+        />
       );
     default:
       return (

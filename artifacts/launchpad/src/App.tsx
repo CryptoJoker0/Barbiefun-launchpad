@@ -9,6 +9,7 @@ import Launch from "@/pages/Launch";
 import TokenDetail from "@/pages/TokenDetail";
 import Verify from "@/pages/Verify";
 import Bridge from "@/pages/Bridge";
+import Swap from "@/pages/Swap";
 import Navbar from "@/components/layout/Navbar";
 import Ticker from "@/components/layout/Ticker";
 import { wagmiConfig } from "@/lib/wagmi";
@@ -30,6 +31,7 @@ function Router() {
           <Route path="/launch" component={Launch} />
           <Route path="/token/:id" component={TokenDetail} />
           <Route path="/bridge" component={Bridge} />
+          <Route path="/swap" component={Swap} />
           <Route path="/verify" component={Verify} />
           <Route component={NotFound} />
         </Switch>

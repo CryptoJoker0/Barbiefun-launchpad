@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Rocket, Wallet, ChevronDown, Menu, X, CheckCircle2, ArrowLeftRight } from "lucide-react";
+import { Rocket, Wallet, ChevronDown, Menu, X, CheckCircle2, ArrowLeftRight, FileText, Repeat } from "lucide-react";
 import { useAccount, useDisconnect } from "wagmi";
 import WalletModal from "@/components/WalletModal";
 import ChainIcon from "@/components/ChainIcon";
@@ -9,6 +9,7 @@ import { SUPPORTED_CHAINS } from "@/lib/wagmi";
 
 const TELEGRAM_URL = "https://t.me/barbiefunv2";
 const TWITTER_URL = "https://x.com/Amanchain50";
+const WHITEPAPER_URL = `${import.meta.env.BASE_URL}barbiefun-whitepaper.pdf`;
 
 export default function Navbar() {
   const { address, isConnected, chain } = useAccount();
@@ -66,6 +67,10 @@ export default function Navbar() {
                 className="hidden sm:flex items-center justify-center w-9 h-9 rounded-full bg-pink-50 hover:bg-pink-100 border border-pink-200 transition-colors" title="X (Twitter)">
                 <svg viewBox="0 0 24 24" className="w-4 h-4 fill-foreground"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.261 5.636 5.903-5.636zm-1.161 17.52h1.833L7.084 4.126H5.117z" /></svg>
               </a>
+              <a href={WHITEPAPER_URL} target="_blank" rel="noopener noreferrer"
+                className="hidden lg:flex items-center justify-center w-9 h-9 rounded-full bg-pink-50 hover:bg-pink-100 border border-pink-200 transition-colors text-pink-600" title="Whitepaper (Doc)">
+                <FileText className="w-4 h-4" />
+              </a>
 
               {/* Chain indicator (when connected) */}
               {isConnected && currentChain && (
@@ -112,6 +117,14 @@ export default function Navbar() {
                 <button className="flex items-center justify-center w-9 h-9 rounded-full bg-pink-50 hover:bg-pink-100 border border-pink-200 transition-colors text-pink-600" title="Bridge Assets">
                   <ArrowLeftRight className="w-4 h-4" />
                 </button>
+              </Link>
+
+              {/* Swap */}
+              <Link href="/swap" className="hidden sm:block">
+                <Button variant="outline" className="border-pink-300 text-pink-700 hover:bg-pink-50 font-bold rounded-full px-4 shadow-sm hover:shadow-md transition-all">
+                  <Repeat className="w-4 h-4 mr-1.5" />
+                  <span>Swap</span>
+                </Button>
               </Link>
 
               {/* Launch Token */}
@@ -164,12 +177,21 @@ export default function Navbar() {
               <Link href="/launch" onClick={() => setMobileOpen(false)}>
                 <div className="px-4 py-2.5 rounded-lg hover:bg-pink-50 font-semibold text-pink-700">Launch Token</div>
               </Link>
+              <Link href="/swap" onClick={() => setMobileOpen(false)}>
+                <div className="px-4 py-2.5 rounded-lg hover:bg-pink-50 font-semibold text-pink-700">Swap</div>
+              </Link>
               <Link href="/bridge" onClick={() => setMobileOpen(false)}>
                 <div className="px-4 py-2.5 rounded-lg hover:bg-pink-50 font-semibold text-pink-700">Bridge Assets</div>
               </Link>
               <Link href="/verify" onClick={() => setMobileOpen(false)}>
                 <div className="px-4 py-2.5 rounded-lg hover:bg-pink-50 font-semibold text-pink-700">Verify</div>
               </Link>
+              <a href={WHITEPAPER_URL} target="_blank" rel="noopener noreferrer" onClick={() => setMobileOpen(false)}>
+                <div className="px-4 py-2.5 rounded-lg hover:bg-pink-50 font-semibold text-pink-700 flex items-center space-x-2">
+                  <FileText className="w-4 h-4" />
+                  <span>Whitepaper (Doc)</span>
+                </div>
+              </a>
               <div className="px-4 py-2 flex items-center space-x-4">
                 <a href={TELEGRAM_URL} target="_blank" rel="noopener noreferrer" className="flex items-center space-x-1.5 text-sm text-pink-600 font-semibold">
                   <svg viewBox="0 0 24 24" className="w-4 h-4 fill-[#229ED9]"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
