@@ -42,7 +42,7 @@ export const tempo: Chain = {
 // once Circle publishes the mainnet chain ID/RPC, update this entry only.
 export const arcMainnet: Chain = {
   id: 5042002,
-  name: "Arc Testnet",
+  name: "Arc Mainnet",
   nativeCurrency: { name: "USD Coin", symbol: "USDC", decimals: 6 },
   rpcUrls: {
     default: { http: ["https://rpc.testnet.arc.network"] },
@@ -112,15 +112,15 @@ export const SUPPORTED_CHAINS: ChainMeta[] = [
   { id: mainnet.id, name: "Ethereum", symbol: "ETH", icon: "ethereum", dex: "https://app.uniswap.org/swap" },
   { id: xlayer.id, name: "X Layer", symbol: "OKB", icon: "xlayer", dex: "https://www.okx.com/dex" },
   { id: tempo.id, name: "Tempo", symbol: "USD", icon: "tempo", dex: "https://explore.tempo.xyz", isStableGas: true },
-  { id: arcMainnet.id, name: "Arc Mainnet", symbol: "USDC", icon: "arc", dex: "https://testnet.arcscan.app", isStableGas: true, isTestnet: true },
+  { id: arcMainnet.id, name: "Arc Mainnet", symbol: "USDC", icon: "arc", dex: "https://testnet.arcscan.app", isStableGas: true },
   { id: robinhoodChain.id, name: "Robinhood Chain", symbol: "ETH", icon: "robinhood", dex: "https://robinhoodchain.blockscout.com" },
 ];
 
 /**
  * X1 Blockchain (x1.xyz) runs on the Solana Virtual Machine, not the EVM.
  * It has no EIP-155 numeric chain ID, no Ethereum-style JSON-RPC, and is
- * only reachable through SVM wallets (Phantom, Solflare, Backpack) — never
- * MetaMask / WalletConnect / wagmi. It is intentionally excluded from
+ * only reachable through Solana wallets (Backpack, Phantom, X1 Web Wallet) —
+ * never MetaMask / WalletConnect / wagmi. It is intentionally excluded from
  * `wagmiConfig` and `SUPPORTED_CHAINS`. See SvmChainNotice for the UI
  * treatment and README/summary for the full explanation.
  */
@@ -132,7 +132,7 @@ export const X1_CHAIN_INFO = {
   rpc: "https://rpc.x1.xyz",
   explorer: "https://explorer.x1.xyz",
   bridge: "https://app.bridge.x1.xyz/",
-  requiredWallets: ["Phantom", "Solflare", "Backpack"],
+  requiredWallets: ["Backpack", "Phantom", "X1 Web Wallet"],
   reason:
-    "X1 is a Solana Virtual Machine (SVM) chain, not EVM-compatible. MetaMask, WalletConnect and wagmi only speak Ethereum JSON-RPC, so X1 cannot appear as a connectable network in this wallet modal. Supporting it for real would require a parallel Solana wallet-adapter integration (@solana/wallet-adapter + @solana/web3.js) and an SPL-token deployment flow, entirely separate from the EVM stack used here.",
+    "X1 runs on the Solana Virtual Machine (SVM), not the EVM. MetaMask, WalletConnect and wagmi only speak Ethereum JSON-RPC, so X1 cannot appear as a connectable network in this wallet modal. Connecting to X1 requires a Solana-compatible wallet such as Backpack, Phantom, or the X1 Web Wallet, via a parallel Solana wallet-adapter integration (@solana/wallet-adapter + @solana/web3.js) and an SPL-token deployment flow, entirely separate from the EVM stack used here.",
 };

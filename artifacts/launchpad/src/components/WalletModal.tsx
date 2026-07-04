@@ -1,16 +1,17 @@
 import { useConnect, useDisconnect, useAccount, useSwitchChain } from "wagmi";
 import { Button } from "@/components/ui/button";
-import { Wallet, X, Copy, LogOut, CheckCircle2, ChevronRight, AlertCircle, ExternalLink } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import { Wallet, X, Copy, LogOut, CheckCircle2, ChevronRight, AlertCircle, ExternalLink, Globe, CircleDollarSign, Link2, ShieldCheck, Briefcase } from "lucide-react";
 import { useState } from "react";
 import { SUPPORTED_CHAINS, X1_CHAIN_INFO } from "@/lib/wagmi";
 import ChainIcon from "@/components/ChainIcon";
 
-const WALLET_META: Record<string, { name: string; icon: string }> = {
-  metaMask: { name: "MetaMask", icon: "🦊" },
-  injected: { name: "Browser Wallet", icon: "🌐" },
-  coinbaseWallet: { name: "Coinbase Wallet", icon: "🔵" },
-  walletConnect: { name: "WalletConnect", icon: "🔗" },
-  safe: { name: "Safe", icon: "🛡️" },
+const WALLET_META: Record<string, { name: string; icon: LucideIcon }> = {
+  metaMask: { name: "MetaMask", icon: Wallet },
+  injected: { name: "Browser Wallet", icon: Globe },
+  coinbaseWallet: { name: "Coinbase Wallet", icon: CircleDollarSign },
+  walletConnect: { name: "WalletConnect", icon: Link2 },
+  safe: { name: "Safe", icon: ShieldCheck },
 };
 
 interface WalletModalProps {
@@ -60,7 +61,7 @@ export default function WalletModal({ onClose }: WalletModalProps) {
             {/* Address display */}
             <div className="bg-pink-50 border border-pink-200 rounded-2xl p-4 text-center">
               <div className="w-14 h-14 rounded-full bg-gradient-to-br from-pink-400 to-red-400 mx-auto mb-3 flex items-center justify-center shadow-lg shadow-pink-200">
-                <span className="text-2xl">👛</span>
+                <Wallet className="w-6 h-6 text-white" />
               </div>
               <p className="font-mono font-bold text-gray-800 text-sm mb-1">{shortAddress}</p>
               <p className="text-xs text-pink-500 font-semibold">
@@ -106,11 +107,6 @@ export default function WalletModal({ onClose }: WalletModalProps) {
                     <div className="flex items-center space-x-3">
                       <ChainIcon chain={c.icon} size={22} />
                       <span className="font-semibold text-sm">{c.name}</span>
-                      {c.isTestnet && (
-                        <span className="text-[9px] bg-amber-50 text-amber-600 border border-amber-200 px-1.5 py-0.5 rounded-full font-bold">
-                          TESTNET
-                        </span>
-                      )}
                     </div>
                     {chain?.id === c.id && <CheckCircle2 className="w-4 h-4 text-pink-500" />}
                   </button>
@@ -122,7 +118,7 @@ export default function WalletModal({ onClose }: WalletModalProps) {
                     <ChainIcon chain="x1" size={22} />
                     <div className="text-left">
                       <span className="font-semibold text-sm text-gray-600">X1 Blockchain</span>
-                      <p className="text-[10px] text-gray-400">Needs a Solana wallet (SVM)</p>
+                      <p className="text-[10px] text-gray-400">Needs Backpack, Phantom, or X1 Web Wallet</p>
                     </div>
                   </div>
                   <a href={X1_CHAIN_INFO.bridge} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-600">
@@ -150,7 +146,7 @@ export default function WalletModal({ onClose }: WalletModalProps) {
             {connectors.map((connector) => {
               const meta = WALLET_META[connector.id] || {
                 name: connector.name,
-                icon: "💼",
+                icon: Briefcase,
               };
               return (
                 <button
@@ -160,7 +156,9 @@ export default function WalletModal({ onClose }: WalletModalProps) {
                   className="w-full flex items-center justify-between px-4 py-3.5 bg-white hover:bg-pink-50 border border-pink-100 hover:border-pink-300 rounded-2xl transition-all group disabled:opacity-60"
                 >
                   <div className="flex items-center space-x-3">
-                    <span className="text-2xl">{meta.icon}</span>
+                    <div className="w-9 h-9 rounded-full bg-pink-50 flex items-center justify-center shrink-0">
+                      <meta.icon className="w-4.5 h-4.5 text-pink-500" />
+                    </div>
                     <div className="text-left">
                       <p className="font-bold text-gray-800 text-sm">{meta.name}</p>
                       <p className="text-xs text-gray-400">
@@ -186,7 +184,7 @@ export default function WalletModal({ onClose }: WalletModalProps) {
               <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
               <span>
                 X1 Blockchain isn&apos;t shown here — it runs on the Solana Virtual Machine and needs a
-                Solana wallet like Phantom, not MetaMask/WalletConnect.
+                Solana wallet such as Backpack, Phantom, or the X1 Web Wallet, not MetaMask/WalletConnect.
               </span>
             </div>
 

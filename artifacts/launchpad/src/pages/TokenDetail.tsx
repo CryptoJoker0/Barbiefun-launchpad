@@ -63,7 +63,6 @@ export default function TokenDetail() {
                   <div className="flex items-center space-x-2 text-xs font-semibold text-gray-500">
                     <ChainIcon chain={chainMeta.icon} size={16} />
                     <span>{chainMeta.name}</span>
-                    {chainMeta.isTestnet && <span className="text-amber-500">(testnet)</span>}
                   </div>
                 )}
               </div>

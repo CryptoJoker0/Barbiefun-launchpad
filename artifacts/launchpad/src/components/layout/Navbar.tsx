@@ -105,7 +105,7 @@ export default function Navbar() {
                         </button>
                       ))}
                       <div className="flex items-center space-x-2 px-4 py-2.5 text-sm text-gray-400 border-t border-pink-50">
-                        <ChainIcon chain="x1" size={18} /><span>X1 (needs Solana wallet)</span>
+                        <ChainIcon chain="x1" size={18} /><span>X1 (Backpack, Phantom, X1 Web Wallet)</span>
                       </div>
                     </div>
                   )}

@@ -108,7 +108,7 @@ export default function Launch() {
             </motion.div>
 
             <div className="space-y-2">
-              <h2 className="text-3xl font-extrabold tracking-tight text-foreground">Launch Fee Paid! 🎀</h2>
+              <h2 className="text-3xl font-extrabold tracking-tight text-foreground">Launch Fee Paid!</h2>
               <p className="text-pink-600 text-lg font-semibold">
                 ${successData.ticker} launch request recorded on {successChain?.name}
               </p>
@@ -221,15 +221,12 @@ export default function Launch() {
               >
                 <ChainIcon chain={c.icon} size={28} />
                 <span className="text-xs font-bold text-gray-700 text-center leading-tight">{c.name}</span>
-                {c.isTestnet && (
-                  <span className="text-[9px] bg-amber-50 text-amber-600 border border-amber-200 px-1.5 rounded-full font-bold">TESTNET</span>
-                )}
               </button>
             ))}
             <div className="flex flex-col items-center justify-center gap-1.5 rounded-2xl border-2 border-dashed border-gray-200 p-3 opacity-70">
               <ChainIcon chain="x1" size={28} />
               <span className="text-xs font-bold text-gray-500 text-center leading-tight">X1 Blockchain</span>
-              <span className="text-[9px] text-gray-400 text-center leading-tight">Needs Solana wallet</span>
+              <span className="text-[9px] text-gray-400 text-center leading-tight">Needs Backpack, Phantom, or X1 Web Wallet</span>
             </div>
           </div>
           {selectedChain && chain && chain.id !== selectedChain.id && isConnected && (

@@ -3,7 +3,8 @@ import { Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Rocket, Clock, Trophy, ArrowLeftRight } from "lucide-react";
+import { Rocket, Clock, Trophy, ArrowLeftRight, Sparkles, DollarSign, Link2, Heart } from "lucide-react";
+import RecentLaunches from "@/components/RecentLaunches";
 import TokenCard from "@/components/TokenCard";
 import LiveTerminal from "@/components/LiveTerminal";
 import ChainIcon from "@/components/ChainIcon";
@@ -62,13 +63,14 @@ export default function Home() {
                 />
               </motion.div>
               <div className="inline-flex items-center bg-pink-100 border border-pink-300 rounded-full px-4 py-1.5">
-                <span className="text-pink-500 text-xs font-bold uppercase tracking-wider">✨ Fair Launch Protocol</span>
+                <Sparkles className="w-3.5 h-3.5 text-pink-500 mr-1.5" />
+                <span className="text-pink-500 text-xs font-bold uppercase tracking-wider">Fair Launch Protocol</span>
               </div>
             </div>
 
             <div className="mb-4">
               <p className="text-xs sm:text-sm font-black uppercase tracking-[0.3em] text-pink-400 mb-2">
-                ✦ We Introduce ✦
+                We Introduce
               </p>
               <h1 className="text-5xl sm:text-6xl font-black leading-none tracking-tight mb-1">
                 <span
@@ -94,7 +96,7 @@ export default function Home() {
                     letterSpacing: "0.08em",
                   }}
                 >
-                  FUN ✨
+                  FUN
                 </span>
               </h1>
             </div>
@@ -105,9 +107,10 @@ export default function Home() {
 
             <div className="relative inline-block mb-7">
               <div className="absolute inset-0 bg-gradient-to-r from-pink-400 to-red-400 rounded-2xl blur-md opacity-40 scale-105" />
-              <div className="relative bg-gradient-to-r from-pink-500 via-red-400 to-pink-500 rounded-2xl px-5 py-2.5 shadow-lg">
+              <div className="relative bg-gradient-to-r from-pink-500 via-red-400 to-pink-500 rounded-2xl px-5 py-2.5 shadow-lg flex items-center justify-center gap-2">
+                <Rocket className="w-5 h-5 text-white" />
                 <span className="text-white font-black text-lg sm:text-xl tracking-widest uppercase drop-shadow">
-                  🚀 Start Launching
+                  Start Launching
                 </span>
               </div>
             </div>
@@ -144,10 +147,9 @@ export default function Home() {
               >
                 <ChainIcon chain={chain.icon} size={16} />
                 <span>{chain.name}</span>
-                {chain.isTestnet && <span className="text-[9px] text-amber-500 font-bold">(testnet)</span>}
               </div>
             ))}
-            <div className="flex items-center space-x-1.5 bg-gray-50 border border-dashed border-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-400 cursor-default" title={"X1 uses the Solana Virtual Machine — needs a Solana wallet, not MetaMask"}>
+            <div className="flex items-center space-x-1.5 bg-gray-50 border border-dashed border-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-400 cursor-default" title={"X1 uses the Solana Virtual Machine — needs a Solana wallet such as Backpack, Phantom, or the X1 Web Wallet"}>
               <ChainIcon chain="x1" size={16} />
               <span>X1 (SVM)</span>
             </div>
@@ -158,18 +160,21 @@ export default function Home() {
       {/* Stats Row */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
-          { label: "Tokens Launched", value: launches.length.toLocaleString(), icon: "🚀" },
-          { label: "Launch Fee", value: "$5 flat", icon: "💸" },
-          { label: "EVM Chains Live", value: String(SUPPORTED_CHAINS.length), icon: "⛓️" },
-          { label: "SVM Chains", value: "1 (bridge only)", icon: "🌉" },
+          { label: "Tokens Launched", value: launches.length.toLocaleString(), icon: Rocket },
+          { label: "Launch Fee", value: "$5 flat", icon: DollarSign },
+          { label: "EVM Chains Live", value: String(SUPPORTED_CHAINS.length), icon: Link2 },
+          { label: "SVM Chains", value: "1 (bridge only)", icon: ArrowLeftRight },
         ].map((stat) => (
           <div key={stat.label} className="bg-white border border-pink-100 rounded-2xl p-4 text-center shadow-sm hover:shadow-md hover:border-pink-200 transition-all">
-            <div className="text-2xl mb-1">{stat.icon}</div>
+            <stat.icon className="w-6 h-6 text-pink-500 mx-auto mb-1.5" />
             <div className="text-xl font-extrabold text-foreground">{stat.value}</div>
             <div className="text-xs text-muted-foreground font-medium">{stat.label}</div>
           </div>
         ))}
       </div>
+
+      {/* Recently Launched */}
+      <RecentLaunches launches={launches} />
 
       {/* Token Feed */}
       <section>
@@ -224,7 +229,9 @@ export default function Home() {
 
       {/* Community Section */}
       <section className="rounded-3xl bg-gradient-to-r from-pink-500 via-red-400 to-pink-600 p-8 sm:p-12 text-white text-center shadow-xl">
-        <h2 className="text-3xl sm:text-4xl font-extrabold mb-3">Join the Barbie&apos;s Community 💕</h2>
+        <h2 className="text-3xl sm:text-4xl font-extrabold mb-3 flex items-center justify-center gap-2">
+          Join the Barbie&apos;s Community <Heart className="w-7 h-7 fill-current" />
+        </h2>
         <p className="text-pink-100 text-lg mb-8 max-w-xl mx-auto">
           Connect with thousands of degens on Telegram and X. Get alpha, token launches, and Barbie vibes.
         </p>
