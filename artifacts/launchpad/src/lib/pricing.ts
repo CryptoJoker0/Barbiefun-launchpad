@@ -45,6 +45,17 @@ export function useNativeTokenPriceUsd(symbol: string) {
 
 export const LAUNCH_FEE_USD = 5;
 
+/** Standard-track verification review, processed in 24-48 hours. */
+export const VERIFICATION_FEE_STANDARD_USD = 80;
+/** Fast-track verification review, jumps the review queue. */
+export const VERIFICATION_FEE_FAST_USD = 100;
+
+export type VerificationTier = "standard" | "fast";
+
+export function verificationFeeUsd(tier: VerificationTier): number {
+  return tier === "fast" ? VERIFICATION_FEE_FAST_USD : VERIFICATION_FEE_STANDARD_USD;
+}
+
 export type LaunchFee = {
   usd: number;
   native: number | null;
@@ -55,28 +66,32 @@ export type LaunchFee = {
 };
 
 /**
- * Resolves the $5 launch fee into a native-token amount for the given
- * chain symbol. Stable-gas chains (Tempo/Arc, both USD-pegged) are always
+ * Resolves a USD fee into a native-token amount for the given chain
+ * symbol. Stable-gas chains (Tempo/Arc, both USD-pegged) are always
  * exactly 1:1 and therefore always "live". Everything else uses the
  * CoinGecko feed with a static fallback.
  */
-export function useLaunchFeeNative(symbol: string, isStableGas?: boolean): LaunchFee {
+export function useFeeNative(usd: number, symbol: string, isStableGas?: boolean): LaunchFee {
   const { data, isLoading, isError } = useNativeTokenPriceUsd(symbol);
 
   if (isStableGas) {
-    return { usd: LAUNCH_FEE_USD, native: LAUNCH_FEE_USD, symbol, isLive: true, loading: false };
+    return { usd, native: usd, symbol, isLive: true, loading: false };
   }
 
   const livePrice = data ?? null;
   const price = livePrice ?? FALLBACK_USD_PRICES[symbol] ?? null;
 
   return {
-    usd: LAUNCH_FEE_USD,
-    native: price ? LAUNCH_FEE_USD / price : null,
+    usd,
+    native: price ? usd / price : null,
     symbol,
     isLive: !!livePrice && !isError,
     loading: isLoading,
   };
+}
+
+export function useLaunchFeeNative(symbol: string, isStableGas?: boolean): LaunchFee {
+  return useFeeNative(LAUNCH_FEE_USD, symbol, isStableGas);
 }
 
 export function formatNativeAmount(amount: number | null): string {

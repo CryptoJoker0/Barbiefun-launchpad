@@ -3,7 +3,8 @@ import { Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Rocket, Clock, Trophy, ArrowLeftRight, Sparkles, DollarSign, Link2, Heart, BadgeCheck } from "lucide-react";
+import { Rocket, Clock, Trophy, ArrowLeftRight, Sparkles, DollarSign, Link2, Heart, BadgeCheck, Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import RecentLaunches from "@/components/RecentLaunches";
 import TokenCard from "@/components/TokenCard";
 import LiveTerminal from "@/components/LiveTerminal";
@@ -16,6 +17,7 @@ const TWITTER_URL = "https://x.com/Amanchain50";
 
 export default function Home() {
   const [tab, setTab] = useState("new");
+  const [search, setSearch] = useState("");
   const launches = getLaunches();
 
   const getFiltered = () => {
@@ -33,7 +35,11 @@ export default function Home() {
     }
   };
 
-  const filteredLaunches = getFiltered();
+  const query = search.trim().toLowerCase();
+  const filteredLaunches = getFiltered().filter((l) => {
+    if (!query) return true;
+    return l.name.toLowerCase().includes(query) || l.deployer.toLowerCase().includes(query);
+  });
 
   const container = {
     hidden: { opacity: 0 },
@@ -183,10 +189,21 @@ export default function Home() {
       {/* Token Feed */}
       <section>
         <Tabs defaultValue="new" value={tab} onValueChange={setTab} className="w-full">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
             <h2 className="text-2xl font-bold tracking-tight">
               <span className="bg-gradient-to-r from-pink-500 to-red-400 bg-clip-text text-transparent">Discovery</span>
             </h2>
+            <div className="relative w-full sm:w-72">
+              <Search className="w-4 h-4 text-pink-300 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <Input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search by name or contract address"
+                className="pl-10 border-pink-200 focus-visible:ring-pink-300 rounded-full"
+              />
+            </div>
+          </div>
+          <div className="flex justify-end mb-6">
             <TabsList className="bg-pink-50 border border-pink-200 rounded-full p-1 w-full sm:w-auto">
               <TabsTrigger value="new" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full text-pink-600 font-semibold">
                 <Clock className="w-3.5 h-3.5 mr-1.5" />New
@@ -202,7 +219,15 @@ export default function Home() {
 
           {filteredLaunches.length === 0 ? (
             <div className="bg-white border border-dashed border-pink-200 rounded-2xl py-16 px-6 text-center">
-              {tab === "verified" ? (
+              {query ? (
+                <>
+                  <Search className="w-8 h-8 text-pink-200 mx-auto mb-3" />
+                  <h3 className="text-lg font-bold text-gray-700 mb-1">No matches found</h3>
+                  <p className="text-sm text-gray-400 mb-5 max-w-sm mx-auto">
+                    No tokens match "{search}" by name or contract address. Try a different search.
+                  </p>
+                </>
+              ) : tab === "verified" ? (
                 <>
                   <BadgeCheck className="w-8 h-8 text-pink-200 mx-auto mb-3" />
                   <h3 className="text-lg font-bold text-gray-700 mb-1">No verified tokens yet</h3>
