@@ -27,6 +27,8 @@ export type Launch = {
   deployer: string;
   feeTxHash: string;
   createdAt: string;
+  /** true once a team reviewer has approved the project's Verify application */
+  verified?: boolean;
 };
 
 const STORAGE_KEY = "barbiefun.launches.v1";
@@ -51,6 +53,20 @@ export function addLaunch(launch: Launch): void {
 
 export function getLaunchById(id: string): Launch | undefined {
   return getLaunches().find((l) => l.id === id);
+}
+
+/**
+ * Marks a launch verified/unverified. This is the reviewer-side action a
+ * team member takes after evaluating a Verify application (see Verify.tsx).
+ * There's no backend yet, so the decision is persisted to the same
+ * localStorage record the rest of the app already reads from — swapping
+ * this for a real review-queue API later is a drop-in replacement.
+ */
+export function setLaunchVerified(id: string, verified: boolean): void {
+  if (typeof window === "undefined") return;
+  const existing = getLaunches();
+  const updated = existing.map((l) => (l.id === id ? { ...l, verified } : l));
+  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
 }
 
 export function formatSupply(value: string): string {

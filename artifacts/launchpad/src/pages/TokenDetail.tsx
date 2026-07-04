@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { getLaunchById, formatSupply } from "@/lib/launches";
 import { SUPPORTED_CHAINS } from "@/lib/wagmi";
 import ChainIcon from "@/components/ChainIcon";
-import { CheckCircle, ExternalLink, Copy, Clock, Info, Rocket } from "lucide-react";
+import { CheckCircle, ExternalLink, Copy, Clock, Info, Rocket, BadgeCheck } from "lucide-react";
 
 const CHAIN_EXPLORERS: Record<number, string> = {
   56: "https://bscscan.com/tx/",
@@ -58,6 +58,11 @@ export default function TokenDetail() {
                 <div className="flex items-center flex-wrap gap-2 mb-1">
                   <h1 className="text-2xl font-extrabold">{launch.name}</h1>
                   <Badge className="font-mono text-xs border-pink-200 text-pink-600 bg-pink-50">${launch.ticker}</Badge>
+                  {launch.verified && (
+                    <Badge className="text-xs border-primary/30 text-primary bg-primary/10 flex items-center gap-1">
+                      <BadgeCheck className="w-3.5 h-3.5" />Verified
+                    </Badge>
+                  )}
                 </div>
                 {chainMeta && (
                   <div className="flex items-center space-x-2 text-xs font-semibold text-gray-500">

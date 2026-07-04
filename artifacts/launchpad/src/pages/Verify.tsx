@@ -4,11 +4,20 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { BadgeCheck, ShieldAlert, CheckCircle2 } from "lucide-react";
+import { BadgeCheck, ShieldAlert, CheckCircle2, Rocket } from "lucide-react";
+import { getLaunches, setLaunchVerified } from "@/lib/launches";
+import ChainIcon from "@/components/ChainIcon";
+import { SUPPORTED_CHAINS } from "@/lib/wagmi";
 
 export default function Verify() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [launches, setLaunches] = useState(getLaunches());
+
+  const toggleVerified = (id: string, verified: boolean) => {
+    setLaunchVerified(id, verified);
+    setLaunches(getLaunches());
+  };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -165,6 +174,71 @@ export default function Verify() {
             </CardContent>
           </Card>
         </div>
+      </div>
+
+      {/* Reviewer panel — no backend yet, so review decisions are applied
+          directly to the local launch records that power the Verified
+          badge shown across the app (TokenCard, TokenDetail, Home feed). */}
+      <div className="mt-10">
+        <Card className="border-border rounded-3xl shadow-sm">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <ShieldAlert className="w-5 h-5 text-primary" />
+              Review Queue
+            </CardTitle>
+            <CardDescription>
+              Team-only: approve or revoke the Verified badge for tokens launched on Barbie Fun.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {launches.length === 0 ? (
+              <div className="text-center py-10">
+                <Rocket className="w-8 h-8 text-pink-200 mx-auto mb-3" />
+                <p className="text-sm text-muted-foreground">No launches to review yet.</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {launches.map((launch) => {
+                  const chainMeta = SUPPORTED_CHAINS.find((c) => c.id === launch.chainId);
+                  return (
+                    <div
+                      key={launch.id}
+                      className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl border border-border bg-muted/10"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-pink-300 to-red-300 flex items-center justify-center text-white font-black text-[10px] shrink-0">
+                          {launch.ticker.slice(0, 2)}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="font-bold text-sm truncate flex items-center gap-1">
+                            {launch.name}
+                            {launch.verified && <BadgeCheck className="w-3.5 h-3.5 text-primary shrink-0" />}
+                          </p>
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <span className="font-mono">${launch.ticker}</span>
+                            {chainMeta && (
+                              <span className="flex items-center gap-1">
+                                <ChainIcon chain={chainMeta.icon} size={12} />{chainMeta.name}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant={launch.verified ? "outline" : "default"}
+                        className={launch.verified ? "rounded-full border-red-200 text-red-500 hover:bg-red-50" : "rounded-full bg-primary text-primary-foreground"}
+                        onClick={() => toggleVerified(launch.id, !launch.verified)}
+                      >
+                        {launch.verified ? "Revoke" : "Approve"}
+                      </Button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

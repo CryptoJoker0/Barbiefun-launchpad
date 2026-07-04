@@ -3,7 +3,7 @@ import { Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Rocket, Clock, Trophy, ArrowLeftRight, Sparkles, DollarSign, Link2, Heart } from "lucide-react";
+import { Rocket, Clock, Trophy, ArrowLeftRight, Sparkles, DollarSign, Link2, Heart, BadgeCheck } from "lucide-react";
 import RecentLaunches from "@/components/RecentLaunches";
 import TokenCard from "@/components/TokenCard";
 import LiveTerminal from "@/components/LiveTerminal";
@@ -24,6 +24,10 @@ export default function Home() {
         return [...launches].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
       case "chains":
         return [...launches].sort((a, b) => a.chainName.localeCompare(b.chainName));
+      case "verified":
+        return [...launches]
+          .filter((l) => l.verified)
+          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
       default:
         return launches;
     }
@@ -190,21 +194,41 @@ export default function Home() {
               <TabsTrigger value="chains" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full text-pink-600 font-semibold">
                 <Trophy className="w-3.5 h-3.5 mr-1.5" />By Chain
               </TabsTrigger>
+              <TabsTrigger value="verified" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full text-pink-600 font-semibold">
+                <BadgeCheck className="w-3.5 h-3.5 mr-1.5" />Verified
+              </TabsTrigger>
             </TabsList>
           </div>
 
           {filteredLaunches.length === 0 ? (
             <div className="bg-white border border-dashed border-pink-200 rounded-2xl py-16 px-6 text-center">
-              <Rocket className="w-8 h-8 text-pink-200 mx-auto mb-3" />
-              <h3 className="text-lg font-bold text-gray-700 mb-1">No tokens launched yet</h3>
-              <p className="text-sm text-gray-400 mb-5 max-w-sm mx-auto">
-                Be the first to launch a token on Barbie Fun — pick a chain, pay the $5 fee, and your launch will show up here.
-              </p>
-              <Link href="/launch">
-                <Button className="bg-gradient-to-r from-pink-500 to-red-500 text-white font-bold rounded-full">
-                  <Rocket className="w-4 h-4 mr-2" />Launch the First Token
-                </Button>
-              </Link>
+              {tab === "verified" ? (
+                <>
+                  <BadgeCheck className="w-8 h-8 text-pink-200 mx-auto mb-3" />
+                  <h3 className="text-lg font-bold text-gray-700 mb-1">No verified tokens yet</h3>
+                  <p className="text-sm text-gray-400 mb-5 max-w-sm mx-auto">
+                    Verified tokens have passed a team review for legitimacy and trust.
+                  </p>
+                  <Link href="/verify">
+                    <Button className="bg-gradient-to-r from-pink-500 to-red-500 text-white font-bold rounded-full">
+                      <BadgeCheck className="w-4 h-4 mr-2" />Apply for Verification
+                    </Button>
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Rocket className="w-8 h-8 text-pink-200 mx-auto mb-3" />
+                  <h3 className="text-lg font-bold text-gray-700 mb-1">No tokens launched yet</h3>
+                  <p className="text-sm text-gray-400 mb-5 max-w-sm mx-auto">
+                    Be the first to launch a token on Barbie Fun — pick a chain, pay the $5 fee, and your launch will show up here.
+                  </p>
+                  <Link href="/launch">
+                    <Button className="bg-gradient-to-r from-pink-500 to-red-500 text-white font-bold rounded-full">
+                      <Rocket className="w-4 h-4 mr-2" />Launch the First Token
+                    </Button>
+                  </Link>
+                </>
+              )}
             </div>
           ) : (
             <AnimatePresence mode="wait">

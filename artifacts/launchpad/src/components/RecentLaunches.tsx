@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { Rocket, Clock, ArrowRight } from "lucide-react";
+import { Rocket, Clock, ArrowRight, BadgeCheck } from "lucide-react";
 import type { Launch } from "@/lib/launches";
 import ChainIcon from "@/components/ChainIcon";
 import { SUPPORTED_CHAINS } from "@/lib/wagmi";
@@ -47,8 +47,10 @@ export default function RecentLaunches({ launches }: { launches: Launch[] }) {
                       {launch.ticker.slice(0, 2)}
                     </div>
                     <div className="min-w-0">
-                      <p className="font-bold text-gray-800 text-sm truncate">
-                        {launch.name} <span className="text-pink-400 font-mono font-semibold">${launch.ticker}</span>
+                      <p className="font-bold text-gray-800 text-sm truncate flex items-center gap-1">
+                        {launch.name}
+                        {launch.verified && <BadgeCheck className="w-3.5 h-3.5 text-primary shrink-0" />}
+                        <span className="text-pink-400 font-mono font-semibold">${launch.ticker}</span>
                       </p>
                       <div className="flex items-center gap-2 text-[11px] text-gray-400">
                         {chainMeta && (

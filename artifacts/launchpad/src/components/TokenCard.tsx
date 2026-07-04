@@ -3,7 +3,7 @@ import type { Launch } from "@/lib/launches";
 import { formatSupply } from "@/lib/launches";
 import ChainIcon from "@/components/ChainIcon";
 import { SUPPORTED_CHAINS } from "@/lib/wagmi";
-import { ExternalLink, Clock } from "lucide-react";
+import { ExternalLink, Clock, BadgeCheck } from "lucide-react";
 
 function timeAgo(iso: string): string {
   const diffMs = Date.now() - new Date(iso).getTime();
@@ -28,7 +28,10 @@ export default function TokenCard({ launch }: { launch: Launch }) {
                 {launch.ticker.slice(0, 2)}
               </div>
               <div className="min-w-0">
-                <h3 className="font-bold text-gray-800 text-sm leading-tight truncate">{launch.name}</h3>
+                <h3 className="font-bold text-gray-800 text-sm leading-tight truncate flex items-center gap-1">
+                  {launch.name}
+                  {launch.verified && <BadgeCheck className="w-3.5 h-3.5 text-primary shrink-0" />}
+                </h3>
                 <span className="text-[11px] font-mono text-pink-400 font-semibold">${launch.ticker}</span>
               </div>
             </div>
