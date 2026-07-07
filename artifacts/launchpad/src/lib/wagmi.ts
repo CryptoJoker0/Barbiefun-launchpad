@@ -98,6 +98,8 @@ export type ChainMeta = {
   id: number;
   name: string;
   symbol: string;
+  /** Full native token name, e.g. "BNB", "Ether" */
+  tokenName: string;
   /** id used by the ChainIcon component */
   icon: string;
   dex: string;
@@ -105,34 +107,47 @@ export type ChainMeta = {
   isStableGas?: boolean;
   /** true when only a testnet is publicly available today */
   isTestnet?: boolean;
+  /** true when this chain runs on the Solana VM (not EVM) */
+  isSvm?: boolean;
 };
 
+/**
+ * EVM-only chains that can be passed to wagmi's switchChain.
+ * Never add SVM/non-EVM entries here — they have no numeric chain ID
+ * and will break switchChain({ chainId: 0 }) callers throughout the app.
+ */
 export const SUPPORTED_CHAINS: ChainMeta[] = [
-  { id: bsc.id, name: "BNB Smart Chain", symbol: "BNB", icon: "bnb", dex: "https://pancakeswap.finance/swap" },
-  { id: mainnet.id, name: "Ethereum", symbol: "ETH", icon: "ethereum", dex: "https://app.uniswap.org/swap" },
-  { id: xlayer.id, name: "X Layer", symbol: "OKB", icon: "xlayer", dex: "https://www.okx.com/dex" },
-  { id: tempo.id, name: "Tempo", symbol: "USD", icon: "tempo", dex: "https://explore.tempo.xyz", isStableGas: true },
-  { id: arcMainnet.id, name: "Arc Mainnet", symbol: "USDC", icon: "arc", dex: "https://testnet.arcscan.app", isStableGas: true },
-  { id: robinhoodChain.id, name: "Robinhood Chain", symbol: "ETH", icon: "robinhood", dex: "https://robinhoodchain.blockscout.com" },
+  { id: bsc.id, name: "BNB Smart Chain", symbol: "BNB", tokenName: "BNB", icon: "bnb", dex: "https://pancakeswap.finance/swap" },
+  { id: mainnet.id, name: "Ethereum", symbol: "ETH", tokenName: "Ether", icon: "ethereum", dex: "https://app.uniswap.org/swap" },
+  { id: xlayer.id, name: "X Layer", symbol: "OKB", tokenName: "OKB", icon: "xlayer", dex: "https://www.okx.com/dex" },
+  { id: tempo.id, name: "Tempo", symbol: "USD", tokenName: "US Dollar", icon: "tempo", dex: "https://explore.tempo.xyz", isStableGas: true },
+  { id: arcMainnet.id, name: "Arc Mainnet", symbol: "USDC", tokenName: "USD Coin", icon: "arc", dex: "https://testnet.arcscan.app", isStableGas: true },
+  { id: robinhoodChain.id, name: "Robinhood Chain", symbol: "ETH", tokenName: "Ether", icon: "robinhood", dex: "https://robinhoodchain.blockscout.com" },
+];
+
+/**
+ * All chains for display-only UI (home page badge strip, etc.).
+ * Includes EVM chains + the X1 SVM chain as a read-only display entry.
+ * Do NOT use this list for wagmi switchChain calls.
+ */
+export const DISPLAY_CHAINS: ChainMeta[] = [
+  ...SUPPORTED_CHAINS,
+  { id: -1, name: "X1 Blockchain", symbol: "XN", tokenName: "XN Token", icon: "x1", dex: "https://app.bridge.x1.xyz/", isSvm: true },
 ];
 
 /**
  * X1 Blockchain (x1.xyz) runs on the Solana Virtual Machine, not the EVM.
- * It has no EIP-155 numeric chain ID, no Ethereum-style JSON-RPC, and is
- * only reachable through Solana wallets (Backpack, Phantom, X1 Web Wallet) —
- * never MetaMask / WalletConnect / wagmi. It is intentionally excluded from
- * `wagmiConfig` and `SUPPORTED_CHAINS`. See SvmChainNotice for the UI
- * treatment and README/summary for the full explanation.
+ * Connect via Phantom, Backpack, or X1 Web Wallet — not MetaMask/WalletConnect.
  */
 export const X1_CHAIN_INFO = {
   name: "X1 Blockchain",
   symbol: "XN",
+  tokenName: "XN Token",
   icon: "x1",
   vm: "SVM",
   rpc: "https://rpc.x1.xyz",
   explorer: "https://explorer.x1.xyz",
   bridge: "https://app.bridge.x1.xyz/",
-  requiredWallets: ["Backpack", "Phantom", "X1 Web Wallet"],
-  reason:
-    "X1 runs on the Solana Virtual Machine (SVM), not the EVM. MetaMask, WalletConnect and wagmi only speak Ethereum JSON-RPC, so X1 cannot appear as a connectable network in this wallet modal. Connecting to X1 requires a Solana-compatible wallet such as Backpack, Phantom, or the X1 Web Wallet, via a parallel Solana wallet-adapter integration (@solana/wallet-adapter + @solana/web3.js) and an SPL-token deployment flow, entirely separate from the EVM stack used here.",
+  webWallet: "https://wallet.x1.xyz/",
+  requiredWallets: ["Phantom", "Backpack", "X1 Web Wallet"],
 };

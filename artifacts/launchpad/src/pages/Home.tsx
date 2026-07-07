@@ -10,7 +10,7 @@ import TokenCard from "@/components/TokenCard";
 import LiveTerminal from "@/components/LiveTerminal";
 import ChainIcon from "@/components/ChainIcon";
 import { getLaunches } from "@/lib/launches";
-import { SUPPORTED_CHAINS } from "@/lib/wagmi";
+import { SUPPORTED_CHAINS, DISPLAY_CHAINS } from "@/lib/wagmi";
 
 const TELEGRAM_URL = "https://t.me/barbiefunv2";
 const TWITTER_URL = "https://x.com/Amanchain50";
@@ -150,19 +150,26 @@ export default function Home() {
         <div className="relative z-10 border-t border-pink-100 bg-white/60 backdrop-blur-sm px-8 py-4">
           <div className="flex items-center gap-2 flex-wrap justify-center sm:justify-start">
             <span className="text-xs text-pink-400 font-bold uppercase tracking-widest mr-2">Supported Chains</span>
-            {SUPPORTED_CHAINS.map((chain) => (
+            {DISPLAY_CHAINS.map((chain) => (
               <div
-                key={chain.id}
-                className="flex items-center space-x-1.5 bg-white border border-pink-100 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 shadow-sm hover:border-pink-300 transition-colors cursor-default"
+                key={chain.isSvm ? "x1" : chain.id}
+                className={`flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-semibold shadow-sm transition-all cursor-default ${
+                  chain.isSvm
+                    ? "bg-gradient-to-r from-purple-50 to-purple-100 border border-purple-200 text-purple-700 hover:border-purple-400"
+                    : "bg-white border border-pink-100 text-gray-700 hover:border-pink-300"
+                }`}
+                title={`Native token: ${chain.tokenName} (${chain.symbol})`}
               >
                 <ChainIcon chain={chain.icon} size={16} />
                 <span>{chain.name}</span>
+                <span className={`text-[11px] font-black border-l pl-2 ${chain.isSvm ? "border-purple-200 text-purple-500" : "border-pink-100 text-pink-400"}`}>
+                  {chain.symbol}
+                </span>
+                {chain.isSvm && (
+                  <span className="text-[9px] font-bold bg-purple-200 text-purple-700 rounded-full px-1.5 py-0.5 leading-none">SVM</span>
+                )}
               </div>
             ))}
-            <div className="flex items-center space-x-1.5 bg-gray-50 border border-dashed border-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-400 cursor-default" title={"X1 uses the Solana Virtual Machine — needs a Solana wallet such as Backpack, Phantom, or the X1 Web Wallet"}>
-              <ChainIcon chain="x1" size={16} />
-              <span>X1 (SVM)</span>
-            </div>
           </div>
         </div>
       </section>
@@ -172,8 +179,8 @@ export default function Home() {
         {[
           { label: "Tokens Launched", value: launches.length.toLocaleString(), icon: Rocket },
           { label: "Launch Fee", value: "$5 flat", icon: DollarSign },
-          { label: "EVM Chains Live", value: String(SUPPORTED_CHAINS.length), icon: Link2 },
-          { label: "SVM Chains", value: "1 (bridge only)", icon: ArrowLeftRight },
+          { label: "EVM Chains Live", value: String(SUPPORTED_CHAINS.filter((c) => !c.isSvm).length), icon: Link2 },
+          { label: "SVM Chains (X1)", value: "1 · Phantom/Backpack", icon: ArrowLeftRight },
         ].map((stat) => (
           <div key={stat.label} className="bg-white border border-pink-100 rounded-2xl p-4 text-center shadow-sm hover:shadow-md hover:border-pink-200 transition-all">
             <stat.icon className="w-6 h-6 text-pink-500 mx-auto mb-1.5" />
