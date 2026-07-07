@@ -1,14 +1,17 @@
 import type { LucideIcon } from "lucide-react";
 import { Rocket, ArrowLeftRight, Link2, Heart, PartyPopper } from "lucide-react";
 import { getLaunches } from "@/lib/launches";
-import { SUPPORTED_CHAINS } from "@/lib/wagmi";
+import { SUPPORTED_CHAINS, DISPLAY_CHAINS } from "@/lib/wagmi";
 
 type TickerItem = { icon: LucideIcon; text: string };
 
+const evmCount = SUPPORTED_CHAINS.length;
+const svmCount = DISPLAY_CHAINS.filter((c) => c.isSvm).length;
+
 const ANNOUNCEMENTS: TickerItem[] = [
-  { icon: Rocket, text: "Launch your token for a flat $5 across 6 EVM chains" },
-  { icon: ArrowLeftRight, text: "Bridge assets with Robinhood Bridge & X1 Bridge" },
-  { icon: Link2, text: `Live on ${SUPPORTED_CHAINS.map((c) => c.name).join(" · ")}` },
+  { icon: Rocket, text: `Launch your token for a flat $5 across ${evmCount} EVM chains + ${svmCount} SVM chains` },
+  { icon: ArrowLeftRight, text: "Bridge assets · Base Bridge · Solana · X1 Bridge · Robinhood Bridge" },
+  { icon: Link2, text: `Live on ${SUPPORTED_CHAINS.map((c) => c.name).join(" · ")} · X1 Blockchain · Solana` },
   { icon: Heart, text: "Join the community on Telegram & X" },
 ];
 

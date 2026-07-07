@@ -10,8 +10,9 @@ import { useQuery } from "@tanstack/react-query";
 
 const COINGECKO_IDS: Record<string, string> = {
   BNB: "binancecoin",
-  ETH: "ethereum",
+  ETH: "ethereum",   // covers both Base and Robinhood Chain (both use ETH)
   OKB: "okb",
+  SOL: "solana",
 };
 
 // Used only if the live feed is temporarily unreachable, so the UI never
@@ -20,6 +21,7 @@ const FALLBACK_USD_PRICES: Record<string, number> = {
   BNB: 620,
   ETH: 2500,
   OKB: 55,
+  SOL: 175,
 };
 
 async function fetchUsdPrice(symbol: string): Promise<number | null> {
@@ -68,8 +70,7 @@ export type LaunchFee = {
 /**
  * Resolves a USD fee into a native-token amount for the given chain
  * symbol. Stable-gas chains (Tempo/Arc, both USD-pegged) are always
- * exactly 1:1 and therefore always "live". Everything else uses the
- * CoinGecko feed with a static fallback.
+ * exactly 1:1. Everything else uses the CoinGecko feed with a static fallback.
  */
 export function useFeeNative(usd: number, symbol: string, isStableGas?: boolean): LaunchFee {
   const { data, isLoading, isError } = useNativeTokenPriceUsd(symbol);

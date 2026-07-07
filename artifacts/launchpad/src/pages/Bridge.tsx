@@ -3,14 +3,34 @@ import ChainIcon from "@/components/ChainIcon";
 
 const BRIDGES = [
   {
+    id: "base",
+    name: "Base Bridge",
+    icon: "base",
+    description: "Bridge ETH and tokens between Ethereum and Base using Coinbase's official bridge.",
+    chains: "Ethereum → Base",
+    url: "https://bridge.base.org/",
+    accent: "from-[#0052FF]/15 to-blue-50",
+    button: "bg-[#0052FF] hover:bg-[#0040cc]",
+  },
+  {
     id: "robinhood",
     name: "Robinhood Bridge",
     icon: "robinhood",
     description: "Bridge assets in and out of Robinhood Chain via Relay's cross-chain routing.",
-    chains: "Ethereum, BSC, Arbitrum → Robinhood Chain",
+    chains: "Ethereum, Base, Arbitrum → Robinhood Chain",
     url: "https://relay.link/bridge",
     accent: "from-[#00C805]/15 to-emerald-50",
     button: "bg-[#00C805] hover:bg-[#00b304]",
+  },
+  {
+    id: "solana",
+    name: "Solana Bridge",
+    icon: "solana",
+    description: "Move assets between EVM chains and Solana via Portal (Wormhole).",
+    chains: "Ethereum, Base, BSC → Solana",
+    url: "https://portalbridge.com",
+    accent: "from-purple-500/15 to-purple-50",
+    button: "bg-gradient-to-r from-purple-600 to-purple-800 hover:from-purple-700 hover:to-purple-900",
   },
   {
     id: "x1",
@@ -63,8 +83,7 @@ export default function Bridge() {
         <ShieldCheck className="w-5 h-5 text-pink-500 shrink-0 mt-0.5" />
         <p className="text-sm text-gray-600">
           Always verify you&apos;re on the official bridge domain before connecting a wallet or approving a
-          transaction. Barbie Fun links directly to <span className="font-semibold">relay.link</span> and{" "}
-          <span className="font-semibold">app.bridge.x1.xyz</span> — double-check the URL bar after the page loads.
+          transaction. Double-check the URL bar after the page loads. Barbie Fun never custodies funds during bridging.
         </p>
       </div>
     </div>

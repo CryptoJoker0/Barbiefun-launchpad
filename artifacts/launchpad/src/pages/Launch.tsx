@@ -17,7 +17,7 @@ import { addLaunch } from "@/lib/launches";
 
 const CHAIN_EXPLORERS: Record<number, string> = {
   56: "https://bscscan.com/tx/",
-  1: "https://etherscan.io/tx/",
+  8453: "https://basescan.org/tx/",
   196: "https://www.okx.com/explorer/xlayer/tx/",
   4217: "https://explore.tempo.xyz/tx/",
   5042002: "https://testnet.arcscan.app/tx/",

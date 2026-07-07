@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Rocket, Wallet, ChevronDown, Menu, X, CheckCircle2, ArrowLeftRight, FileText, Repeat } from "lucide-react";
+import { Rocket, Wallet, ChevronDown, Menu, X, CheckCircle2, ArrowLeftRight, FileText, Repeat, BarChart3, ShieldCheck } from "lucide-react";
 import { useAccount, useDisconnect } from "wagmi";
 import WalletModal from "@/components/WalletModal";
 import ChainIcon from "@/components/ChainIcon";
-import { SUPPORTED_CHAINS } from "@/lib/wagmi";
+import { SUPPORTED_CHAINS, DISPLAY_CHAINS } from "@/lib/wagmi";
+import { useSolanaWallet } from "@/hooks/useSolanaWallet";
 
 const TELEGRAM_URL = "https://t.me/barbiefunv2";
 const TWITTER_URL = "https://x.com/Amanchain50";
@@ -14,12 +15,15 @@ const WHITEPAPER_URL = `${import.meta.env.BASE_URL}barbiefun-whitepaper.pdf`;
 export default function Navbar() {
   const { address, isConnected, chain } = useAccount();
   const { disconnect } = useDisconnect();
+  const solana = useSolanaWallet();
   const [chainOpen, setChainOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [walletOpen, setWalletOpen] = useState(false);
 
   const shortAddress = address ? `${address.slice(0, 6)}…${address.slice(-4)}` : "";
+  const shortSolAddress = solana.publicKey ? `${solana.publicKey.slice(0, 4)}…${solana.publicKey.slice(-4)}` : "";
   const currentChain = SUPPORTED_CHAINS.find((c) => c.id === chain?.id);
+  const anyConnected = isConnected || solana.connected;
 
   return (
     <>
@@ -42,16 +46,22 @@ export default function Navbar() {
               {/* Desktop Nav */}
               <div className="hidden md:flex space-x-1">
                 <Link href="/">
-                  <Button variant="ghost" className="text-pink-700 hover:text-pink-500 hover:bg-pink-50 font-semibold">Terminal</Button>
+                  <Button variant="ghost" className="text-pink-700 hover:text-pink-500 hover:bg-pink-50 font-semibold">Home</Button>
                 </Link>
                 <Link href="/launch">
                   <Button variant="ghost" className="text-pink-700 hover:text-pink-500 hover:bg-pink-50 font-semibold">Launch</Button>
+                </Link>
+                <Link href="/portfolio">
+                  <Button variant="ghost" className="text-pink-700 hover:text-pink-500 hover:bg-pink-50 font-semibold">Portfolio</Button>
                 </Link>
                 <Link href="/bridge">
                   <Button variant="ghost" className="text-pink-700 hover:text-pink-500 hover:bg-pink-50 font-semibold">Bridge</Button>
                 </Link>
                 <Link href="/verify">
                   <Button variant="ghost" className="text-pink-700 hover:text-pink-500 hover:bg-pink-50 font-semibold">Verify</Button>
+                </Link>
+                <Link href="/admin">
+                  <Button variant="ghost" className="text-pink-700 hover:text-pink-500 hover:bg-pink-50 font-semibold">Admin</Button>
                 </Link>
               </div>
             </div>
@@ -68,11 +78,11 @@ export default function Navbar() {
                 <svg viewBox="0 0 24 24" className="w-4 h-4 fill-foreground"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.261 5.636 5.903-5.636zm-1.161 17.52h1.833L7.084 4.126H5.117z" /></svg>
               </a>
               <a href={WHITEPAPER_URL} target="_blank" rel="noopener noreferrer"
-                className="hidden lg:flex items-center justify-center w-9 h-9 rounded-full bg-pink-50 hover:bg-pink-100 border border-pink-200 transition-colors text-pink-600" title="Whitepaper (Doc)">
+                className="hidden lg:flex items-center justify-center w-9 h-9 rounded-full bg-pink-50 hover:bg-pink-100 border border-pink-200 transition-colors text-pink-600" title="Whitepaper">
                 <FileText className="w-4 h-4" />
               </a>
 
-              {/* Chain indicator (when connected) */}
+              {/* Chain indicator (when EVM connected) */}
               {isConnected && currentChain && (
                 <div className="hidden sm:flex items-center space-x-1.5 px-3 py-1.5 rounded-full border border-pink-200 bg-pink-50 text-sm font-semibold text-pink-700">
                   <ChainIcon chain={currentChain.icon} size={16} />
@@ -84,9 +94,16 @@ export default function Navbar() {
                   <span className="hidden lg:inline">Unsupported network</span>
                 </div>
               )}
+              {/* Solana connected indicator */}
+              {solana.connected && !isConnected && (
+                <div className="hidden sm:flex items-center space-x-1.5 px-3 py-1.5 rounded-full border border-purple-200 bg-purple-50 text-sm font-semibold text-purple-700">
+                  <ChainIcon chain="x1" size={16} />
+                  <span className="hidden lg:inline">{shortSolAddress}</span>
+                </div>
+              )}
 
               {/* Chain selector (when not connected) */}
-              {!isConnected && (
+              {!anyConnected && (
                 <div className="relative hidden sm:block">
                   <button
                     onClick={() => setChainOpen(!chainOpen)}
@@ -97,37 +114,49 @@ export default function Navbar() {
                     <ChevronDown className="w-3.5 h-3.5" />
                   </button>
                   {chainOpen && (
-                    <div className="absolute right-0 mt-2 w-56 bg-white border border-pink-200 rounded-xl shadow-lg z-50 overflow-hidden">
+                    <div className="absolute right-0 mt-2 w-64 bg-white border border-pink-200 rounded-xl shadow-lg z-50 overflow-hidden">
+                      <div className="px-3 py-2 text-[10px] font-bold text-pink-400 uppercase tracking-widest bg-pink-50 border-b border-pink-100">
+                        EVM Chains
+                      </div>
                       {SUPPORTED_CHAINS.map((c) => (
                         <button key={c.id} onClick={() => setChainOpen(false)}
-                          className="w-full flex items-center space-x-2 px-4 py-2.5 text-sm hover:bg-pink-50 transition-colors text-left text-gray-700">
-                          <ChainIcon chain={c.icon} size={18} /><span>{c.name}</span>
+                          className="w-full flex items-center justify-between px-4 py-2.5 text-sm hover:bg-pink-50 transition-colors text-left text-gray-700">
+                          <div className="flex items-center space-x-2">
+                            <ChainIcon chain={c.icon} size={18} />
+                            <span>{c.name}</span>
+                          </div>
+                          <span className="text-[10px] text-pink-400 font-bold">{c.symbol}</span>
                         </button>
                       ))}
-                      <div className="flex items-center space-x-2 px-4 py-2.5 text-sm text-gray-400 border-t border-pink-50">
-                        <ChainIcon chain="x1" size={18} /><span>X1 (Backpack, Phantom, X1 Web Wallet)</span>
+                      <div className="px-3 py-2 text-[10px] font-bold text-purple-400 uppercase tracking-widest bg-purple-50 border-y border-purple-100">
+                        SVM Chains
                       </div>
+                      {DISPLAY_CHAINS.filter((c) => c.isSvm).map((c) => (
+                        <div key={c.id} className="flex items-center justify-between px-4 py-2.5 text-sm text-purple-600">
+                          <div className="flex items-center space-x-2">
+                            <ChainIcon chain={c.icon} size={18} />
+                            <span>{c.name}</span>
+                          </div>
+                          <span className="text-[9px] bg-purple-100 text-purple-600 rounded px-1.5 font-bold">SVM</span>
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>
               )}
 
-              {/* Bridge shortcut */}
+              {/* Shortcut buttons */}
               <Link href="/bridge" className="hidden sm:block">
                 <button className="flex items-center justify-center w-9 h-9 rounded-full bg-pink-50 hover:bg-pink-100 border border-pink-200 transition-colors text-pink-600" title="Bridge Assets">
                   <ArrowLeftRight className="w-4 h-4" />
                 </button>
               </Link>
-
-              {/* Swap */}
               <Link href="/swap" className="hidden sm:block">
                 <Button variant="outline" className="border-pink-300 text-pink-700 hover:bg-pink-50 font-bold rounded-full px-4 shadow-sm hover:shadow-md transition-all">
                   <Repeat className="w-4 h-4 mr-1.5" />
                   <span>Swap</span>
                 </Button>
               </Link>
-
-              {/* Launch Token */}
               <Link href="/launch" className="hidden sm:block">
                 <Button className="bg-primary text-primary-foreground hover:bg-primary/90 font-bold rounded-full px-4 shadow-md hover:shadow-lg transition-all">
                   <Rocket className="w-4 h-4 mr-1.5" />
@@ -137,14 +166,16 @@ export default function Navbar() {
               </Link>
 
               {/* Wallet Button */}
-              {isConnected ? (
+              {anyConnected ? (
                 <button
                   onClick={() => setWalletOpen(true)}
                   className="wallet-btn px-4 py-2 rounded-full text-sm font-bold border-2 border-pink-300 shadow-md hover:shadow-pink-300/50 transition-all"
                 >
                   <span className="flex items-center space-x-1.5">
                     <CheckCircle2 className="w-4 h-4 text-pink-700" />
-                    <span className="hidden sm:inline font-mono">{shortAddress}</span>
+                    <span className="hidden sm:inline font-mono">
+                      {isConnected ? shortAddress : shortSolAddress}
+                    </span>
                     <span className="sm:hidden">Connected</span>
                   </span>
                 </button>
@@ -172,10 +203,15 @@ export default function Navbar() {
           {mobileOpen && (
             <div className="md:hidden border-t border-pink-100 py-3 space-y-1">
               <Link href="/" onClick={() => setMobileOpen(false)}>
-                <div className="px-4 py-2.5 rounded-lg hover:bg-pink-50 font-semibold text-pink-700">Terminal</div>
+                <div className="px-4 py-2.5 rounded-lg hover:bg-pink-50 font-semibold text-pink-700">Home</div>
               </Link>
               <Link href="/launch" onClick={() => setMobileOpen(false)}>
                 <div className="px-4 py-2.5 rounded-lg hover:bg-pink-50 font-semibold text-pink-700">Launch Token</div>
+              </Link>
+              <Link href="/portfolio" onClick={() => setMobileOpen(false)}>
+                <div className="px-4 py-2.5 rounded-lg hover:bg-pink-50 font-semibold text-pink-700 flex items-center space-x-2">
+                  <BarChart3 className="w-4 h-4" /><span>Portfolio</span>
+                </div>
               </Link>
               <Link href="/swap" onClick={() => setMobileOpen(false)}>
                 <div className="px-4 py-2.5 rounded-lg hover:bg-pink-50 font-semibold text-pink-700">Swap</div>
@@ -184,12 +220,16 @@ export default function Navbar() {
                 <div className="px-4 py-2.5 rounded-lg hover:bg-pink-50 font-semibold text-pink-700">Bridge Assets</div>
               </Link>
               <Link href="/verify" onClick={() => setMobileOpen(false)}>
-                <div className="px-4 py-2.5 rounded-lg hover:bg-pink-50 font-semibold text-pink-700">Verify</div>
+                <div className="px-4 py-2.5 rounded-lg hover:bg-pink-50 font-semibold text-pink-700">Verify Token</div>
+              </Link>
+              <Link href="/admin" onClick={() => setMobileOpen(false)}>
+                <div className="px-4 py-2.5 rounded-lg hover:bg-pink-50 font-semibold text-pink-700 flex items-center space-x-2">
+                  <ShieldCheck className="w-4 h-4" /><span>Admin</span>
+                </div>
               </Link>
               <a href={WHITEPAPER_URL} target="_blank" rel="noopener noreferrer" onClick={() => setMobileOpen(false)}>
                 <div className="px-4 py-2.5 rounded-lg hover:bg-pink-50 font-semibold text-pink-700 flex items-center space-x-2">
-                  <FileText className="w-4 h-4" />
-                  <span>Whitepaper (Doc)</span>
+                  <FileText className="w-4 h-4" /><span>Whitepaper</span>
                 </div>
               </a>
               <div className="px-4 py-2 flex items-center space-x-4">
@@ -202,9 +242,9 @@ export default function Navbar() {
                   X (Twitter)
                 </a>
               </div>
-              {isConnected && (
-                <button onClick={() => { disconnect(); }} className="mx-4 mt-1 flex items-center space-x-2 text-sm text-red-500 font-semibold">
-                  <span>Disconnect {shortAddress}</span>
+              {anyConnected && (
+                <button onClick={() => { disconnect(); solana.disconnect(); }} className="mx-4 mt-1 flex items-center space-x-2 text-sm text-red-500 font-semibold">
+                  <span>Disconnect</span>
                 </button>
               )}
             </div>

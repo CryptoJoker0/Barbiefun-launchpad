@@ -7,7 +7,7 @@ import { Rocket, Clock, Trophy, ArrowLeftRight, Sparkles, DollarSign, Link2, Hea
 import { Input } from "@/components/ui/input";
 import RecentLaunches from "@/components/RecentLaunches";
 import TokenCard from "@/components/TokenCard";
-import LiveTerminal from "@/components/LiveTerminal";
+import NativeTokenPrices from "@/components/NativeTokenPrices";
 import ChainIcon from "@/components/ChainIcon";
 import { getLaunches } from "@/lib/launches";
 import { SUPPORTED_CHAINS, DISPLAY_CHAINS } from "@/lib/wagmi";
@@ -141,8 +141,9 @@ export default function Home() {
             </div>
           </div>
 
+          {/* Native Token Prices — replaces Live Terminal */}
           <div className="w-full lg:flex-1 min-w-0">
-            <LiveTerminal />
+            <NativeTokenPrices />
           </div>
         </div>
 
@@ -152,7 +153,7 @@ export default function Home() {
             <span className="text-xs text-pink-400 font-bold uppercase tracking-widest mr-2">Supported Chains</span>
             {DISPLAY_CHAINS.map((chain) => (
               <div
-                key={chain.isSvm ? "x1" : chain.id}
+                key={chain.id}
                 className={`flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-semibold shadow-sm transition-all cursor-default ${
                   chain.isSvm
                     ? "bg-gradient-to-r from-purple-50 to-purple-100 border border-purple-200 text-purple-700 hover:border-purple-400"
@@ -179,8 +180,8 @@ export default function Home() {
         {[
           { label: "Tokens Launched", value: launches.length.toLocaleString(), icon: Rocket },
           { label: "Launch Fee", value: "$5 flat", icon: DollarSign },
-          { label: "EVM Chains Live", value: String(SUPPORTED_CHAINS.filter((c) => !c.isSvm).length), icon: Link2 },
-          { label: "SVM Chains (X1)", value: "1 · Phantom/Backpack", icon: ArrowLeftRight },
+          { label: "EVM Chains", value: String(SUPPORTED_CHAINS.length), icon: Link2 },
+          { label: "SVM Chains", value: "X1 · Solana", icon: ArrowLeftRight },
         ].map((stat) => (
           <div key={stat.label} className="bg-white border border-pink-100 rounded-2xl p-4 text-center shadow-sm hover:shadow-md hover:border-pink-200 transition-all">
             <stat.icon className="w-6 h-6 text-pink-500 mx-auto mb-1.5" />
@@ -231,7 +232,7 @@ export default function Home() {
                   <Search className="w-8 h-8 text-pink-200 mx-auto mb-3" />
                   <h3 className="text-lg font-bold text-gray-700 mb-1">No matches found</h3>
                   <p className="text-sm text-gray-400 mb-5 max-w-sm mx-auto">
-                    No tokens match "{search}" by name or contract address. Try a different search.
+                    No tokens match &quot;{search}&quot; by name or contract address.
                   </p>
                 </>
               ) : tab === "verified" ? (

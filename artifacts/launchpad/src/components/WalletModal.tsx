@@ -7,7 +7,7 @@ import {
   ShieldCheck, Briefcase, Zap,
 } from "lucide-react";
 import { useState } from "react";
-import { SUPPORTED_CHAINS, X1_CHAIN_INFO } from "@/lib/wagmi";
+import { SUPPORTED_CHAINS, DISPLAY_CHAINS, X1_CHAIN_INFO, SOLANA_CHAIN_INFO } from "@/lib/wagmi";
 import ChainIcon from "@/components/ChainIcon";
 import { useSolanaWallet, isPhantomAvailable, isBackpackAvailable } from "@/hooks/useSolanaWallet";
 
@@ -85,7 +85,7 @@ export default function WalletModal({ onClose }: WalletModalProps) {
               <p className="text-xs text-pink-500 font-semibold">
                 {isConnected
                   ? (chain ? chain.name : "Unsupported network")
-                  : `X1 Blockchain · ${solana.walletId === "phantom" ? "Phantom" : "Backpack"}`}
+                  : `SVM · ${solana.walletId === "phantom" ? "Phantom" : "Backpack"}`}
               </p>
               <button
                 onClick={copyAddress}
@@ -206,7 +206,7 @@ export default function WalletModal({ onClose }: WalletModalProps) {
             className={`flex-1 py-3 text-sm font-bold transition-all flex items-center justify-center gap-1.5 ${section === "x1" ? "text-purple-600 border-b-2 border-purple-500" : "text-gray-400 hover:text-purple-400"}`}
           >
             <Zap className="w-3.5 h-3.5" />
-            X1 Blockchain
+            SVM Chains
           </button>
         </div>
 
@@ -259,18 +259,20 @@ export default function WalletModal({ onClose }: WalletModalProps) {
               </p>
             </>
           ) : (
-            /* X1 Blockchain — Solana wallet section */
+            /* SVM Chains — X1 + Solana wallet section */
             <>
-              <div className="flex items-center space-x-3 bg-purple-50 border border-purple-100 rounded-2xl px-4 py-3 mb-2">
-                <ChainIcon chain="x1" size={32} />
-                <div>
-                  <p className="font-bold text-purple-800 text-sm">X1 Blockchain</p>
-                  <p className="text-xs text-purple-500">Solana VM · Native token: XN</p>
-                </div>
+              {/* Chain pills */}
+              <div className="flex gap-2 mb-3">
+                {DISPLAY_CHAINS.filter((c) => c.isSvm).map((c) => (
+                  <div key={c.id} className="flex items-center gap-1.5 bg-purple-50 border border-purple-100 rounded-full px-3 py-1.5 flex-1 justify-center">
+                    <ChainIcon chain={c.icon} size={18} />
+                    <span className="text-xs font-bold text-purple-700">{c.name}</span>
+                  </div>
+                ))}
               </div>
 
               <p className="text-xs text-gray-400 text-center mb-1">
-                X1 uses the Solana Virtual Machine. Connect with a Solana-compatible wallet below.
+                X1 and Solana run on the Solana VM. Connect with a compatible wallet below.
               </p>
 
               {/* Phantom */}
@@ -351,6 +353,25 @@ export default function WalletModal({ onClose }: WalletModalProps) {
                 <ExternalLink className="w-4 h-4 text-purple-400 group-hover:text-purple-600 transition-colors" />
               </a>
 
+              {/* Jupiter for Solana swaps */}
+              <a
+                href={SOLANA_CHAIN_INFO.dex}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full flex items-center justify-between px-4 py-3.5 bg-white hover:bg-purple-50 border border-purple-100 hover:border-purple-300 rounded-2xl transition-all group"
+              >
+                <div className="flex items-center space-x-3">
+                  <div className="w-9 h-9 rounded-full overflow-hidden shrink-0">
+                    <ChainIcon chain="solana" size={36} />
+                  </div>
+                  <div className="text-left">
+                    <p className="font-bold text-gray-800 text-sm">Jupiter · Solana</p>
+                    <p className="text-xs text-gray-400">Trade on jup.ag in new tab</p>
+                  </div>
+                </div>
+                <ExternalLink className="w-4 h-4 text-purple-400 group-hover:text-purple-600 transition-colors" />
+              </a>
+
               {solana.error && (
                 <div className="flex items-center space-x-2 bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-600">
                   <AlertCircle className="w-4 h-4 shrink-0" />
@@ -361,7 +382,7 @@ export default function WalletModal({ onClose }: WalletModalProps) {
               <div className="flex items-start space-x-2 bg-purple-50 border border-purple-100 rounded-xl px-3 py-2.5 text-xs text-purple-500">
                 <Zap className="w-3.5 h-3.5 shrink-0 mt-0.5 text-purple-400" />
                 <span>
-                  X1 runs on the Solana Virtual Machine. EVM wallets (MetaMask, WalletConnect) cannot connect — use the Solana wallets above.
+                  X1 and Solana run on the Solana VM. EVM wallets (MetaMask, WalletConnect) cannot connect here — use Phantom or Backpack above.
                 </span>
               </div>
             </>

@@ -13,14 +13,24 @@ const SWAPS = [
     button: "bg-[#F3BA2F] hover:bg-[#e0a91f] text-gray-900",
   },
   {
-    id: "ethereum",
-    name: "Uniswap",
-    icon: "ethereum",
-    description: "Swap tokens on Ethereum and other EVM chains via the most trusted DEX.",
-    chains: "Ethereum, and more",
-    url: "https://app.uniswap.org/swap",
-    accent: "from-[#627EEA]/15 to-indigo-50",
-    button: "bg-[#627EEA] hover:bg-[#4f68d1]",
+    id: "base",
+    name: "Uniswap · Base",
+    icon: "base",
+    description: "Swap tokens on Base using Uniswap — the leading DEX now live on Coinbase's L2.",
+    chains: "Base (Ethereum L2)",
+    url: "https://app.uniswap.org/swap?chain=base",
+    accent: "from-[#0052FF]/15 to-blue-50",
+    button: "bg-[#0052FF] hover:bg-[#0040cc]",
+  },
+  {
+    id: "solana",
+    name: "Jupiter · Solana",
+    icon: "solana",
+    description: "Best swap rates on Solana via Jupiter — the largest DEX aggregator in the ecosystem.",
+    chains: "Solana",
+    url: "https://jup.ag",
+    accent: "from-purple-500/15 to-purple-50",
+    button: "bg-gradient-to-r from-purple-600 to-purple-800 hover:from-purple-700 hover:to-purple-900",
   },
   {
     id: "xlayer",
@@ -33,6 +43,16 @@ const SWAPS = [
     button: "bg-gray-900 hover:bg-gray-800",
   },
   {
+    id: "x1",
+    name: "X1 Swap",
+    icon: "x1",
+    description: "Swap SVM-based assets on the X1 blockchain.",
+    chains: "X1 Blockchain (SVM)",
+    url: "https://app.bridge.x1.xyz/",
+    accent: "from-orange-500/15 to-orange-50",
+    button: "bg-orange-500 hover:bg-orange-600",
+  },
+  {
     id: "robinhood",
     name: "Robinhood Chain Swap",
     icon: "robinhood",
@@ -41,16 +61,6 @@ const SWAPS = [
     url: "https://relay.link/bridge",
     accent: "from-[#00C805]/15 to-emerald-50",
     button: "bg-[#00C805] hover:bg-[#00b304]",
-  },
-  {
-    id: "x1",
-    name: "X1 Swap",
-    icon: "x1",
-    description: "Swap SVM-based assets on the X1 blockchain.",
-    chains: "X1 Blockchain",
-    url: "https://app.bridge.x1.xyz/",
-    accent: "from-orange-500/15 to-orange-50",
-    button: "bg-orange-500 hover:bg-orange-600",
   },
   {
     id: "tempo",
@@ -75,8 +85,7 @@ export default function Swap() {
           <span className="bg-gradient-to-r from-pink-500 to-red-400 bg-clip-text text-transparent">Swap Tokens</span>
         </h1>
         <p className="text-pink-600 font-medium max-w-xl mx-auto">
-          Already have a token and just want to trade? Jump straight to a trusted DEX on your chain —
-          no need to launch anything first.
+          Already have a token and just want to trade? Jump straight to a trusted DEX on your chain.
         </p>
       </div>
 

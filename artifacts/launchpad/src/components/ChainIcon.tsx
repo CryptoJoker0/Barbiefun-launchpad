@@ -7,12 +7,6 @@ type ChainIconProps = {
   size?: number;
 };
 
-/**
- * Consistent-sizing SVG chain marks. These are stylized, brand-accurate
- * renditions (correct colors/shape language) rather than pixel-copies of
- * trademarked logo files, so the app never ships third-party brand assets
- * without a license while still looking sharp and instantly recognizable.
- */
 export default function ChainIcon({ chain, className = "", size = 28 }: ChainIconProps) {
   const props = {
     width: size,
@@ -35,6 +29,18 @@ export default function ChainIcon({ chain, className = "", size = 28 }: ChainIco
           </g>
         </svg>
       );
+
+    case "base":
+      return (
+        <svg {...props}>
+          <circle cx="16" cy="16" r="16" fill="#0052FF" />
+          <path
+            d="M16.0 6C10.477 6 6 10.477 6 16s4.477 10 10 10c5.185 0 9.449-3.947 9.95-9H15.999V14h11.95C27.45 8.477 22.186 6 16 6z"
+            fill="#fff"
+          />
+        </svg>
+      );
+
     case "ethereum":
       return (
         <svg {...props}>
@@ -49,6 +55,26 @@ export default function ChainIcon({ chain, className = "", size = 28 }: ChainIco
           </g>
         </svg>
       );
+
+    case "solana":
+      return (
+        <svg {...props}>
+          <defs>
+            <linearGradient id="solGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="#9945FF" />
+              <stop offset="50%" stopColor="#14F195" />
+              <stop offset="100%" stopColor="#9945FF" />
+            </linearGradient>
+          </defs>
+          <circle cx="16" cy="16" r="16" fill="url(#solGrad)" />
+          <g fill="#fff">
+            <path d="M8 11.5h13.5l-2 3H8z" opacity="0.9" />
+            <path d="M8 14.5h11.5l-2 3H8z" opacity="0.9" />
+            <path d="M8 17.5h13.5l-2 3H8z" opacity="0.9" />
+          </g>
+        </svg>
+      );
+
     case "xlayer":
       return (
         <svg {...props}>
@@ -56,6 +82,7 @@ export default function ChainIcon({ chain, className = "", size = 28 }: ChainIco
           <path d="M9 9h4.4l2.6 3.7L18.6 9H23l-6.4 8.9L23 23h-4.4l-2.6-3.6L13.4 23H9l6.4-9Z" fill="#fff" />
         </svg>
       );
+
     case "tempo":
       return (
         <svg {...props}>
@@ -70,6 +97,7 @@ export default function ChainIcon({ chain, className = "", size = 28 }: ChainIco
           <path d="M16 10.5v6l4 2.2" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" fill="none" />
         </svg>
       );
+
     case "arc":
       return (
         <svg {...props}>
@@ -84,6 +112,7 @@ export default function ChainIcon({ chain, className = "", size = 28 }: ChainIco
           <circle cx="16" cy="21" r="1.6" fill="#fff" />
         </svg>
       );
+
     case "x1":
       return (
         <img
@@ -95,6 +124,7 @@ export default function ChainIcon({ chain, className = "", size = 28 }: ChainIco
           style={{ width: size, height: size }}
         />
       );
+
     case "robinhood":
       return (
         <img
@@ -106,13 +136,12 @@ export default function ChainIcon({ chain, className = "", size = 28 }: ChainIco
           style={{ width: size, height: size }}
         />
       );
+
     default:
       return (
         <svg {...props}>
           <circle cx="16" cy="16" r="16" fill="#e5e7eb" />
-          <text x="16" y="21" textAnchor="middle" fontSize="14" fill="#6b7280">
-            ?
-          </text>
+          <text x="16" y="21" textAnchor="middle" fontSize="14" fill="#6b7280">?</text>
         </svg>
       );
   }

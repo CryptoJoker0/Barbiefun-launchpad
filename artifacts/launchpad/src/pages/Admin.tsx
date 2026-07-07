@@ -1,0 +1,503 @@
+/**
+ * Admin Dashboard — platform-wide analytics and controls.
+ * Reads from localStorage-backed launch records; replace with real API
+ * calls once a backend is wired in.
+ */
+import { useState } from "react";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import { Rocket, DollarSign, CheckCircle2, Link2, TrendingUp, BadgeCheck, Activity, Settings, ShieldCheck, Zap, AlertCircle } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import ChainIcon from "@/components/ChainIcon";
+import { SUPPORTED_CHAINS, DISPLAY_CHAINS } from "@/lib/wagmi";
+import { getLaunches, setLaunchVerified } from "@/lib/launches";
+
+// NOTE: VITE_* env vars are included in the client bundle and visible in browser
+// devtools — this gate is a UX deterrent only, not a security boundary.
+// For real authorization, move sensitive actions to a protected backend route.
+const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || "";
+
+const PIE_COLORS = ["#ec4899", "#f43f5e", "#fb923c", "#8b5cf6", "#3b82f6", "#14b8a6"];
+
+export default function Admin() {
+  const [authenticated, setAuthenticated] = useState(!ADMIN_PASSWORD);
+  const [pw, setPw] = useState("");
+  const [pwError, setPwError] = useState(false);
+  const [tab, setTab] = useState<"overview" | "launches" | "chains" | "settings">("overview");
+  const [launches, setLaunches] = useState(() => getLaunches());
+
+  const handleAuth = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!ADMIN_PASSWORD || pw === ADMIN_PASSWORD) {
+      setAuthenticated(true);
+    } else {
+      setPwError(true);
+      setTimeout(() => setPwError(false), 2000);
+    }
+  };
+
+  const refresh = () => setLaunches(getLaunches());
+
+  const toggleVerify = (id: string, current: boolean) => {
+    setLaunchVerified(id, !current);
+    refresh();
+  };
+
+  if (!authenticated) {
+    return (
+      <div className="max-w-sm mx-auto py-24 animate-in fade-in duration-500">
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-pink-500 to-red-400 shadow-lg mb-4">
+            <ShieldCheck className="w-8 h-8 text-white" />
+          </div>
+          <h1 className="text-2xl font-extrabold text-gray-800">Admin Access</h1>
+          <p className="text-sm text-gray-400 mt-1">Enter the admin password to continue</p>
+        </div>
+        <form onSubmit={handleAuth} className="space-y-4">
+          <input
+            type="password"
+            value={pw}
+            onChange={(e) => setPw(e.target.value)}
+            placeholder="Admin password"
+            className={`w-full border rounded-xl px-4 py-3 text-sm font-mono focus:outline-none focus:ring-2 transition-all ${
+              pwError ? "border-red-300 focus:ring-red-300" : "border-pink-200 focus:ring-pink-300"
+            }`}
+          />
+          {pwError && (
+            <p className="text-xs text-red-500 flex items-center gap-1">
+              <AlertCircle className="w-3.5 h-3.5" />
+              Incorrect password
+            </p>
+          )}
+          <button
+            type="submit"
+            className="w-full bg-gradient-to-r from-pink-500 to-red-500 text-white font-bold py-3 rounded-xl hover:from-pink-600 hover:to-red-600 transition-all"
+          >
+            Enter Dashboard
+          </button>
+        </form>
+        {!ADMIN_PASSWORD && (
+          <p className="text-center text-xs text-gray-400 mt-4">
+            Set <code className="bg-gray-100 px-1 py-0.5 rounded">VITE_ADMIN_PASSWORD</code> to protect this page.
+          </p>
+        )}
+      </div>
+    );
+  }
+
+  // Compute stats
+  const totalLaunches = launches.length;
+  const totalRevenue = totalLaunches * 5;
+  const verifiedCount = launches.filter((l) => l.verified).length;
+  const evmChains = SUPPORTED_CHAINS.length;
+  const svmChains = DISPLAY_CHAINS.filter((c) => c.isSvm).length;
+
+  // Launches by chain
+  const chainCounts = SUPPORTED_CHAINS.map((c) => ({
+    name: c.name.split(" ")[0],
+    icon: c.icon,
+    count: launches.filter((l) => l.chainId === c.id).length,
+    symbol: c.symbol,
+  }));
+
+  // Recent 10 launches
+  const recentLaunches = [...launches]
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, 10);
+
+  const tabs = [
+    { id: "overview", label: "Overview", icon: Activity },
+    { id: "launches", label: "Launches", icon: Rocket },
+    { id: "chains", label: "Chains", icon: Link2 },
+    { id: "settings", label: "Settings", icon: Settings },
+  ] as const;
+
+  return (
+    <div className="max-w-6xl mx-auto py-8 pb-20 animate-in fade-in duration-500 space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-500 to-red-400 flex items-center justify-center shadow-md">
+            <ShieldCheck className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-extrabold text-gray-800">Admin Dashboard</h1>
+            <p className="text-xs text-gray-400">Barbie Fun · Platform Control</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="flex items-center gap-1.5 text-xs font-bold text-green-600 bg-green-50 border border-green-200 rounded-full px-3 py-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+            Live
+          </span>
+          <button
+            onClick={refresh}
+            className="text-xs text-pink-500 hover:text-pink-600 font-semibold border border-pink-200 rounded-full px-3 py-1 hover:bg-pink-50 transition-all"
+          >
+            Refresh
+          </button>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex space-x-1 bg-pink-50 border border-pink-100 rounded-xl p-1 w-fit">
+        {tabs.map(({ id, label, icon: Icon }) => (
+          <button
+            key={id}
+            onClick={() => setTab(id)}
+            className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold transition-all ${
+              tab === id ? "bg-white text-pink-600 shadow-sm" : "text-pink-400 hover:text-pink-600"
+            }`}
+          >
+            <Icon className="w-3.5 h-3.5" />
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {/* OVERVIEW TAB */}
+      {tab === "overview" && (
+        <div className="space-y-6">
+          {/* KPI cards */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {[
+              { label: "Total Launches", value: totalLaunches, icon: Rocket, color: "text-pink-500", bg: "bg-pink-50" },
+              { label: "Total Revenue", value: `$${totalRevenue}`, icon: DollarSign, color: "text-green-600", bg: "bg-green-50" },
+              { label: "Verified Tokens", value: verifiedCount, icon: CheckCircle2, color: "text-blue-500", bg: "bg-blue-50" },
+              { label: "EVM + SVM Chains", value: `${evmChains} + ${svmChains}`, icon: Link2, color: "text-purple-500", bg: "bg-purple-50" },
+            ].map((kpi) => (
+              <Card key={kpi.label} className="border-pink-100 shadow-sm hover:shadow-md transition-shadow">
+                <CardContent className="p-5">
+                  <div className={`inline-flex items-center justify-center w-9 h-9 rounded-xl ${kpi.bg} mb-3`}>
+                    <kpi.icon className={`w-4.5 h-4.5 ${kpi.color}`} />
+                  </div>
+                  <p className="text-2xl font-extrabold text-gray-800">{kpi.value}</p>
+                  <p className="text-xs text-gray-400 font-medium mt-0.5">{kpi.label}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* Charts row */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Bar chart — launches by chain */}
+            <Card className="border-pink-100 shadow-sm">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-bold text-pink-600 flex items-center gap-2">
+                  <BarChart className="w-4 h-4" />
+                  Launches by Chain
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {totalLaunches === 0 ? (
+                  <div className="h-40 flex items-center justify-center text-gray-400 text-sm">
+                    No launches yet
+                  </div>
+                ) : (
+                  <ResponsiveContainer width="100%" height={180}>
+                    <BarChart data={chainCounts} barSize={28}>
+                      <XAxis dataKey="name" tick={{ fontSize: 10, fill: "#9ca3af" }} axisLine={false} tickLine={false} />
+                      <YAxis tick={{ fontSize: 10, fill: "#9ca3af" }} axisLine={false} tickLine={false} allowDecimals={false} />
+                      <Tooltip
+                        contentStyle={{ borderRadius: 8, border: "1px solid #fce7f3", fontSize: 12 }}
+                        formatter={(v: any) => [`${v} launches`, "Count"]}
+                      />
+                      <Bar dataKey="count" radius={[6, 6, 0, 0]}>
+                        {chainCounts.map((_, i) => (
+                          <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Pie chart — distribution */}
+            <Card className="border-pink-100 shadow-sm">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-bold text-pink-600 flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4" />
+                  Chain Distribution
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="flex items-center gap-6">
+                {totalLaunches === 0 ? (
+                  <div className="h-40 w-full flex items-center justify-center text-gray-400 text-sm">
+                    No data yet
+                  </div>
+                ) : (
+                  <>
+                    <ResponsiveContainer width="55%" height={180}>
+                      <PieChart>
+                        <Pie
+                          data={chainCounts.filter((c) => c.count > 0)}
+                          dataKey="count"
+                          nameKey="name"
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={45}
+                          outerRadius={75}
+                          paddingAngle={3}
+                        >
+                          {chainCounts.filter((c) => c.count > 0).map((_, i) => (
+                            <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <Tooltip formatter={(v: any) => [`${v} launches`]} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                    <div className="space-y-1.5 flex-1">
+                      {chainCounts.filter((c) => c.count > 0).map((c, i) => (
+                        <div key={c.name} className="flex items-center gap-2 text-xs">
+                          <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: PIE_COLORS[i % PIE_COLORS.length] }} />
+                          <span className="text-gray-600 font-medium">{c.name}</span>
+                          <span className="ml-auto font-bold text-gray-800">{c.count}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Recent activity */}
+          <Card className="border-pink-100 shadow-sm">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-bold text-pink-600 flex items-center gap-2">
+                <Activity className="w-4 h-4" />
+                Recent Activity
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {recentLaunches.length === 0 ? (
+                <p className="text-sm text-gray-400 text-center py-6">No launches recorded yet.</p>
+              ) : (
+                <div className="space-y-2">
+                  {recentLaunches.map((l) => {
+                    const chainMeta = SUPPORTED_CHAINS.find((c) => c.id === l.chainId);
+                    return (
+                      <div key={l.id} className="flex items-center justify-between py-2.5 px-3 rounded-xl border border-pink-50 hover:border-pink-100 transition-colors">
+                        <div className="flex items-center gap-3">
+                          {chainMeta && <ChainIcon chain={chainMeta.icon} size={20} />}
+                          <div>
+                            <span className="font-bold text-sm text-gray-800">${l.ticker}</span>
+                            <span className="text-xs text-gray-400 ml-2">{l.name}</span>
+                          </div>
+                          {l.verified && (
+                            <span className="text-[9px] bg-green-100 text-green-600 border border-green-200 px-1.5 py-0.5 rounded-full font-bold">Verified</span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <span className="text-[10px] text-gray-400 font-mono">
+                            {l.deployer.slice(0, 6)}…{l.deployer.slice(-4)}
+                          </span>
+                          <span className="text-[10px] text-gray-400">
+                            {new Date(l.createdAt).toLocaleDateString()}
+                          </span>
+                          <button
+                            onClick={() => toggleVerify(l.id, !!l.verified)}
+                            className={`text-[10px] font-bold px-2 py-0.5 rounded-full border transition-all ${
+                              l.verified
+                                ? "bg-green-50 text-green-600 border-green-200 hover:bg-red-50 hover:text-red-500 hover:border-red-200"
+                                : "bg-gray-50 text-gray-500 border-gray-200 hover:bg-green-50 hover:text-green-600 hover:border-green-200"
+                            }`}
+                          >
+                            {l.verified ? "✓ Verified" : "Verify"}
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* LAUNCHES TAB */}
+      {tab === "launches" && (
+        <Card className="border-pink-100 shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-sm font-bold text-pink-600 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Rocket className="w-4 h-4" />
+                All Launches ({launches.length})
+              </div>
+              <span className="text-xs text-gray-400 font-normal">Revenue: ${launches.length * 5}</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {launches.length === 0 ? (
+              <div className="text-center py-12">
+                <Rocket className="w-10 h-10 text-pink-200 mx-auto mb-3" />
+                <p className="text-gray-400 text-sm">No launches yet. They'll appear here once users launch tokens.</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-pink-100">
+                      <th className="text-left py-2 px-3 text-xs font-bold text-pink-400 uppercase tracking-wider">Token</th>
+                      <th className="text-left py-2 px-3 text-xs font-bold text-pink-400 uppercase tracking-wider">Chain</th>
+                      <th className="text-left py-2 px-3 text-xs font-bold text-pink-400 uppercase tracking-wider">Deployer</th>
+                      <th className="text-left py-2 px-3 text-xs font-bold text-pink-400 uppercase tracking-wider">Date</th>
+                      <th className="text-left py-2 px-3 text-xs font-bold text-pink-400 uppercase tracking-wider">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-pink-50">
+                    {launches.map((l) => {
+                      const chainMeta = SUPPORTED_CHAINS.find((c) => c.id === l.chainId);
+                      return (
+                        <tr key={l.id} className="hover:bg-pink-50/40 transition-colors">
+                          <td className="py-2.5 px-3">
+                            <div className="font-bold text-gray-800">${l.ticker}</div>
+                            <div className="text-[10px] text-gray-400">{l.name}</div>
+                          </td>
+                          <td className="py-2.5 px-3">
+                            <div className="flex items-center gap-1.5">
+                              {chainMeta && <ChainIcon chain={chainMeta.icon} size={14} />}
+                              <span className="text-xs text-gray-600">{chainMeta?.name ?? l.chainName}</span>
+                            </div>
+                          </td>
+                          <td className="py-2.5 px-3 font-mono text-xs text-gray-400">
+                            {l.deployer.slice(0, 8)}…{l.deployer.slice(-6)}
+                          </td>
+                          <td className="py-2.5 px-3 text-xs text-gray-400">
+                            {new Date(l.createdAt).toLocaleDateString()}
+                          </td>
+                          <td className="py-2.5 px-3">
+                            <button
+                              onClick={() => toggleVerify(l.id, !!l.verified)}
+                              className={`text-[10px] font-bold px-2.5 py-1 rounded-full border transition-all ${
+                                l.verified
+                                  ? "bg-green-100 text-green-700 border-green-300 hover:bg-red-50 hover:text-red-500 hover:border-red-200"
+                                  : "bg-gray-100 text-gray-500 border-gray-200 hover:bg-green-50 hover:text-green-600 hover:border-green-200"
+                              }`}
+                            >
+                              {l.verified ? "✓ Verified" : "Unverified"}
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* CHAINS TAB */}
+      {tab === "chains" && (
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {DISPLAY_CHAINS.map((chain) => (
+              <Card key={chain.id} className={`border shadow-sm ${chain.isSvm ? "border-purple-200" : "border-pink-100"}`}>
+                <CardContent className="p-5">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <ChainIcon chain={chain.icon} size={32} />
+                      <div>
+                        <p className="font-bold text-gray-800">{chain.name}</p>
+                        <p className="text-xs text-gray-400">{chain.symbol} · {chain.tokenName}</p>
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-end gap-1">
+                      {chain.isSvm ? (
+                        <span className="text-[9px] bg-purple-100 text-purple-600 border border-purple-200 rounded-full px-2 py-0.5 font-bold">SVM</span>
+                      ) : (
+                        <span className="text-[9px] bg-green-100 text-green-600 border border-green-200 rounded-full px-2 py-0.5 font-bold">EVM ✓</span>
+                      )}
+                      {chain.isStableGas && (
+                        <span className="text-[9px] bg-blue-100 text-blue-600 border border-blue-200 rounded-full px-2 py-0.5 font-bold">Stable Gas</span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-gray-400">
+                      Launches: <strong className="text-gray-700">{chain.isSvm ? "—" : launches.filter((l) => l.chainId === chain.id).length}</strong>
+                    </span>
+                    <a href={chain.dex} target="_blank" rel="noopener noreferrer"
+                      className="text-pink-400 hover:text-pink-600 font-semibold">
+                      DEX →
+                    </a>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* SETTINGS TAB */}
+      {tab === "settings" && (
+        <div className="space-y-4">
+          <Card className="border-pink-100 shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-sm font-bold text-pink-600 flex items-center gap-2">
+                <Zap className="w-4 h-4" />
+                Platform Configuration
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4 text-sm">
+              {[
+                { key: "VITE_LAUNCH_FEE_TREASURY_ADDRESS", label: "Treasury Address", description: "Wallet that receives $5 launch fees" },
+                { key: "VITE_WALLETCONNECT_PROJECT_ID", label: "WalletConnect Project ID", description: "Enables WalletConnect QR modal" },
+                { key: "VITE_ADMIN_PASSWORD", label: "Admin Password", description: "Protects this dashboard" },
+              ].map((setting) => {
+                const value = import.meta.env[setting.key];
+                const configured = !!value;
+                return (
+                  <div key={setting.key} className="flex items-center justify-between py-3 px-4 rounded-xl border border-pink-50 bg-pink-50/30">
+                    <div>
+                      <p className="font-bold text-gray-800">{setting.label}</p>
+                      <p className="text-xs text-gray-400 mt-0.5">{setting.description}</p>
+                      <code className="text-[10px] text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded mt-1 inline-block">{setting.key}</code>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {configured ? (
+                        <span className="flex items-center gap-1 text-xs font-bold text-green-600 bg-green-50 border border-green-200 rounded-full px-2.5 py-1">
+                          <CheckCircle2 className="w-3 h-3" /> Set
+                        </span>
+                      ) : (
+                        <span className="flex items-center gap-1 text-xs font-bold text-amber-600 bg-amber-50 border border-amber-200 rounded-full px-2.5 py-1">
+                          <AlertCircle className="w-3 h-3" /> Not set
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </CardContent>
+          </Card>
+
+          <Card className="border-pink-100 shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-sm font-bold text-pink-600 flex items-center gap-2">
+                <BadgeCheck className="w-4 h-4" />
+                Verification Queue
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-gray-500">
+                {launches.filter((l) => !l.verified).length} tokens awaiting review.{" "}
+                {verifiedCount} tokens verified.
+              </p>
+              <div className="mt-3 flex gap-2">
+                <button
+                  onClick={() => setTab("launches")}
+                  className="text-sm font-bold text-pink-500 hover:text-pink-600 border border-pink-200 rounded-full px-4 py-1.5 hover:bg-pink-50 transition-all"
+                >
+                  View Launches →
+                </button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+    </div>
+  );
+}

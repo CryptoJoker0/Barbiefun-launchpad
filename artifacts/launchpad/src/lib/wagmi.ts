@@ -1,5 +1,5 @@
 import { createConfig, http } from "wagmi";
-import { mainnet, bsc } from "wagmi/chains";
+import { base, bsc } from "wagmi/chains";
 import { injected, walletConnect, coinbaseWallet } from "wagmi/connectors";
 import type { Chain } from "wagmi/chains";
 
@@ -36,10 +36,7 @@ export const tempo: Chain = {
   },
 };
 
-// Circle Arc — mainnet chain ID has not been publicly announced yet
-// (Circle targets a Summer 2026 mainnet beta). We connect to the live
-// public testnet so the app is fully wired for day-one mainnet swap-in —
-// once Circle publishes the mainnet chain ID/RPC, update this entry only.
+// Circle Arc — mainnet chain ID has not been publicly announced yet.
 export const arcMainnet: Chain = {
   id: 5042002,
   name: "Arc Mainnet",
@@ -72,11 +69,11 @@ const connectorList = [
 ];
 
 export const wagmiConfig = createConfig({
-  chains: [bsc, mainnet, xlayer, tempo, arcMainnet, robinhoodChain],
+  chains: [bsc, base, xlayer, tempo, arcMainnet, robinhoodChain],
   connectors: connectorList,
   transports: {
     [bsc.id]: http("https://bsc-dataseed.binance.org"),
-    [mainnet.id]: http("https://cloudflare-eth.com"),
+    [base.id]: http("https://mainnet.base.org"),
     [xlayer.id]: http("https://rpc.xlayer.tech"),
     [tempo.id]: http("https://rpc.tempo.xyz"),
     [arcMainnet.id]: http("https://rpc.testnet.arc.network"),
@@ -91,7 +88,7 @@ declare module "wagmi" {
 }
 
 // ---------------------------------------------------------------------------
-// Chain metadata used across the UI (wallet-connectable EVM chains only)
+// Chain metadata used across the UI
 // ---------------------------------------------------------------------------
 
 export type ChainMeta = {
@@ -109,36 +106,38 @@ export type ChainMeta = {
   isTestnet?: boolean;
   /** true when this chain runs on the Solana VM (not EVM) */
   isSvm?: boolean;
+  /** CoinGecko price feed ID for the native token */
+  coingeckoId?: string;
 };
 
 /**
  * EVM-only chains that can be passed to wagmi's switchChain.
- * Never add SVM/non-EVM entries here — they have no numeric chain ID
- * and will break switchChain({ chainId: 0 }) callers throughout the app.
+ * Never add SVM/non-EVM entries here.
  */
 export const SUPPORTED_CHAINS: ChainMeta[] = [
-  { id: bsc.id, name: "BNB Smart Chain", symbol: "BNB", tokenName: "BNB", icon: "bnb", dex: "https://pancakeswap.finance/swap" },
-  { id: mainnet.id, name: "Ethereum", symbol: "ETH", tokenName: "Ether", icon: "ethereum", dex: "https://app.uniswap.org/swap" },
-  { id: xlayer.id, name: "X Layer", symbol: "OKB", tokenName: "OKB", icon: "xlayer", dex: "https://www.okx.com/dex" },
-  { id: tempo.id, name: "Tempo", symbol: "USD", tokenName: "US Dollar", icon: "tempo", dex: "https://explore.tempo.xyz", isStableGas: true },
-  { id: arcMainnet.id, name: "Arc Mainnet", symbol: "USDC", tokenName: "USD Coin", icon: "arc", dex: "https://testnet.arcscan.app", isStableGas: true },
-  { id: robinhoodChain.id, name: "Robinhood Chain", symbol: "ETH", tokenName: "Ether", icon: "robinhood", dex: "https://robinhoodchain.blockscout.com" },
+  { id: bsc.id,          name: "BNB Smart Chain", symbol: "BNB",  tokenName: "BNB",      icon: "bnb",      dex: "https://pancakeswap.finance/swap",                coingeckoId: "binancecoin" },
+  { id: base.id,         name: "Base",             symbol: "ETH",  tokenName: "Ether",    icon: "base",     dex: "https://app.uniswap.org/swap?chain=base",          coingeckoId: "ethereum"    },
+  { id: xlayer.id,       name: "X Layer",          symbol: "OKB",  tokenName: "OKB",      icon: "xlayer",   dex: "https://www.okx.com/dex",                          coingeckoId: "okb"         },
+  { id: tempo.id,        name: "Tempo",            symbol: "USD",  tokenName: "US Dollar",icon: "tempo",    dex: "https://explore.tempo.xyz",  isStableGas: true                               },
+  { id: arcMainnet.id,   name: "Arc Mainnet",      symbol: "USDC", tokenName: "USD Coin", icon: "arc",      dex: "https://testnet.arcscan.app", isStableGas: true                               },
+  { id: robinhoodChain.id, name: "Robinhood Chain",symbol: "ETH",  tokenName: "Ether",    icon: "robinhood",dex: "https://robinhoodchain.blockscout.com",             coingeckoId: "ethereum"    },
 ];
 
 /**
- * All chains for display-only UI (home page badge strip, etc.).
- * Includes EVM chains + the X1 SVM chain as a read-only display entry.
+ * All chains for display-only UI (home page badge strip, token prices, etc.).
+ * Includes EVM chains + SVM chains (X1, Solana) as read-only display entries.
  * Do NOT use this list for wagmi switchChain calls.
  */
 export const DISPLAY_CHAINS: ChainMeta[] = [
   ...SUPPORTED_CHAINS,
-  { id: -1, name: "X1 Blockchain", symbol: "XN", tokenName: "XN Token", icon: "x1", dex: "https://app.bridge.x1.xyz/", isSvm: true },
+  { id: -1, name: "X1 Blockchain", symbol: "XN",  tokenName: "XN Token", icon: "x1",     dex: "https://app.bridge.x1.xyz/", isSvm: true },
+  { id: -2, name: "Solana",        symbol: "SOL", tokenName: "Solana",   icon: "solana", dex: "https://jup.ag",              isSvm: true, coingeckoId: "solana" },
 ];
 
-/**
- * X1 Blockchain (x1.xyz) runs on the Solana Virtual Machine, not the EVM.
- * Connect via Phantom, Backpack, or X1 Web Wallet — not MetaMask/WalletConnect.
- */
+// ---------------------------------------------------------------------------
+// SVM chain metadata
+// ---------------------------------------------------------------------------
+
 export const X1_CHAIN_INFO = {
   name: "X1 Blockchain",
   symbol: "XN",
@@ -150,4 +149,17 @@ export const X1_CHAIN_INFO = {
   bridge: "https://app.bridge.x1.xyz/",
   webWallet: "https://wallet.x1.xyz/",
   requiredWallets: ["Phantom", "Backpack", "X1 Web Wallet"],
+};
+
+export const SOLANA_CHAIN_INFO = {
+  name: "Solana",
+  symbol: "SOL",
+  tokenName: "Solana",
+  icon: "solana",
+  vm: "SVM",
+  rpc: "https://api.mainnet-beta.solana.com",
+  explorer: "https://solscan.io",
+  dex: "https://jup.ag",
+  bridge: "https://portalbridge.com",
+  requiredWallets: ["Phantom", "Backpack"],
 };
