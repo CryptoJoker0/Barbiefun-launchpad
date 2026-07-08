@@ -2,7 +2,7 @@ import { Link } from "wouter";
 import type { Launch } from "@/lib/launches";
 import { formatSupply } from "@/lib/launches";
 import ChainIcon from "@/components/ChainIcon";
-import { SUPPORTED_CHAINS } from "@/lib/wagmi";
+import { SUPPORTED_CHAINS, DISPLAY_CHAINS } from "@/lib/wagmi";
 import { ExternalLink, Clock, BadgeCheck } from "lucide-react";
 
 function timeAgo(iso: string): string {
@@ -16,7 +16,9 @@ function timeAgo(iso: string): string {
 }
 
 export default function TokenCard({ launch }: { launch: Launch }) {
-  const chainMeta = SUPPORTED_CHAINS.find((c) => c.id === launch.chainId);
+  const chainMeta =
+    SUPPORTED_CHAINS.find((c) => c.id === launch.chainId) ??
+    DISPLAY_CHAINS.find((c) => c.id === launch.chainId);
 
   return (
     <Link href={`/token/${launch.id}`}>

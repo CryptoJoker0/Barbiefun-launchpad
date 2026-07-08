@@ -1,2 +1,4 @@
 - [Wagmi v2 dependency setup](wagmi-setup.md) — wagmi/viem must be in devDependencies (not dependencies) in launchpad; pin exact versions 2.19.5/2.53.1 to avoid v3 conflict.
 - [Multi-chain launchpad decisions](multichain-launchpad-decisions.md) — SVM/non-EVM chains excluded from wagmi config, unannounced mainnets use live testnet placeholder, treasury address is a plain env var not a secret.
+- [X1 token data sources](x1-data-sources.md) — x1scr.xyz has no public API (CORS-blocked + curl 403); DexScreener has no X1 chain indexed. Fallback: graceful placeholder linking to x1scr.xyz/x1oracle.com.
+- [SVM chain integration patterns](svm-chain-patterns.md) — SVM chains (chainId -1 X1, -2 Solana) need DISPLAY_CHAINS fallback everywhere SUPPORTED_CHAINS is used for chain lookup; tx sigs are 87-88 char base58.

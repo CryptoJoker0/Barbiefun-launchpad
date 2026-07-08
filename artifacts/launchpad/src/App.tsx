@@ -12,8 +12,10 @@ import Bridge from "@/pages/Bridge";
 import Swap from "@/pages/Swap";
 import Portfolio from "@/pages/Portfolio";
 import Admin from "@/pages/Admin";
+import Contact from "@/pages/Contact";
 import Navbar from "@/components/layout/Navbar";
 import Ticker from "@/components/layout/Ticker";
+import Footer from "@/components/layout/Footer";
 import { wagmiConfig } from "@/lib/wagmi";
 
 const queryClient = new QueryClient({
@@ -36,10 +38,12 @@ function Router() {
           <Route path="/swap" component={Swap} />
           <Route path="/verify" component={Verify} />
           <Route path="/portfolio" component={Portfolio} />
+          <Route path="/contact" component={Contact} />
           <Route path="/admin" component={Admin} />
           <Route component={NotFound} />
         </Switch>
       </main>
+      <Footer />
     </div>
   );
 }

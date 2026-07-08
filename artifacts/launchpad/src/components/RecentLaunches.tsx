@@ -2,7 +2,7 @@ import { Link } from "wouter";
 import { Rocket, Clock, ArrowRight, BadgeCheck } from "lucide-react";
 import type { Launch } from "@/lib/launches";
 import ChainIcon from "@/components/ChainIcon";
-import { SUPPORTED_CHAINS } from "@/lib/wagmi";
+import { SUPPORTED_CHAINS, DISPLAY_CHAINS } from "@/lib/wagmi";
 
 function timeAgo(iso: string): string {
   const diffMs = Date.now() - new Date(iso).getTime();
@@ -38,7 +38,9 @@ export default function RecentLaunches({ launches }: { launches: Launch[] }) {
       ) : (
         <div className="divide-y divide-pink-50">
           {recent.map((launch) => {
-            const chainMeta = SUPPORTED_CHAINS.find((c) => c.id === launch.chainId);
+            const chainMeta =
+              SUPPORTED_CHAINS.find((c) => c.id === launch.chainId) ??
+              DISPLAY_CHAINS.find((c) => c.id === launch.chainId);
             return (
               <Link key={launch.id} href={`/token/${launch.id}`}>
                 <div className="flex items-center justify-between py-3 group cursor-pointer">

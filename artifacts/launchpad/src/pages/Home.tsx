@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import RecentLaunches from "@/components/RecentLaunches";
 import TokenCard from "@/components/TokenCard";
 import NativeTokenPrices from "@/components/NativeTokenPrices";
+import X1TokenTracker from "@/components/X1TokenTracker";
 import ChainIcon from "@/components/ChainIcon";
 import { getLaunches } from "@/lib/launches";
 import { SUPPORTED_CHAINS, DISPLAY_CHAINS } from "@/lib/wagmi";
@@ -190,6 +191,16 @@ export default function Home() {
           </div>
         ))}
       </div>
+
+      {/* X1 Token Tracker */}
+      <section>
+        <div className="flex items-center gap-3 mb-4">
+          <ChainIcon chain="x1" size={20} />
+          <h2 className="text-xl font-extrabold text-gray-800">X1 Blockchain Tokens</h2>
+          <span className="text-[10px] font-bold bg-orange-100 text-orange-600 border border-orange-200 rounded-full px-2 py-0.5 uppercase tracking-widest">Live</span>
+        </div>
+        <X1TokenTracker />
+      </section>
 
       {/* Recently Launched */}
       <RecentLaunches launches={launches} />

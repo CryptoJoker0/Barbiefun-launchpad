@@ -4,13 +4,17 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { BadgeCheck, ShieldAlert, CheckCircle2, Rocket, Zap, Wallet, ExternalLink, AlertCircle } from "lucide-react";
+import {
+  BadgeCheck, ShieldAlert, CheckCircle2, Rocket, Zap,
+  Wallet, ExternalLink, AlertCircle, Copy,
+} from "lucide-react";
 import { getLaunches, setLaunchVerified } from "@/lib/launches";
 import ChainIcon from "@/components/ChainIcon";
-import { SUPPORTED_CHAINS } from "@/lib/wagmi";
+import { SUPPORTED_CHAINS, DISPLAY_CHAINS, X1_CHAIN_INFO, SOLANA_CHAIN_INFO } from "@/lib/wagmi";
 import { useAccount, useSendTransaction, useSwitchChain } from "wagmi";
 import { parseEther, parseUnits, isAddress } from "viem";
 import WalletModal from "@/components/WalletModal";
+import { useSolanaWallet } from "@/hooks/useSolanaWallet";
 import {
   useFeeNative,
   formatNativeAmount,
@@ -20,75 +24,126 @@ import {
   type VerificationTier,
 } from "@/lib/pricing";
 
-const CHAIN_EXPLORERS: Record<number, string> = {
-  56: "https://bscscan.com/tx/",
-  1: "https://etherscan.io/tx/",
-  196: "https://www.okx.com/explorer/xlayer/tx/",
-  4217: "https://explore.tempo.xyz/tx/",
+// ---------------------------------------------------------------------------
+// Chain explorer URLs
+// ---------------------------------------------------------------------------
+const EVM_EXPLORERS: Record<number, string> = {
+  56:      "https://bscscan.com/tx/",
+  8453:    "https://basescan.org/tx/",
+  196:     "https://www.okx.com/explorer/xlayer/tx/",
+  4217:    "https://explore.tempo.xyz/tx/",
   5042002: "https://testnet.arcscan.app/tx/",
-  4663: "https://robinhoodchain.blockscout.com/tx/",
+  4663:    "https://robinhoodchain.blockscout.com/tx/",
 };
 
-const TREASURY_ADDRESS = import.meta.env.VITE_LAUNCH_FEE_TREASURY_ADDRESS as string | undefined;
+// SVM treasury address — set VITE_SOLANA_TREASURY_ADDRESS for real SOL payments
+const EVM_TREASURY   = import.meta.env.VITE_LAUNCH_FEE_TREASURY_ADDRESS as string | undefined;
+const SOL_TREASURY   = import.meta.env.VITE_SOLANA_TREASURY_ADDRESS as string | undefined;
 
+type SvmChainKey = "x1" | "solana";
+
+const SVM_CHAINS: { key: SvmChainKey; name: string; icon: string; symbol: string; explorer: string }[] = [
+  { key: "x1",     name: "X1 Blockchain", icon: "x1",     symbol: "XN",  explorer: "https://explorer.x1.xyz/tx/" },
+  { key: "solana", name: "Solana",        icon: "solana", symbol: "SOL", explorer: "https://solscan.io/tx/" },
+];
+
+/**
+ * Validate a base58-encoded SVM transaction signature.
+ * Solana/X1 tx signatures are 64-byte Ed25519 values — base58 of 64 bytes
+ * produces exactly 87 or 88 characters in the standard base58 alphabet.
+ */
+function isValidSvmSig(sig: string): boolean {
+  return /^[1-9A-HJ-NP-Za-km-z]{87,88}$/.test(sig.trim());
+}
+
+// ---------------------------------------------------------------------------
+// Component
+// ---------------------------------------------------------------------------
 export default function Verify() {
   const { address, isConnected, chain } = useAccount();
   const { switchChain } = useSwitchChain();
   const { sendTransactionAsync, isPending: isSending } = useSendTransaction();
+  const solana = useSolanaWallet();
 
-  const [walletOpen, setWalletOpen] = useState(false);
-  const [tier, setTier] = useState<VerificationTier>("standard");
-  const [selectedChainId, setSelectedChainId] = useState<number | null>(null);
-  const [successData, setSuccessData] = useState<{ tier: VerificationTier; txHash: string; chainId: number } | null>(null);
-  const [launches, setLaunches] = useState(getLaunches());
+  const [walletOpen,     setWalletOpen]     = useState(false);
+  const [tier,           setTier]           = useState<VerificationTier>("standard");
+  const [selectedEvmId,  setSelectedEvmId]  = useState<number | null>(null);
+  const [selectedSvm,    setSelectedSvm]    = useState<SvmChainKey | null>(null);
+  const [svmTxSig,       setSvmTxSig]       = useState("");
+  const [svmSubmitting,  setSvmSubmitting]  = useState(false);
+  const [successData,    setSuccessData]    = useState<{
+    tier: VerificationTier;
+    txHash: string;
+    chainName: string;
+    explorer: string;
+  } | null>(null);
+  const [launches,       setLaunches]       = useState(getLaunches());
+  const [copied,         setCopied]         = useState(false);
 
-  const selectedChain = SUPPORTED_CHAINS.find((c) => c.id === selectedChainId);
+  // derived
+  const selectedEvmChain = SUPPORTED_CHAINS.find((c) => c.id === selectedEvmId);
+  const selectedSvmMeta  = SVM_CHAINS.find((c) => c.key === selectedSvm);
   const feeUsd = verificationFeeUsd(tier);
-  const fee = useFeeNative(feeUsd, selectedChain?.symbol ?? "", selectedChain?.isStableGas);
-  const treasuryConfigured = !!TREASURY_ADDRESS && isAddress(TREASURY_ADDRESS);
+  const evmFee = useFeeNative(feeUsd, selectedEvmChain?.symbol ?? "", selectedEvmChain?.isStableGas);
+  const treasuryConfigured = !!EVM_TREASURY && isAddress(EVM_TREASURY);
+  const anySvmConnected = solana.connected;
 
   const toggleVerified = (id: string, verified: boolean) => {
     setLaunchVerified(id, verified);
     setLaunches(getLaunches());
   };
 
-  const handleChainSelect = (chainId: number) => {
-    setSelectedChainId(chainId);
-    if (isConnected && chain?.id !== chainId) {
-      switchChain({ chainId });
-    }
+  // EVM chain select
+  const handleEvmChainSelect = (chainId: number) => {
+    setSelectedEvmId(chainId);
+    setSelectedSvm(null);
+    if (isConnected && chain?.id !== chainId) switchChain({ chainId });
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  // SVM chain select
+  const handleSvmSelect = (key: SvmChainKey) => {
+    setSelectedSvm(key);
+    setSelectedEvmId(null);
+    setSvmTxSig("");
+  };
+
+  // EVM submit
+  const handleEvmSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!isConnected) { setWalletOpen(true); return; }
-    if (!selectedChain) return;
-    if (chain?.id !== selectedChain.id) {
-      switchChain({ chainId: selectedChain.id });
-      return;
-    }
-    if (!treasuryConfigured || fee.native === null) return;
+    if (!selectedEvmChain) return;
+    if (chain?.id !== selectedEvmChain.id) { switchChain({ chainId: selectedEvmChain.id }); return; }
+    if (!treasuryConfigured || evmFee.native === null) return;
 
     try {
-      const decimals = selectedChain.symbol === "USDC" ? 6 : 18;
-      const value = selectedChain.isStableGas
-        ? parseUnits(fee.native.toFixed(decimals), decimals)
-        : parseEther(fee.native.toFixed(18));
+      const decimals = selectedEvmChain.symbol === "USDC" ? 6 : 18;
+      const value = selectedEvmChain.isStableGas
+        ? parseUnits(evmFee.native.toFixed(decimals), decimals)
+        : parseEther(evmFee.native.toFixed(18));
 
-      const txHash = await sendTransactionAsync({
-        to: TREASURY_ADDRESS as `0x${string}`,
-        value,
-      });
-
-      setSuccessData({ tier, txHash, chainId: selectedChain.id });
+      const txHash = await sendTransactionAsync({ to: EVM_TREASURY as `0x${string}`, value });
+      const explorerBase = EVM_EXPLORERS[selectedEvmChain.id] ?? "";
+      setSuccessData({ tier, txHash, chainName: selectedEvmChain.name, explorer: explorerBase });
     } catch (err) {
       console.error("Verification fee payment failed", err);
     }
   };
 
+  // SVM submit (manual signature)
+  const handleSvmSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!selectedSvmMeta) return;
+    if (!isValidSvmSig(svmTxSig)) return;
+    setSvmSubmitting(true);
+    await new Promise((r) => setTimeout(r, 800)); // simulate brief confirmation
+    setSuccessData({ tier, txHash: svmTxSig.trim(), chainName: selectedSvmMeta.name, explorer: selectedSvmMeta.explorer });
+    setSvmSubmitting(false);
+  };
+
+  // ---------------------------------------------------------------------------
+  // Success screen
+  // ---------------------------------------------------------------------------
   if (successData) {
-    const explorerBase = CHAIN_EXPLORERS[successData.chainId];
-    const successChain = SUPPORTED_CHAINS.find((c) => c.id === successData.chainId);
     const paidUsd = verificationFeeUsd(successData.tier);
     return (
       <div className="max-w-xl mx-auto py-12 animate-in slide-in-from-bottom-8 duration-500">
@@ -97,29 +152,26 @@ export default function Verify() {
             <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center border-4 border-primary">
               <CheckCircle2 className="w-10 h-10 text-primary" />
             </div>
-
             <div className="space-y-2">
               <h2 className="text-2xl font-bold tracking-tight">Application Submitted</h2>
               <p className="text-muted-foreground">
                 Your ${paidUsd} {successData.tier === "fast" ? "fast-track" : "standard"} verification fee has been paid on{" "}
-                {successChain?.name}. Our team will review your application {successData.tier === "fast" ? "within a few hours" : "within 24-48 hours"}.
-                If approved, your token will receive the Verified badge.
+                {successData.chainName}. Our team will review your application{" "}
+                {successData.tier === "fast" ? "within a few hours" : "within 24-48 hours"}.
               </p>
             </div>
-
             <div className="w-full bg-pink-50 border border-pink-200 p-4 rounded-2xl text-left">
               <Label className="text-pink-500 text-xs font-bold uppercase tracking-wide mb-2 block">Fee Transaction Hash</Label>
               <div className="flex items-center justify-between bg-white p-3 rounded-xl border border-pink-100">
                 <span className="font-mono text-xs text-gray-600 truncate">{successData.txHash}</span>
-                {explorerBase && (
-                  <a href={`${explorerBase}${successData.txHash}`} target="_blank" rel="noopener noreferrer"
+                {successData.explorer && (
+                  <a href={`${successData.explorer}${successData.txHash}`} target="_blank" rel="noopener noreferrer"
                     className="ml-2 shrink-0 text-pink-500 hover:text-pink-700">
                     <ExternalLink className="w-4 h-4" />
                   </a>
                 )}
               </div>
             </div>
-
             <Button variant="outline" onClick={() => setSuccessData(null)} className="mt-4 rounded-full">
               Submit Another
             </Button>
@@ -128,6 +180,12 @@ export default function Verify() {
       </div>
     );
   }
+
+  // ---------------------------------------------------------------------------
+  // Main form
+  // ---------------------------------------------------------------------------
+  const isSvmSelected = !!selectedSvm;
+  const isEvmSelected = !!selectedEvmChain;
 
   return (
     <div className="max-w-4xl mx-auto py-8 animate-in fade-in duration-500">
@@ -144,16 +202,32 @@ export default function Verify() {
         <div className="mb-6 bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-start space-x-3">
           <AlertCircle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
           <p className="text-sm font-semibold text-amber-700">
-            Verification fee treasury address isn&apos;t configured yet. Set <code className="bg-amber-100 px-1 rounded">VITE_LAUNCH_FEE_TREASURY_ADDRESS</code> to enable real payments.
+            EVM treasury not configured. Set <code className="bg-amber-100 px-1 rounded">VITE_LAUNCH_FEE_TREASURY_ADDRESS</code> to enable real EVM payments.
           </p>
         </div>
       )}
 
-      {!isConnected && (
+      {/* SVM wallet banner */}
+      {isSvmSelected && !anySvmConnected && (
+        <div className="mb-6 bg-purple-50 border border-purple-200 rounded-2xl p-4 flex items-center justify-between gap-4">
+          <div className="flex items-center space-x-3">
+            <Wallet className="w-5 h-5 text-purple-500 shrink-0" />
+            <p className="text-sm font-semibold text-purple-700">
+              Connect Phantom or Backpack to proceed with {selectedSvmMeta?.name} verification
+            </p>
+          </div>
+          <Button onClick={() => setWalletOpen(true)} size="sm" className="bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-full shrink-0">
+            Connect SVM Wallet
+          </Button>
+        </div>
+      )}
+
+      {/* EVM wallet banner */}
+      {isEvmSelected && !isConnected && (
         <div className="mb-6 bg-pink-50 border border-pink-200 rounded-2xl p-4 flex items-center justify-between gap-4">
           <div className="flex items-center space-x-3">
             <Wallet className="w-5 h-5 text-pink-500 shrink-0" />
-            <p className="text-sm font-semibold text-pink-700">Connect your wallet to pay the verification fee on-chain</p>
+            <p className="text-sm font-semibold text-pink-700">Connect your EVM wallet to pay the verification fee on-chain</p>
           </div>
           <Button onClick={() => setWalletOpen(true)} size="sm" className="bg-gradient-to-r from-pink-500 to-red-500 text-white font-bold rounded-full shrink-0">
             Connect
@@ -162,172 +236,368 @@ export default function Verify() {
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div className="md:col-span-2">
-          <Card className="border-border rounded-3xl shadow-sm">
-            <form onSubmit={handleSubmit}>
-              <CardHeader>
-                <CardTitle>Verification Application</CardTitle>
-                <CardDescription>Provide details about your project to prove legitimacy.</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
+        <div className="md:col-span-2 space-y-6">
 
-                <div className="space-y-4">
-                  <h3 className="text-lg font-bold border-b border-border/50 pb-2">Review Speed</h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <button
-                      type="button"
-                      onClick={() => setTier("standard")}
-                      className={`text-left rounded-2xl border-2 p-4 transition-all ${
-                        tier === "standard" ? "border-pink-500 bg-pink-50 shadow-md" : "border-border hover:border-pink-300"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="font-bold text-sm">Standard</span>
-                        <span className="font-extrabold text-lg text-pink-600">${VERIFICATION_FEE_STANDARD_USD}</span>
-                      </div>
-                      <p className="text-xs text-muted-foreground">Reviewed within 24-48 hours</p>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setTier("fast")}
-                      className={`text-left rounded-2xl border-2 p-4 transition-all ${
-                        tier === "fast" ? "border-pink-500 bg-pink-50 shadow-md" : "border-border hover:border-pink-300"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="font-bold text-sm flex items-center gap-1"><Zap className="w-3.5 h-3.5 text-amber-500" />Fast-Track</span>
-                        <span className="font-extrabold text-lg text-pink-600">${VERIFICATION_FEE_FAST_USD}</span>
-                      </div>
-                      <p className="text-xs text-muted-foreground">Jumps the queue, reviewed within hours</p>
-                    </button>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <h3 className="text-lg font-bold border-b border-border/50 pb-2">Pay Fee On</h3>
-                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
-                    {SUPPORTED_CHAINS.map((c) => (
-                      <button
-                        key={c.id}
-                        type="button"
-                        onClick={() => handleChainSelect(c.id)}
-                        className={`flex flex-col items-center justify-center gap-1.5 rounded-2xl border-2 p-3 transition-all ${
-                          selectedChainId === c.id ? "border-pink-500 bg-pink-50 shadow-md" : "border-border hover:border-pink-300"
-                        }`}
-                      >
-                        <ChainIcon chain={c.icon} size={24} />
-                        <span className="text-xs font-bold text-gray-700 text-center leading-tight">{c.name}</span>
-                      </button>
-                    ))}
-                  </div>
-                  {selectedChain && chain && chain.id !== selectedChain.id && isConnected && (
-                    <p className="text-xs font-semibold text-amber-600">
-                      Your wallet is on a different network — you&apos;ll be prompted to switch to {selectedChain.name}.
-                    </p>
-                  )}
-                  {selectedChain && (
-                    <div className="bg-white border-2 border-pink-200 rounded-2xl p-4 flex items-center justify-between flex-wrap gap-3">
-                      <div className="flex items-center space-x-3">
-                        <ChainIcon chain={selectedChain.icon} size={28} />
-                        <div>
-                          <p className="text-xs uppercase tracking-wide font-bold text-pink-400">Verification Fee</p>
-                          <p className="text-xl font-extrabold text-gray-800">
-                            ${feeUsd.toFixed(2)}
-                            <span className="text-sm font-semibold text-pink-500 ml-2">
-                              ≈ {fee.loading ? "…" : `${formatNativeAmount(fee.native)} ${selectedChain.symbol}`}
+          {/* ── EVM form ── */}
+          {(!isSvmSelected) && (
+            <Card className="border-border rounded-3xl shadow-sm">
+              <form onSubmit={handleEvmSubmit}>
+                <CardHeader>
+                  <CardTitle>Verification Application</CardTitle>
+                  <CardDescription>Provide details about your project to prove legitimacy.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Tier */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-bold border-b border-border/50 pb-2">Review Speed</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {[
+                        { id: "standard" as const, label: "Standard", price: VERIFICATION_FEE_STANDARD_USD, desc: "Reviewed within 24-48 hours" },
+                        { id: "fast" as const, label: "Fast-Track", price: VERIFICATION_FEE_FAST_USD, desc: "Jumps the queue, reviewed within hours" },
+                      ].map((t) => (
+                        <button key={t.id} type="button" onClick={() => setTier(t.id)}
+                          className={`text-left rounded-2xl border-2 p-4 transition-all ${tier === t.id ? "border-pink-500 bg-pink-50 shadow-md" : "border-border hover:border-pink-300"}`}>
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="font-bold text-sm flex items-center gap-1">
+                              {t.id === "fast" && <Zap className="w-3.5 h-3.5 text-amber-500" />}{t.label}
                             </span>
+                            <span className="font-extrabold text-lg text-pink-600">${t.price}</span>
+                          </div>
+                          <p className="text-xs text-muted-foreground">{t.desc}</p>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Chain select */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-bold border-b border-border/50 pb-2">Pay Fee On</h3>
+                    <div className="space-y-2">
+                      <p className="text-xs font-bold text-pink-400 uppercase tracking-widest">EVM Chains</p>
+                      <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+                        {SUPPORTED_CHAINS.map((c) => (
+                          <button key={c.id} type="button" onClick={() => handleEvmChainSelect(c.id)}
+                            className={`flex flex-col items-center justify-center gap-1.5 rounded-2xl border-2 p-3 transition-all ${
+                              selectedEvmId === c.id ? "border-pink-500 bg-pink-50 shadow-md" : "border-border hover:border-pink-300"
+                            }`}>
+                            <ChainIcon chain={c.icon} size={24} />
+                            <span className="text-xs font-bold text-gray-700 text-center leading-tight">{c.name}</span>
+                          </button>
+                        ))}
+                      </div>
+                      <p className="text-xs font-bold text-purple-400 uppercase tracking-widest mt-3">SVM Chains</p>
+                      <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+                        {SVM_CHAINS.map((sc) => (
+                          <button key={sc.key} type="button" onClick={() => handleSvmSelect(sc.key)}
+                            className="flex flex-col items-center justify-center gap-1.5 rounded-2xl border-2 border-purple-200 hover:border-purple-400 bg-purple-50/50 p-3 transition-all">
+                            <ChainIcon chain={sc.icon} size={24} />
+                            <span className="text-xs font-bold text-purple-700 text-center leading-tight">{sc.name}</span>
+                            <span className="text-[9px] bg-purple-100 text-purple-600 rounded px-1 font-bold">SVM</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    {selectedEvmChain && chain && chain.id !== selectedEvmChain.id && isConnected && (
+                      <p className="text-xs font-semibold text-amber-600">
+                        Your wallet is on a different network — you&apos;ll be prompted to switch to {selectedEvmChain.name}.
+                      </p>
+                    )}
+                    {selectedEvmChain && (
+                      <div className="bg-white border-2 border-pink-200 rounded-2xl p-4 flex items-center justify-between flex-wrap gap-3">
+                        <div className="flex items-center space-x-3">
+                          <ChainIcon chain={selectedEvmChain.icon} size={28} />
+                          <div>
+                            <p className="text-xs uppercase tracking-wide font-bold text-pink-400">Verification Fee</p>
+                            <p className="text-xl font-extrabold text-gray-800">
+                              ${feeUsd.toFixed(2)}
+                              <span className="text-sm font-semibold text-pink-500 ml-2">
+                                ≈ {evmFee.loading ? "…" : `${formatNativeAmount(evmFee.native)} ${selectedEvmChain.symbol}`}
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+                        <span className={`text-xs font-bold px-3 py-1 rounded-full ${evmFee.isLive ? "bg-green-50 text-green-600 border border-green-200" : "bg-gray-50 text-gray-500 border border-gray-200"}`}>
+                          {evmFee.isLive ? "● Live price" : "Est. price"}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Project basics */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-bold border-b border-border/50 pb-2">Project Basics</h3>
+                    <div className="space-y-2">
+                      <Label htmlFor="address">
+                        Contract Address *
+                        {selectedEvmChain && (
+                          <span className="text-xs text-pink-400 ml-2">EVM 0x format</span>
+                        )}
+                      </Label>
+                      <Input id="address" placeholder="0x..." required className="font-mono" />
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="name">Project Name *</Label>
+                        <Input id="name" required />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="website">Website *</Label>
+                        <Input id="website" type="url" placeholder="https://" required />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-bold border-b border-border/50 pb-2">Social Presence</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="twitter">Twitter / X URL</Label>
+                        <Input id="twitter" type="url" placeholder="https://x.com/yourproject" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="telegram">Telegram Group</Label>
+                        <Input id="telegram" type="url" placeholder="https://t.me/yourproject" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-bold border-b border-border/50 pb-2">Trust &amp; Security</h3>
+                    <div className="space-y-2">
+                      <Label htmlFor="audit">Audit Link (Optional)</Label>
+                      <Input id="audit" type="url" placeholder="Link to Certik, Hacken, etc." />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="details">Why should we verify you? *</Label>
+                      <Textarea id="details" placeholder="Tell us about the team, locked liquidity, utility, etc." required className="min-h-[120px]" />
+                    </div>
+                  </div>
+                </CardContent>
+                <CardFooter className="bg-muted/10 border-t border-border mt-6 pt-6">
+                  <Button type="submit" size="lg"
+                    disabled={isSending || !selectedEvmChain || !treasuryConfigured}
+                    className="w-full bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 text-white font-extrabold text-base h-12 rounded-full shadow-md disabled:opacity-50">
+                    {isSending ? (
+                      <span className="flex items-center justify-center space-x-2">
+                        <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                        <span>Confirming in wallet…</span>
+                      </span>
+                    ) : !selectedEvmChain ? (
+                      <span>Select a chain to pay the fee</span>
+                    ) : isConnected ? (
+                      <span className="flex items-center justify-center space-x-2">
+                        <BadgeCheck className="w-4 h-4" />
+                        <span>Pay ${feeUsd} &amp; Submit Application</span>
+                      </span>
+                    ) : (
+                      <span className="flex items-center justify-center space-x-2">
+                        <Wallet className="w-4 h-4" /><span>Connect Wallet to Continue</span>
+                      </span>
+                    )}
+                  </Button>
+                </CardFooter>
+              </form>
+            </Card>
+          )}
+
+          {/* ── SVM form ── */}
+          {isSvmSelected && selectedSvmMeta && (
+            <Card className="border-purple-200 rounded-3xl shadow-sm">
+              <form onSubmit={handleSvmSubmit}>
+                <CardHeader>
+                  <div className="flex items-center gap-3 mb-2">
+                    <ChainIcon chain={selectedSvmMeta.icon} size={32} />
+                    <div>
+                      <CardTitle className="text-purple-800">{selectedSvmMeta.name} Verification</CardTitle>
+                      <CardDescription>SVM chain — use Phantom or Backpack</CardDescription>
+                    </div>
+                  </div>
+                  <button type="button" onClick={() => setSelectedSvm(null)}
+                    className="text-xs text-purple-400 hover:text-purple-600 font-semibold text-left">
+                    ← Switch to EVM chain
+                  </button>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Tier */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-bold border-b border-purple-100 pb-2">Review Speed</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {[
+                        { id: "standard" as const, label: "Standard", price: VERIFICATION_FEE_STANDARD_USD, desc: "24-48 hours" },
+                        { id: "fast" as const, label: "Fast-Track", price: VERIFICATION_FEE_FAST_USD, desc: "Within hours" },
+                      ].map((t) => (
+                        <button key={t.id} type="button" onClick={() => setTier(t.id)}
+                          className={`text-left rounded-2xl border-2 p-4 transition-all ${tier === t.id ? "border-purple-500 bg-purple-50 shadow-md" : "border-purple-200 hover:border-purple-400"}`}>
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="font-bold text-sm flex items-center gap-1">
+                              {t.id === "fast" && <Zap className="w-3.5 h-3.5 text-amber-500" />}{t.label}
+                            </span>
+                            <span className="font-extrabold text-lg text-purple-600">${t.price}</span>
+                          </div>
+                          <p className="text-xs text-muted-foreground">{t.desc}</p>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* SVM wallet status */}
+                  <div className="space-y-3">
+                    <h3 className="text-lg font-bold border-b border-purple-100 pb-2">SVM Wallet</h3>
+                    {anySvmConnected ? (
+                      <div className="flex items-center gap-3 bg-purple-50 border border-purple-200 rounded-xl p-3">
+                        <CheckCircle2 className="w-5 h-5 text-purple-500 shrink-0" />
+                        <div>
+                          <p className="text-sm font-bold text-purple-700">
+                            {solana.walletId === "phantom" ? "Phantom" : "Backpack"} connected
+                          </p>
+                          <p className="text-xs font-mono text-purple-400">
+                            {solana.publicKey?.slice(0, 8)}…{solana.publicKey?.slice(-6)}
                           </p>
                         </div>
                       </div>
-                      <span className={`text-xs font-bold px-3 py-1 rounded-full ${fee.isLive ? "bg-green-50 text-green-600 border border-green-200" : "bg-gray-50 text-gray-500 border border-gray-200"}`}>
-                        {fee.isLive ? "● Live price" : "Est. price"}
+                    ) : (
+                      <button type="button" onClick={() => setWalletOpen(true)}
+                        className="w-full flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-xl transition-colors">
+                        <Wallet className="w-4 h-4" />
+                        Connect Phantom / Backpack
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Fee payment instructions */}
+                  {anySvmConnected && (
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-bold border-b border-purple-100 pb-2">Pay Verification Fee</h3>
+                      <div className="bg-purple-50 border border-purple-200 rounded-2xl p-4 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <p className="text-sm font-bold text-purple-700">Amount to send</p>
+                          <p className="text-lg font-extrabold text-purple-800">${feeUsd} USD in {selectedSvmMeta.symbol}</p>
+                        </div>
+                        {SOL_TREASURY ? (
+                          <div>
+                            <p className="text-xs text-purple-500 font-semibold mb-1">Treasury address ({selectedSvmMeta.symbol})</p>
+                            <div className="flex items-center gap-2 bg-white border border-purple-200 rounded-xl px-3 py-2">
+                              <span className="font-mono text-xs text-purple-800 truncate flex-1">{SOL_TREASURY}</span>
+                              <button type="button" onClick={() => { navigator.clipboard.writeText(SOL_TREASURY!); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
+                                className="shrink-0 text-purple-400 hover:text-purple-600">
+                                {copied ? <CheckCircle2 className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5" />}
+                              </button>
+                            </div>
+                            <p className="text-xs text-purple-400 mt-1">
+                              Send from your {solana.walletId === "phantom" ? "Phantom" : "Backpack"} wallet to this address.
+                            </p>
+                          </div>
+                        ) : (
+                          <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
+                            <AlertCircle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                            <p className="text-xs text-amber-700">
+                              Set <code className="bg-amber-100 px-1 rounded">VITE_SOLANA_TREASURY_ADDRESS</code> to show the {selectedSvmMeta.symbol} treasury address.
+              Until then, contact us at barbiefunlaunchpad@gmail.com to arrange payment.
+                            </p>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="svm-tx-sig" className="font-bold text-purple-700">
+                          Transaction Signature *
+                        </Label>
+                        <Input
+                          id="svm-tx-sig"
+                          placeholder="Paste your tx signature after sending the fee…"
+                          value={svmTxSig}
+                          onChange={(e) => setSvmTxSig(e.target.value)}
+                          className="font-mono border-purple-200 focus:border-purple-400"
+                          required
+                        />
+                        {svmTxSig && !isValidSvmSig(svmTxSig) && (
+                          <p className="text-xs text-red-500 flex items-center gap-1">
+                            <AlertCircle className="w-3.5 h-3.5" />
+                            Invalid signature format — paste the full base58 transaction signature.
+                          </p>
+                        )}
+                        {svmTxSig && isValidSvmSig(svmTxSig) && (
+                          <div className="flex items-center gap-1.5">
+                            <a href={`${selectedSvmMeta.explorer}${svmTxSig}`} target="_blank" rel="noopener noreferrer"
+                              className="text-xs text-purple-500 hover:text-purple-700 flex items-center gap-1 font-semibold">
+                              Verify on {selectedSvmMeta.name === "Solana" ? "Solscan" : "X1 Explorer"}
+                              <ExternalLink className="w-3 h-3" />
+                            </a>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Project basics */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-bold border-b border-purple-100 pb-2">Project Basics</h3>
+                    <div className="space-y-2">
+                      <Label htmlFor="svm-address">
+                        Contract Address *
+                        <span className="text-xs text-purple-400 ml-2">
+                          {selectedSvmMeta.key === "solana" ? "Solana SPL mint address (base58)" : "X1 address (base58)"}
+                        </span>
+                      </Label>
+                      <Input id="svm-address"
+                        placeholder={selectedSvmMeta.key === "solana" ? "E.g. 4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R" : "X1 token address"}
+                        required className="font-mono" />
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>Project Name *</Label>
+                        <Input required />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Website *</Label>
+                        <Input type="url" placeholder="https://" required />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>Twitter / X URL</Label>
+                        <Input type="url" placeholder="https://x.com/yourproject" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Telegram</Label>
+                        <Input type="url" placeholder="https://t.me/yourproject" />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Why should we verify you? *</Label>
+                      <Textarea placeholder="Tell us about the team, locked liquidity, utility, etc." required className="min-h-[100px]" />
+                    </div>
+                  </div>
+                </CardContent>
+                <CardFooter className="bg-purple-50/50 border-t border-purple-100 mt-6 pt-6">
+                  <Button type="submit" size="lg"
+                    disabled={svmSubmitting || !anySvmConnected || !isValidSvmSig(svmTxSig)}
+                    className="w-full bg-gradient-to-r from-purple-600 to-purple-800 hover:from-purple-700 hover:to-purple-900 text-white font-extrabold text-base h-12 rounded-full shadow-md disabled:opacity-50">
+                    {svmSubmitting ? (
+                      <span className="flex items-center justify-center space-x-2">
+                        <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                        <span>Submitting…</span>
                       </span>
-                    </div>
-                  )}
-                </div>
-
-                <div className="space-y-4">
-                  <h3 className="text-lg font-bold border-b border-border/50 pb-2">Project Basics</h3>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="address">Contract Address *</Label>
-                    <Input id="address" placeholder="0x..." required className="font-mono" />
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="name">Project Name *</Label>
-                      <Input id="name" required />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="website">Website *</Label>
-                      <Input id="website" type="url" placeholder="https://" required />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <h3 className="text-lg font-bold border-b border-border/50 pb-2">Social Presence</h3>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="twitter">Twitter / X URL</Label>
-                      <Input id="twitter" type="url" placeholder="https://x.com/Amanchain50" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="telegram">Telegram Group</Label>
-                      <Input id="telegram" type="url" placeholder="https://t.me/barbiefunv2" />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <h3 className="text-lg font-bold border-b border-border/50 pb-2">Trust & Security</h3>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="audit">Audit Link (Optional but recommended)</Label>
-                    <Input id="audit" type="url" placeholder="Link to Certik, Hacken, etc." />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="details">Why should we verify you? *</Label>
-                    <Textarea
-                      id="details"
-                      placeholder="Tell us about the team, locked liquidity, utility, etc."
-                      required
-                      className="min-h-[120px]"
-                    />
-                  </div>
-                </div>
-
-              </CardContent>
-              <CardFooter className="bg-muted/10 border-t border-border mt-6 pt-6">
-                <Button
-                  type="submit"
-                  size="lg"
-                  disabled={isSending || !selectedChain || !treasuryConfigured}
-                  className="w-full bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 text-white font-extrabold text-base h-12 rounded-full shadow-md hover:shadow-pink-300/50 transition-all disabled:opacity-50"
-                >
-                  {isSending ? (
-                    <span className="flex items-center justify-center space-x-2">
-                      <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                      <span>Confirming in wallet…</span>
-                    </span>
-                  ) : !selectedChain ? (
-                    <span>Select a chain to pay the fee</span>
-                  ) : isConnected ? (
-                    <span className="flex items-center justify-center space-x-2">
-                      <BadgeCheck className="w-4 h-4" /><span>Pay ${feeUsd} & Submit Application</span>
-                    </span>
-                  ) : (
-                    <span className="flex items-center justify-center space-x-2"><Wallet className="w-4 h-4" /><span>Connect Wallet to Continue</span></span>
-                  )}
-                </Button>
-              </CardFooter>
-            </form>
-          </Card>
+                    ) : !anySvmConnected ? (
+                      <span className="flex items-center justify-center space-x-2">
+                        <Wallet className="w-4 h-4" /><span>Connect SVM Wallet</span>
+                      </span>
+                    ) : !isValidSvmSig(svmTxSig) ? (
+                      <span>Paste tx signature to continue</span>
+                    ) : (
+                      <span className="flex items-center justify-center space-x-2">
+                        <BadgeCheck className="w-4 h-4" />
+                        <span>Submit {selectedSvmMeta.name} Verification</span>
+                      </span>
+                    )}
+                  </Button>
+                </CardFooter>
+              </form>
+            </Card>
+          )}
         </div>
 
+        {/* Sidebar */}
         <div className="space-y-6">
           <Card className="bg-primary/5 border-primary/20 rounded-3xl">
             <CardHeader>
@@ -338,31 +608,47 @@ export default function Verify() {
             </CardHeader>
             <CardContent>
               <ul className="space-y-3 text-sm text-muted-foreground">
-                <li className="flex items-start">
-                  <CheckCircle2 className="w-4 h-4 text-primary mr-2 mt-0.5 shrink-0" />
-                  <span>Liquidity must be locked or burned</span>
-                </li>
-                <li className="flex items-start">
-                  <CheckCircle2 className="w-4 h-4 text-primary mr-2 mt-0.5 shrink-0" />
-                  <span>Contract source code verified on explorer</span>
-                </li>
-                <li className="flex items-start">
-                  <CheckCircle2 className="w-4 h-4 text-primary mr-2 mt-0.5 shrink-0" />
-                  <span>Active social media presence</span>
-                </li>
-                <li className="flex items-start">
-                  <CheckCircle2 className="w-4 h-4 text-primary mr-2 mt-0.5 shrink-0" />
-                  <span>No malicious functions in contract (honeypot, tax &gt; 10%)</span>
-                </li>
+                {[
+                  "Liquidity must be locked or burned",
+                  "Contract source code verified on explorer",
+                  "Active social media presence",
+                  "No malicious functions (honeypot, tax > 10%)",
+                ].map((c) => (
+                  <li key={c} className="flex items-start">
+                    <CheckCircle2 className="w-4 h-4 text-primary mr-2 mt-0.5 shrink-0" />
+                    <span>{c}</span>
+                  </li>
+                ))}
               </ul>
+            </CardContent>
+          </Card>
+
+          {/* Chain explorers quick-link */}
+          <Card className="border-border/50 rounded-3xl">
+            <CardHeader>
+              <CardTitle className="text-sm font-bold text-gray-600">Chain Explorers</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {[
+                { name: "BscScan", url: "https://bscscan.com", icon: "bnb" },
+                { name: "BaseScan", url: "https://basescan.org", icon: "base" },
+                { name: "Solscan", url: "https://solscan.io", icon: "solana" },
+                { name: "X1 Explorer", url: "https://explorer.x1.xyz", icon: "x1" },
+                { name: "OKX Explorer", url: "https://www.okx.com/explorer/xlayer", icon: "xlayer" },
+              ].map((ex) => (
+                <a key={ex.name} href={ex.url} target="_blank" rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-xs text-gray-500 hover:text-pink-500 font-medium transition-colors">
+                  <ChainIcon chain={ex.icon} size={14} />
+                  {ex.name}
+                  <ExternalLink className="w-3 h-3 ml-auto" />
+                </a>
+              ))}
             </CardContent>
           </Card>
         </div>
       </div>
 
-      {/* Reviewer panel — no backend yet, so review decisions are applied
-          directly to the local launch records that power the Verified
-          badge shown across the app (TokenCard, TokenDetail, Home feed). */}
+      {/* Review Queue */}
       <div className="mt-10">
         <Card className="border-border rounded-3xl shadow-sm">
           <CardHeader>
@@ -383,12 +669,11 @@ export default function Verify() {
             ) : (
               <div className="space-y-2">
                 {launches.map((launch) => {
-                  const chainMeta = SUPPORTED_CHAINS.find((c) => c.id === launch.chainId);
+                  const chainMeta = SUPPORTED_CHAINS.find((c) => c.id === launch.chainId)
+                    ?? DISPLAY_CHAINS.find((c) => c.id === launch.chainId);
                   return (
-                    <div
-                      key={launch.id}
-                      className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl border border-border bg-muted/10"
-                    >
+                    <div key={launch.id}
+                      className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl border border-border bg-muted/10">
                       <div className="flex items-center gap-3 min-w-0">
                         <div className="w-9 h-9 rounded-full bg-gradient-to-br from-pink-300 to-red-300 flex items-center justify-center text-white font-black text-[10px] shrink-0">
                           {launch.ticker.slice(0, 2)}
@@ -408,12 +693,9 @@ export default function Verify() {
                           </div>
                         </div>
                       </div>
-                      <Button
-                        size="sm"
-                        variant={launch.verified ? "outline" : "default"}
+                      <Button size="sm" variant={launch.verified ? "outline" : "default"}
                         className={launch.verified ? "rounded-full border-red-200 text-red-500 hover:bg-red-50" : "rounded-full bg-primary text-primary-foreground"}
-                        onClick={() => toggleVerified(launch.id, !launch.verified)}
-                      >
+                        onClick={() => toggleVerified(launch.id, !launch.verified)}>
                         {launch.verified ? "Revoke" : "Approve"}
                       </Button>
                     </div>

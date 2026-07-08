@@ -4,17 +4,19 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { getLaunchById, formatSupply } from "@/lib/launches";
-import { SUPPORTED_CHAINS } from "@/lib/wagmi";
+import { SUPPORTED_CHAINS, DISPLAY_CHAINS } from "@/lib/wagmi";
 import ChainIcon from "@/components/ChainIcon";
 import { CheckCircle, ExternalLink, Copy, Clock, Info, Rocket, BadgeCheck } from "lucide-react";
 
 const CHAIN_EXPLORERS: Record<number, string> = {
-  56: "https://bscscan.com/tx/",
-  1: "https://etherscan.io/tx/",
-  196: "https://www.okx.com/explorer/xlayer/tx/",
-  4217: "https://explore.tempo.xyz/tx/",
+  56:      "https://bscscan.com/tx/",
+  8453:    "https://basescan.org/tx/",
+  196:     "https://www.okx.com/explorer/xlayer/tx/",
+  4217:    "https://explore.tempo.xyz/tx/",
   5042002: "https://testnet.arcscan.app/tx/",
-  4663: "https://robinhoodchain.blockscout.com/tx/",
+  4663:    "https://robinhoodchain.blockscout.com/tx/",
+  [-1]:    "https://explorer.x1.xyz/tx/",
+  [-2]:    "https://solscan.io/tx/",
 };
 
 export default function TokenDetail() {
@@ -35,7 +37,9 @@ export default function TokenDetail() {
     );
   }
 
-  const chainMeta = SUPPORTED_CHAINS.find((c) => c.id === launch.chainId);
+  const chainMeta =
+    SUPPORTED_CHAINS.find((c) => c.id === launch.chainId) ??
+    DISPLAY_CHAINS.find((c) => c.id === launch.chainId);
   const explorerBase = CHAIN_EXPLORERS[launch.chainId];
   const explorerUrl = explorerBase ? `${explorerBase}${launch.feeTxHash}` : undefined;
 
