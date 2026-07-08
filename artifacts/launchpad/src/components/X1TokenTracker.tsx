@@ -4,8 +4,9 @@
  * Data-source waterfall (all fetched client-side):
  *   1. x1scr.xyz  — preferred: xDEX AMM pools + Degen Launchpad bonding-curve tokens
  *   2. DexScreener search — fallback for any pairs indexed under "xone" chain
- *   3. Graceful static placeholder — shows the screener link so the user can
- *      visit x1scr.xyz directly when no live data is available.
+ *   3. Curated featured projects — a hand-picked snapshot of top X1 ecosystem
+ *      tokens (X1 Brains, Degen, Capy, Xenium, Shib, Theo AI) with links to their
+ *      live pair pages on x1.ninja, shown when no live API is reachable.
  *
  * The component NEVER breaks the page — every error path renders a fallback UI.
  */
@@ -33,6 +34,92 @@ export type X1Token = {
   pairUrl?: string;
   source: "x1scr" | "dexscreener" | "static";
 };
+
+// ---------------------------------------------------------------------------
+// Curated featured projects — hand-picked snapshot of top X1 ecosystem tokens.
+// Used as the final fallback tier when no live API (x1scr.xyz / DexScreener)
+// is reachable. Each entry links out to its live pair page on x1.ninja so the
+// user can always check current data themselves.
+// ---------------------------------------------------------------------------
+const FEATURED_X1_TOKENS: X1Token[] = [
+  {
+    address: "7deZorr98nLdZhpmSdUgu8WY4NAjSpeLDGxHzaTAxrUg",
+    name: "X1 Brains",
+    symbol: "BRAINS",
+    priceUsd: 0.005273,
+    priceChange24h: -1.39,
+    volume24h: 99.08,
+    liquidity: 11270,
+    marketCap: 39090,
+    logo: "https://gptree.vip/token-profiles/EpKRiKwbCKZDZE9pgH48HcXqQkBunXUK-logo-1770004011249-d9cb417d589c14a2.webp",
+    pairUrl: "https://x1.ninja/pair/7deZorr98nLdZhpmSdUgu8WY4NAjSpeLDGxHzaTAxrUg",
+    source: "static",
+  },
+  {
+    address: "99MjDDtQzNxo11yNTL71bQCubNGCePncN8zWYrDBSH9t",
+    name: "Degen",
+    symbol: "DGN.X",
+    priceUsd: 0.0003,
+    priceChange24h: 3.29,
+    volume24h: 49.79,
+    liquidity: 2110,
+    marketCap: 138510,
+    logo: "https://ipfs.io/ipfs/bafkreicoi7s3nahwhdtazbhhp7ktmlot4f7doh6xep27epcdxuz47adequ",
+    pairUrl: "https://x1.ninja/pair/99MjDDtQzNxo11yNTL71bQCubNGCePncN8zWYrDBSH9t",
+    source: "static",
+  },
+  {
+    address: "GdKcXA1Q78Bquke5jyZUR1C8YMN6VYT9AUheN1RwKLfe",
+    name: "Capy X1",
+    symbol: "CAPY",
+    priceUsd: 0.0000221,
+    priceChange24h: -12.59,
+    volume24h: 456.56,
+    liquidity: 5050,
+    marketCap: 22210,
+    logo: "https://gptree.vip/token-profiles/AnvCcvnY4DLRW42EZBEAb1QeU6Pt9aab-logo-1778358724024-176411d4099bf9af.webp",
+    pairUrl: "https://x1.ninja/pair/GdKcXA1Q78Bquke5jyZUR1C8YMN6VYT9AUheN1RwKLfe",
+    source: "static",
+  },
+  {
+    address: "8EUkm5ChdmLm9pxKX3Q99APck1URfVqP9m9R3FQcP6Tb",
+    name: "Xenium",
+    symbol: "XNM",
+    priceUsd: 0.00066,
+    priceChange24h: -1.48,
+    volume24h: 229.5,
+    liquidity: 3870,
+    marketCap: 336710,
+    logo: "https://explorer.xenblocks.io/tokens/xnm.png",
+    pairUrl: "https://x1.ninja/pair/8EUkm5ChdmLm9pxKX3Q99APck1URfVqP9m9R3FQcP6Tb",
+    source: "static",
+  },
+  {
+    address: "EcmFn1chD6T9rE3XctPUDxjcqEDT3n2YeQJH627rSCD5",
+    name: "Shib Inu",
+    symbol: "SHIB",
+    priceUsd: 0.0000018,
+    priceChange24h: -0.84,
+    volume24h: 35.63,
+    liquidity: 6230,
+    marketCap: 697820000,
+    pairUrl: "https://x1.ninja/pair/EcmFn1chD6T9rE3XctPUDxjcqEDT3n2YeQJH627rSCD5",
+    source: "static",
+  },
+  {
+    address: "5J4hECH58eYQzuxpfrDyBrNr83G6Q7eMSbBhiymj8S3K",
+    name: "Theo Prime AI",
+    symbol: "THEO",
+    priceUsd: 133.01,
+    priceChange24h: null,
+    volume24h: 0,
+    liquidity: 2230,
+    marketCap: 6650,
+    logo: "https://gptree.vip/token-profiles/5aXz3n196NK41nSRiM9kS5NGCftmF7vn-logo-1770047076747-8fdaa3f7da52c7b7.webp",
+    pairUrl: "https://x1.ninja/pair/5J4hECH58eYQzuxpfrDyBrNr83G6Q7eMSbBhiymj8S3K",
+    source: "static",
+  },
+];
 
 // ---------------------------------------------------------------------------
 // Formatters
@@ -146,27 +233,25 @@ async function fetchDexScreener(): Promise<X1Token[]> {
 }
 
 /** Combined fetch with waterfall */
-async function fetchX1Tokens(): Promise<{ tokens: X1Token[]; source: string }> {
+async function fetchX1Tokens(): Promise<{ tokens: X1Token[]; source: string; isSnapshot: boolean }> {
   try {
     const tokens = await fetchX1Scr();
-    return { tokens, source: "x1scr.xyz" };
+    return { tokens, source: "x1scr.xyz", isSnapshot: false };
   } catch {}
   try {
     const tokens = await fetchDexScreener();
-    return { tokens, source: "DexScreener" };
+    return { tokens, source: "DexScreener", isSnapshot: false };
   } catch {}
-  return { tokens: [], source: "unavailable" };
+  // No live API reachable — show the curated featured projects instead of an
+  // empty state so the user always sees the top X1 ecosystem tokens.
+  return { tokens: FEATURED_X1_TOKENS, source: "Featured (snapshot)", isSnapshot: true };
 }
 
 // ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
-interface Props {
-  compact?: boolean;
-}
-
-export default function X1TokenTracker({ compact = false }: Props) {
-  const { data, isLoading, isError, dataUpdatedAt, refetch } = useQuery({
+export default function X1TokenTracker() {
+  const { data, isLoading, dataUpdatedAt, refetch } = useQuery({
     queryKey: ["x1-token-tracker"],
     queryFn: fetchX1Tokens,
     refetchInterval: 60_000,
@@ -176,6 +261,7 @@ export default function X1TokenTracker({ compact = false }: Props) {
 
   const tokens = data?.tokens ?? [];
   const source = data?.source ?? "—";
+  const isSnapshot = data?.isSnapshot ?? false;
   const hasData = tokens.length > 0;
   const lastUpdated = dataUpdatedAt ? new Date(dataUpdatedAt) : null;
 
@@ -198,16 +284,24 @@ export default function X1TokenTracker({ compact = false }: Props) {
           </div>
         </div>
         <div className="flex items-center space-x-2">
-          <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${isLoading ? "bg-yellow-400" : hasData ? "bg-green-400" : "bg-gray-300"}`} />
+          <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${isLoading ? "bg-yellow-400" : isSnapshot ? "bg-orange-300" : hasData ? "bg-green-400" : "bg-gray-300"}`} />
           <span className="text-[10px] text-orange-400 font-semibold">
             {isLoading ? "Loading…" : hasData ? source : "Offline"}
           </span>
-          {hasData ? <Wifi className="w-3 h-3 text-green-500" /> : <WifiOff className="w-3 h-3 text-gray-300" />}
+          {hasData && !isSnapshot ? <Wifi className="w-3 h-3 text-green-500" /> : <WifiOff className="w-3 h-3 text-gray-300" />}
           <button onClick={() => refetch()} className="text-orange-300 hover:text-orange-500 transition-colors" title="Refresh">
             <RefreshCw className="w-3 h-3" />
           </button>
         </div>
       </div>
+      {isSnapshot && (
+        <div className="px-4 py-1.5 bg-orange-50/60 border-b border-orange-100 text-[10px] text-orange-500 font-semibold flex items-center justify-between">
+          <span>Showing featured X1 projects — live API unavailable</span>
+          <a href="https://x1.ninja" target="_blank" rel="noopener noreferrer" className="text-orange-600 hover:text-orange-700 underline">
+            View live on x1.ninja
+          </a>
+        </div>
+      )}
 
       {/* Column headers */}
       <div className="grid grid-cols-5 text-[11px] font-mono border-b border-orange-50 bg-orange-50/40">
@@ -285,33 +379,21 @@ export default function X1TokenTracker({ compact = false }: Props) {
           })}
         </div>
       ) : (
-        /* Fallback — link to x1scr.xyz */
+        /* Safety-net fallback — only reachable if FEATURED_X1_TOKENS is ever emptied */
         <div className="py-8 px-4 text-center">
           <div className="w-12 h-12 rounded-full bg-orange-50 border border-orange-200 flex items-center justify-center mx-auto mb-3">
             <BarChart2 className="w-5 h-5 text-orange-400" />
           </div>
           <p className="text-sm font-bold text-gray-700 mb-1">X1 token data unavailable</p>
           <p className="text-xs text-gray-400 mb-4">
-            Live X1 token prices require x1scr.xyz to expose a public API. Visit the screener directly for real-time data.
+            Live X1 token prices require a public API. Visit x1.ninja directly for real-time data.
           </p>
-          <div className="flex flex-col sm:flex-row gap-2 justify-center">
-            <a href="https://x1scr.xyz" target="_blank" rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-xs font-bold bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-full transition-colors">
-              <ChainIcon chain="x1" size={14} />
-              Open x1scr.xyz
-              <ExternalLink className="w-3 h-3" />
-            </a>
-            <a href="https://x1oracle.com" target="_blank" rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-xs font-bold border border-orange-200 text-orange-600 hover:bg-orange-50 px-4 py-2 rounded-full transition-colors">
-              X1 Oracle
-              <ExternalLink className="w-3 h-3" />
-            </a>
-            <a href="https://explorer.fortiblox.com" target="_blank" rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-xs font-bold border border-orange-200 text-orange-600 hover:bg-orange-50 px-4 py-2 rounded-full transition-colors">
-              FortiBlox Explorer
-              <ExternalLink className="w-3 h-3" />
-            </a>
-          </div>
+          <a href="https://x1.ninja" target="_blank" rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 text-xs font-bold bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-full transition-colors">
+            <ChainIcon chain="x1" size={14} />
+            Open x1.ninja
+            <ExternalLink className="w-3 h-3" />
+          </a>
         </div>
       )}
 
@@ -319,11 +401,15 @@ export default function X1TokenTracker({ compact = false }: Props) {
       {hasData && (
         <div className="border-t border-orange-50 px-3 py-1.5 flex items-center justify-between bg-orange-50/30">
           <span className="text-[9px] text-gray-400">
-            {lastUpdated ? `Updated ${lastUpdated.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}` : "X1 Blockchain"}
+            {isSnapshot
+              ? "Snapshot data"
+              : lastUpdated
+                ? `Updated ${lastUpdated.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
+                : "X1 Blockchain"}
           </span>
-          <a href="https://x1scr.xyz" target="_blank" rel="noopener noreferrer"
+          <a href="https://x1.ninja" target="_blank" rel="noopener noreferrer"
             className="text-[9px] text-orange-400 hover:text-orange-600 font-semibold flex items-center gap-0.5">
-            x1scr.xyz <ExternalLink className="w-2.5 h-2.5 inline" />
+            x1.ninja <ExternalLink className="w-2.5 h-2.5 inline" />
           </a>
         </div>
       )}
