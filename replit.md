@@ -1,24 +1,29 @@
-# [Project name]
+# Barbie Fun (Degen Launchpad)
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+A multi-chain fair-launch token launchpad ("Barbie Fun") — lets users launch, trade, bridge, and track tokens across 6 EVM chains plus X1 and Solana.
 
 ## Run & Operate
 
-- `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
+- Workflows (auto-managed by the artifacts system, start via Replit UI or `WorkflowsRestart`):
+  - `artifacts/launchpad: web` — frontend (Vite/React), served at `/`
+  - `artifacts/api-server: API Server` — Express API, served at `/api` (health check: `/api/healthz`)
+  - `artifacts/mockup-sandbox: Component Preview Server` — design/canvas sandbox
 - `pnpm run typecheck` — full typecheck across all packages
-- `pnpm run build` — typecheck + build all packages
+- `pnpm run build` — typecheck + build all packages (frontend build needs `PORT`/`BASE_PATH` env, which the artifact workflow/deploy system injects automatically — don't run it bare from the shell)
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
 - `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- Required env: `DATABASE_URL` — Postgres connection string
+- Required env: `DATABASE_URL` — Postgres connection string (already configured)
 
 ## Stack
 
-- pnpm workspaces, Node.js 24, TypeScript 5.9
+- pnpm workspaces, Node.js 20, TypeScript 5.9
+- Frontend: React + Vite, wagmi/viem (EVM wallets), Tailwind, shadcn/radix components
 - API: Express 5
 - DB: PostgreSQL + Drizzle ORM
 - Validation: Zod (`zod/v4`), `drizzle-zod`
 - API codegen: Orval (from OpenAPI spec)
 - Build: esbuild (CJS bundle)
+- Contracts: Hardhat (`contracts/`)
 
 ## Where things live
 
