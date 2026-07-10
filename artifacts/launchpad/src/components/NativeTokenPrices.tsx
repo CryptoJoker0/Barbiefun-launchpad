@@ -53,23 +53,23 @@ export default function NativeTokenPrices() {
       <div className="flex items-center justify-between px-4 py-2.5 bg-gradient-to-r from-pink-500/10 to-transparent border-b border-pink-100">
         <div className="flex items-center space-x-2">
           <div className="flex space-x-1">
-            <span className="w-2.5 h-2.5 rounded-full bg-red-400" />
+            <span className="w-2.5 h-2.5 rounded-full bg-rose-400" />
             <span className="w-2.5 h-2.5 rounded-full bg-yellow-400" />
-            <span className="w-2.5 h-2.5 rounded-full bg-green-400" />
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
           </div>
           <span className="text-[11px] font-bold text-pink-500 uppercase tracking-widest ml-1">
             Native Token Prices
           </span>
         </div>
         <div className="flex items-center space-x-2">
-          <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${isLoading ? "bg-yellow-400" : prices ? "bg-green-400" : "bg-gray-300"}`} />
+          <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${isLoading ? "bg-yellow-400" : prices ? "bg-emerald-400" : "bg-gray-300"}`} />
           <span className="text-[10px] text-pink-400 font-semibold">
             {isLoading ? "Loading…" : isError ? "Offline" : "CoinGecko LIVE"}
           </span>
           {prices ? (
-            <Wifi className="w-3 h-3 text-green-500" />
+            <Wifi className="w-3 h-3 text-emerald-400" />
           ) : (
-            <WifiOff className="w-3 h-3 text-gray-300" />
+            <WifiOff className="w-3 h-3 text-pink-300" />
           )}
           <button
             onClick={() => refetch()}
@@ -108,42 +108,42 @@ export default function NativeTokenPrices() {
               <div className="col-span-2 flex items-center space-x-2 min-w-0 pl-1">
                 <ChainIcon chain={chain.icon} size={22} className="shrink-0" />
                 <div className="min-w-0">
-                  <div className="font-bold text-gray-800 text-[11px] truncate flex items-center gap-1">
+                  <div className="font-bold text-pink-900 text-[11px] truncate flex items-center gap-1">
                     {chain.symbol}
                     {chain.isSvm && (
                       <span className="text-[8px] bg-purple-100 text-purple-600 rounded px-1 font-bold leading-none py-0.5">SVM</span>
                     )}
                   </div>
-                  <div className="text-[9px] text-gray-400 truncate">{chain.name}</div>
+                  <div className="text-[9px] text-pink-400 truncate">{chain.name}</div>
                 </div>
               </div>
 
               {/* Price */}
               <div className="flex items-center justify-end px-1">
                 {isLoading && !price ? (
-                  <span className="text-[10px] text-gray-300">—</span>
+                  <span className="text-[10px] text-pink-300">—</span>
                 ) : price !== null ? (
-                  <span className="text-gray-700 font-semibold text-[10px]">
+                  <span className="text-pink-800 font-semibold text-[10px]">
                     {isStable ? "$1.0000" : formatPrice(price)}
                   </span>
                 ) : (
-                  <span className="text-[10px] text-gray-300">—</span>
+                  <span className="text-[10px] text-pink-300">—</span>
                 )}
               </div>
 
               {/* 24h change */}
               <div className={`flex items-center justify-end px-1 text-[10px] font-bold ${
-                isStable ? "text-gray-400" : up ? "text-green-500" : "text-red-500"
+                isStable ? "text-pink-400" : up ? "text-emerald-400" : "text-rose-500"
               }`}>
                 {isStable ? (
-                  <span className="text-gray-400">stable</span>
+                  <span className="text-pink-400">stable</span>
                 ) : change !== null ? (
                   <>
                     {up ? <TrendingUp className="w-2.5 h-2.5 mr-0.5 inline" /> : <TrendingDown className="w-2.5 h-2.5 mr-0.5 inline" />}
                     {Math.abs(change).toFixed(2)}%
                   </>
                 ) : (
-                  <span className="text-gray-300">—</span>
+                  <span className="text-pink-300">—</span>
                 )}
               </div>
             </div>
@@ -153,12 +153,12 @@ export default function NativeTokenPrices() {
 
       {/* Footer */}
       <div className="border-t border-pink-50 px-3 py-1.5 flex items-center justify-between bg-pink-50/30">
-        <span className="text-[9px] text-gray-400">
+        <span className="text-[9px] text-pink-400">
           {lastUpdated
             ? `Updated ${lastUpdated.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
             : "Prices via CoinGecko"}
         </span>
-        <span className="text-[9px] text-gray-400 font-mono">All chains · 8 tokens</span>
+        <span className="text-[9px] text-pink-400 font-mono">All chains · 8 tokens</span>
       </div>
     </div>
   );

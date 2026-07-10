@@ -16,7 +16,7 @@ import { getLaunches, setLaunchVerified } from "@/lib/launches";
 // For real authorization, move sensitive actions to a protected backend route.
 const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || "";
 
-const PIE_COLORS = ["#ec4899", "#f43f5e", "#fb923c", "#8b5cf6", "#3b82f6", "#14b8a6"];
+const PIE_COLORS = ["#ec4899", "#db2777", "#f472b6", "#8b5cf6", "#3b82f6", "#14b8a6"];
 
 export default function Admin() {
   const [authenticated, setAuthenticated] = useState(!ADMIN_PASSWORD);
@@ -46,11 +46,11 @@ export default function Admin() {
     return (
       <div className="max-w-sm mx-auto py-24 animate-in fade-in duration-500">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-pink-500 to-red-400 shadow-lg mb-4">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-pink-400 via-pink-500 to-pink-600 shadow-lg mb-4">
             <ShieldCheck className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-2xl font-extrabold text-gray-800">Admin Access</h1>
-          <p className="text-sm text-gray-400 mt-1">Enter the admin password to continue</p>
+          <h1 className="text-2xl font-extrabold text-pink-900">Admin Access</h1>
+          <p className="text-sm text-pink-400 mt-1">Enter the admin password to continue</p>
         </div>
         <form onSubmit={handleAuth} className="space-y-4">
           <input
@@ -59,25 +59,25 @@ export default function Admin() {
             onChange={(e) => setPw(e.target.value)}
             placeholder="Admin password"
             className={`w-full border rounded-xl px-4 py-3 text-sm font-mono focus:outline-none focus:ring-2 transition-all ${
-              pwError ? "border-red-300 focus:ring-red-300" : "border-pink-200 focus:ring-pink-300"
+              pwError ? "border-rose-300 focus:ring-rose-300" : "border-pink-200/60 focus:ring-pink-300"
             }`}
           />
           {pwError && (
-            <p className="text-xs text-red-500 flex items-center gap-1">
+            <p className="text-xs text-rose-500 flex items-center gap-1">
               <AlertCircle className="w-3.5 h-3.5" />
               Incorrect password
             </p>
           )}
           <button
             type="submit"
-            className="w-full bg-gradient-to-r from-pink-500 to-red-500 text-white font-bold py-3 rounded-xl hover:from-pink-600 hover:to-red-600 transition-all"
+            className="w-full bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 text-white font-bold py-3 rounded-xl hover:from-pink-500 hover:via-pink-600 hover:to-pink-700 transition-all"
           >
             Enter Dashboard
           </button>
         </form>
         {!ADMIN_PASSWORD && (
-          <p className="text-center text-xs text-gray-400 mt-4">
-            Set <code className="bg-gray-100 px-1 py-0.5 rounded">VITE_ADMIN_PASSWORD</code> to protect this page.
+          <p className="text-center text-xs text-pink-400 mt-4">
+            Set <code className="bg-pink-100/50 px-1 py-0.5 rounded">VITE_ADMIN_PASSWORD</code> to protect this page.
           </p>
         )}
       </div>
@@ -116,22 +116,22 @@ export default function Admin() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-500 to-red-400 flex items-center justify-center shadow-md">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-400 via-pink-500 to-pink-600 flex items-center justify-center shadow-md">
             <ShieldCheck className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h1 className="text-2xl font-extrabold text-gray-800">Admin Dashboard</h1>
-            <p className="text-xs text-gray-400">Barbie Fun · Platform Control</p>
+            <h1 className="text-2xl font-extrabold text-pink-900">Admin Dashboard</h1>
+            <p className="text-xs text-pink-400">Barbie Fun · Platform Control</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <span className="flex items-center gap-1.5 text-xs font-bold text-green-600 bg-green-50 border border-green-200 rounded-full px-3 py-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+          <span className="flex items-center gap-1.5 text-xs font-bold text-emerald-500 bg-emerald-50 border border-emerald-200 rounded-full px-3 py-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
             Live
           </span>
           <button
             onClick={refresh}
-            className="text-xs text-pink-500 hover:text-pink-600 font-semibold border border-pink-200 rounded-full px-3 py-1 hover:bg-pink-50 transition-all"
+            className="text-xs text-pink-500 hover:text-pink-600 font-semibold border border-pink-200/60 rounded-full px-3 py-1 hover:bg-pink-50 transition-all"
           >
             Refresh
           </button>
@@ -161,7 +161,7 @@ export default function Admin() {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {[
               { label: "Total Launches", value: totalLaunches, icon: Rocket, color: "text-pink-500", bg: "bg-pink-50" },
-              { label: "Total Revenue", value: `$${totalRevenue}`, icon: DollarSign, color: "text-green-600", bg: "bg-green-50" },
+              { label: "Total Revenue", value: `$${totalRevenue}`, icon: DollarSign, color: "text-emerald-500", bg: "bg-emerald-50" },
               { label: "Verified Tokens", value: verifiedCount, icon: CheckCircle2, color: "text-blue-500", bg: "bg-blue-50" },
               { label: "EVM + SVM Chains", value: `${evmChains} + ${svmChains}`, icon: Link2, color: "text-purple-500", bg: "bg-purple-50" },
             ].map((kpi) => (
@@ -170,8 +170,8 @@ export default function Admin() {
                   <div className={`inline-flex items-center justify-center w-9 h-9 rounded-xl ${kpi.bg} mb-3`}>
                     <kpi.icon className={`w-4.5 h-4.5 ${kpi.color}`} />
                   </div>
-                  <p className="text-2xl font-extrabold text-gray-800">{kpi.value}</p>
-                  <p className="text-xs text-gray-400 font-medium mt-0.5">{kpi.label}</p>
+                  <p className="text-2xl font-extrabold text-pink-900">{kpi.value}</p>
+                  <p className="text-xs text-pink-400 font-medium mt-0.5">{kpi.label}</p>
                 </CardContent>
               </Card>
             ))}
@@ -189,7 +189,7 @@ export default function Admin() {
               </CardHeader>
               <CardContent>
                 {totalLaunches === 0 ? (
-                  <div className="h-40 flex items-center justify-center text-gray-400 text-sm">
+                  <div className="h-40 flex items-center justify-center text-pink-400 text-sm">
                     No launches yet
                   </div>
                 ) : (
@@ -222,7 +222,7 @@ export default function Admin() {
               </CardHeader>
               <CardContent className="flex items-center gap-6">
                 {totalLaunches === 0 ? (
-                  <div className="h-40 w-full flex items-center justify-center text-gray-400 text-sm">
+                  <div className="h-40 w-full flex items-center justify-center text-pink-400 text-sm">
                     No data yet
                   </div>
                 ) : (
@@ -250,8 +250,8 @@ export default function Admin() {
                       {chainCounts.filter((c) => c.count > 0).map((c, i) => (
                         <div key={c.name} className="flex items-center gap-2 text-xs">
                           <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: PIE_COLORS[i % PIE_COLORS.length] }} />
-                          <span className="text-gray-600 font-medium">{c.name}</span>
-                          <span className="ml-auto font-bold text-gray-800">{c.count}</span>
+                          <span className="text-pink-700 font-medium">{c.name}</span>
+                          <span className="ml-auto font-bold text-pink-900">{c.count}</span>
                         </div>
                       ))}
                     </div>
@@ -271,7 +271,7 @@ export default function Admin() {
             </CardHeader>
             <CardContent>
               {recentLaunches.length === 0 ? (
-                <p className="text-sm text-gray-400 text-center py-6">No launches recorded yet.</p>
+                <p className="text-sm text-pink-400 text-center py-6">No launches recorded yet.</p>
               ) : (
                 <div className="space-y-2">
                   {recentLaunches.map((l) => {
@@ -281,26 +281,26 @@ export default function Admin() {
                         <div className="flex items-center gap-3">
                           {chainMeta && <ChainIcon chain={chainMeta.icon} size={20} />}
                           <div>
-                            <span className="font-bold text-sm text-gray-800">${l.ticker}</span>
-                            <span className="text-xs text-gray-400 ml-2">{l.name}</span>
+                            <span className="font-bold text-sm text-pink-900">${l.ticker}</span>
+                            <span className="text-xs text-pink-400 ml-2">{l.name}</span>
                           </div>
                           {l.verified && (
-                            <span className="text-[9px] bg-green-100 text-green-600 border border-green-200 px-1.5 py-0.5 rounded-full font-bold">Verified</span>
+                            <span className="text-[9px] bg-emerald-100 text-emerald-500 border border-emerald-200 px-1.5 py-0.5 rounded-full font-bold">Verified</span>
                           )}
                         </div>
                         <div className="flex items-center gap-3">
-                          <span className="text-[10px] text-gray-400 font-mono">
+                          <span className="text-[10px] text-pink-400 font-mono">
                             {l.deployer.slice(0, 6)}…{l.deployer.slice(-4)}
                           </span>
-                          <span className="text-[10px] text-gray-400">
+                          <span className="text-[10px] text-pink-400">
                             {new Date(l.createdAt).toLocaleDateString()}
                           </span>
                           <button
                             onClick={() => toggleVerify(l.id, !!l.verified)}
                             className={`text-[10px] font-bold px-2 py-0.5 rounded-full border transition-all ${
                               l.verified
-                                ? "bg-green-50 text-green-600 border-green-200 hover:bg-red-50 hover:text-red-500 hover:border-red-200"
-                                : "bg-gray-50 text-gray-500 border-gray-200 hover:bg-green-50 hover:text-green-600 hover:border-green-200"
+                                ? "bg-emerald-50 text-emerald-500 border-emerald-200 hover:bg-rose-50 hover:text-rose-500 hover:border-rose-200"
+                                : "bg-pink-50/50 text-pink-600/80 border-pink-200/60 hover:bg-emerald-50 hover:text-emerald-500 hover:border-emerald-200"
                             }`}
                           >
                             {l.verified ? "✓ Verified" : "Verify"}
@@ -325,14 +325,14 @@ export default function Admin() {
                 <Rocket className="w-4 h-4" />
                 All Launches ({launches.length})
               </div>
-              <span className="text-xs text-gray-400 font-normal">Revenue: ${launches.length * 5}</span>
+              <span className="text-xs text-pink-400 font-normal">Revenue: ${launches.length * 5}</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
             {launches.length === 0 ? (
               <div className="text-center py-12">
                 <Rocket className="w-10 h-10 text-pink-200 mx-auto mb-3" />
-                <p className="text-gray-400 text-sm">No launches yet. They'll appear here once users launch tokens.</p>
+                <p className="text-pink-400 text-sm">No launches yet. They'll appear here once users launch tokens.</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
@@ -352,19 +352,19 @@ export default function Admin() {
                       return (
                         <tr key={l.id} className="hover:bg-pink-50/40 transition-colors">
                           <td className="py-2.5 px-3">
-                            <div className="font-bold text-gray-800">${l.ticker}</div>
-                            <div className="text-[10px] text-gray-400">{l.name}</div>
+                            <div className="font-bold text-pink-900">${l.ticker}</div>
+                            <div className="text-[10px] text-pink-400">{l.name}</div>
                           </td>
                           <td className="py-2.5 px-3">
                             <div className="flex items-center gap-1.5">
                               {chainMeta && <ChainIcon chain={chainMeta.icon} size={14} />}
-                              <span className="text-xs text-gray-600">{chainMeta?.name ?? l.chainName}</span>
+                              <span className="text-xs text-pink-700">{chainMeta?.name ?? l.chainName}</span>
                             </div>
                           </td>
-                          <td className="py-2.5 px-3 font-mono text-xs text-gray-400">
+                          <td className="py-2.5 px-3 font-mono text-xs text-pink-400">
                             {l.deployer.slice(0, 8)}…{l.deployer.slice(-6)}
                           </td>
-                          <td className="py-2.5 px-3 text-xs text-gray-400">
+                          <td className="py-2.5 px-3 text-xs text-pink-400">
                             {new Date(l.createdAt).toLocaleDateString()}
                           </td>
                           <td className="py-2.5 px-3">
@@ -372,8 +372,8 @@ export default function Admin() {
                               onClick={() => toggleVerify(l.id, !!l.verified)}
                               className={`text-[10px] font-bold px-2.5 py-1 rounded-full border transition-all ${
                                 l.verified
-                                  ? "bg-green-100 text-green-700 border-green-300 hover:bg-red-50 hover:text-red-500 hover:border-red-200"
-                                  : "bg-gray-100 text-gray-500 border-gray-200 hover:bg-green-50 hover:text-green-600 hover:border-green-200"
+                                  ? "bg-emerald-100 text-emerald-600 border-emerald-300 hover:bg-rose-50 hover:text-rose-500 hover:border-rose-200"
+                                  : "bg-pink-100/50 text-pink-600/80 border-pink-200/60 hover:bg-emerald-50 hover:text-emerald-500 hover:border-emerald-200"
                               }`}
                             >
                               {l.verified ? "✓ Verified" : "Unverified"}
@@ -401,15 +401,15 @@ export default function Admin() {
                     <div className="flex items-center gap-3">
                       <ChainIcon chain={chain.icon} size={32} />
                       <div>
-                        <p className="font-bold text-gray-800">{chain.name}</p>
-                        <p className="text-xs text-gray-400">{chain.symbol} · {chain.tokenName}</p>
+                        <p className="font-bold text-pink-900">{chain.name}</p>
+                        <p className="text-xs text-pink-400">{chain.symbol} · {chain.tokenName}</p>
                       </div>
                     </div>
                     <div className="flex flex-col items-end gap-1">
                       {chain.isSvm ? (
                         <span className="text-[9px] bg-purple-100 text-purple-600 border border-purple-200 rounded-full px-2 py-0.5 font-bold">SVM</span>
                       ) : (
-                        <span className="text-[9px] bg-green-100 text-green-600 border border-green-200 rounded-full px-2 py-0.5 font-bold">EVM ✓</span>
+                        <span className="text-[9px] bg-emerald-100 text-emerald-500 border border-emerald-200 rounded-full px-2 py-0.5 font-bold">EVM ✓</span>
                       )}
                       {chain.isStableGas && (
                         <span className="text-[9px] bg-blue-100 text-blue-600 border border-blue-200 rounded-full px-2 py-0.5 font-bold">Stable Gas</span>
@@ -417,8 +417,8 @@ export default function Admin() {
                     </div>
                   </div>
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-gray-400">
-                      Launches: <strong className="text-gray-700">{chain.isSvm ? "—" : launches.filter((l) => l.chainId === chain.id).length}</strong>
+                    <span className="text-pink-400">
+                      Launches: <strong className="text-pink-800">{chain.isSvm ? "—" : launches.filter((l) => l.chainId === chain.id).length}</strong>
                     </span>
                     <a href={chain.dex} target="_blank" rel="noopener noreferrer"
                       className="text-pink-400 hover:text-pink-600 font-semibold">
@@ -453,13 +453,13 @@ export default function Admin() {
                 return (
                   <div key={setting.key} className="flex items-center justify-between py-3 px-4 rounded-xl border border-pink-50 bg-pink-50/30">
                     <div>
-                      <p className="font-bold text-gray-800">{setting.label}</p>
-                      <p className="text-xs text-gray-400 mt-0.5">{setting.description}</p>
-                      <code className="text-[10px] text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded mt-1 inline-block">{setting.key}</code>
+                      <p className="font-bold text-pink-900">{setting.label}</p>
+                      <p className="text-xs text-pink-400 mt-0.5">{setting.description}</p>
+                      <code className="text-[10px] text-pink-600/80 bg-pink-100/50 px-1.5 py-0.5 rounded mt-1 inline-block">{setting.key}</code>
                     </div>
                     <div className="flex items-center gap-2">
                       {configured ? (
-                        <span className="flex items-center gap-1 text-xs font-bold text-green-600 bg-green-50 border border-green-200 rounded-full px-2.5 py-1">
+                        <span className="flex items-center gap-1 text-xs font-bold text-emerald-500 bg-emerald-50 border border-emerald-200 rounded-full px-2.5 py-1">
                           <CheckCircle2 className="w-3 h-3" /> Set
                         </span>
                       ) : (
@@ -482,14 +482,14 @@ export default function Admin() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-pink-600/80">
                 {launches.filter((l) => !l.verified).length} tokens awaiting review.{" "}
                 {verifiedCount} tokens verified.
               </p>
               <div className="mt-3 flex gap-2">
                 <button
                   onClick={() => setTab("launches")}
-                  className="text-sm font-bold text-pink-500 hover:text-pink-600 border border-pink-200 rounded-full px-4 py-1.5 hover:bg-pink-50 transition-all"
+                  className="text-sm font-bold text-pink-500 hover:text-pink-600 border border-pink-200/60 rounded-full px-4 py-1.5 hover:bg-pink-50 transition-all"
                 >
                   View Launches →
                 </button>

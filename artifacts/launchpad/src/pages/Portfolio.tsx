@@ -19,26 +19,26 @@ function ChainBalance({ chainMeta }: { chainMeta: typeof SUPPORTED_CHAINS[0] }) 
   });
 
   return (
-    <div className="flex items-center justify-between py-3 px-4 rounded-xl border border-pink-100 bg-white hover:border-pink-200 transition-colors group">
+    <div className="flex items-center justify-between py-3 px-4 rounded-xl border border-pink-100 bg-white hover:border-pink-200/60 transition-colors group">
       <div className="flex items-center space-x-3">
         <ChainIcon chain={chainMeta.icon} size={28} />
         <div>
-          <p className="font-bold text-sm text-gray-800">{chainMeta.name}</p>
-          <p className="text-xs text-gray-400">{chainMeta.symbol} · native token</p>
+          <p className="font-bold text-sm text-pink-900">{chainMeta.name}</p>
+          <p className="text-xs text-pink-400">{chainMeta.symbol} · native token</p>
         </div>
       </div>
       <div className="flex items-center space-x-2">
         <div className="text-right">
           {isLoading ? (
-            <p className="text-sm font-mono text-gray-300 animate-pulse">Loading…</p>
+            <p className="text-sm font-mono text-pink-300 animate-pulse">Loading…</p>
           ) : balance ? (
             <>
-              <p className="text-sm font-bold font-mono text-gray-800">
+              <p className="text-sm font-bold font-mono text-pink-900">
                 {parseFloat(balance.formatted).toFixed(4)} {balance.symbol}
               </p>
             </>
           ) : (
-            <p className="text-xs text-gray-400">Connect wallet</p>
+            <p className="text-xs text-pink-400">Connect wallet</p>
           )}
         </div>
         <button
@@ -77,18 +77,18 @@ export default function Portfolio() {
   if (!anyConnected) {
     return (
       <div className="max-w-2xl mx-auto py-20 text-center animate-in fade-in duration-500">
-        <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-gradient-to-br from-pink-500 to-red-400 shadow-lg shadow-pink-200 mb-6">
+        <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-gradient-to-br from-pink-400 via-pink-500 to-pink-600 shadow-lg shadow-pink-200 mb-6">
           <Wallet className="w-10 h-10 text-white" />
         </div>
-        <h1 className="text-3xl font-extrabold tracking-tight mb-3 bg-gradient-to-r from-pink-500 to-red-400 bg-clip-text text-transparent">
+        <h1 className="text-3xl font-extrabold tracking-tight mb-3 bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 bg-clip-text text-transparent">
           Your Portfolio
         </h1>
-        <p className="text-gray-500 mb-8 max-w-sm mx-auto">
+        <p className="text-pink-600/80 mb-8 max-w-sm mx-auto">
           Connect your wallet to view your token balances, holdings, and launch history across all supported chains.
         </p>
         <Button
           onClick={() => setWalletOpen(true)}
-          className="bg-gradient-to-r from-pink-500 to-red-500 text-white font-bold px-8 rounded-full"
+          className="bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 text-white font-bold px-8 rounded-full"
         >
           <Wallet className="w-4 h-4 mr-2" />
           Connect Wallet
@@ -103,15 +103,15 @@ export default function Portfolio() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-pink-500 to-red-400 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 bg-clip-text text-transparent">
             Portfolio
           </h1>
-          <p className="text-sm text-gray-400 mt-1">Your holdings across all supported chains</p>
+          <p className="text-sm text-pink-400 mt-1">Your holdings across all supported chains</p>
         </div>
         <Button
           variant="outline"
           onClick={() => { disconnect(); solana.disconnect(); }}
-          className="border-red-200 text-red-500 hover:bg-red-50 rounded-full"
+          className="border-rose-200 text-rose-500 hover:bg-rose-50 rounded-full"
         >
           <LogOut className="w-4 h-4 mr-1.5" />
           Disconnect
@@ -121,15 +121,15 @@ export default function Portfolio() {
       {/* Wallet cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {isConnected && (
-          <Card className="border-pink-200 shadow-md">
+          <Card className="border-pink-200/60 shadow-md">
             <CardContent className="p-5">
               <div className="flex items-center space-x-3 mb-4">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-400 to-red-400 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-300 via-pink-400 to-pink-500 flex items-center justify-center">
                   <Wallet className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <p className="text-xs text-gray-400 font-semibold uppercase tracking-wider">EVM Wallet</p>
-                  <p className="font-mono font-bold text-gray-800 text-sm">{shortAddress}</p>
+                  <p className="text-xs text-pink-400 font-semibold uppercase tracking-wider">EVM Wallet</p>
+                  <p className="font-mono font-bold text-pink-900 text-sm">{shortAddress}</p>
                 </div>
               </div>
               {chain && (
@@ -160,7 +160,7 @@ export default function Portfolio() {
                   <p className="text-xs text-purple-400 font-semibold uppercase tracking-wider">
                     {solana.walletId === "phantom" ? "Phantom" : "Backpack"} · SVM
                   </p>
-                  <p className="font-mono font-bold text-gray-800 text-sm">{shortSolAddress}</p>
+                  <p className="font-mono font-bold text-pink-900 text-sm">{shortSolAddress}</p>
                 </div>
               </div>
               <div className="flex items-center gap-1.5 text-xs text-purple-500 font-semibold mb-3">
@@ -206,7 +206,7 @@ export default function Portfolio() {
                   {solana.connected ? (
                     <p className="text-xs text-purple-400 font-semibold">Use wallet UI</p>
                   ) : (
-                    <p className="text-xs text-gray-400">Needs Phantom / Backpack</p>
+                    <p className="text-xs text-pink-400">Needs Phantom / Backpack</p>
                   )}
                 </div>
               </div>
@@ -221,14 +221,14 @@ export default function Portfolio() {
           <CardTitle className="text-base font-bold text-pink-600 flex items-center gap-2">
             <Rocket className="w-4 h-4" />
             My Token Launches
-            <span className="ml-auto text-xs text-gray-400 font-normal">{myLaunches.length} total</span>
+            <span className="ml-auto text-xs text-pink-400 font-normal">{myLaunches.length} total</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
           {myLaunches.length === 0 ? (
             <div className="text-center py-10">
               <Rocket className="w-8 h-8 text-pink-200 mx-auto mb-3" />
-              <p className="text-sm text-gray-500">No tokens launched yet from this wallet.</p>
+              <p className="text-sm text-pink-600/80">No tokens launched yet from this wallet.</p>
               <a href="/launch" className="mt-3 inline-block text-sm font-bold text-pink-500 hover:text-pink-600">
                 Launch your first token →
               </a>
@@ -242,19 +242,19 @@ export default function Portfolio() {
                     key={launch.id}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="flex items-center justify-between py-3 px-4 rounded-xl border border-pink-100 bg-white hover:border-pink-200 transition-colors"
+                    className="flex items-center justify-between py-3 px-4 rounded-xl border border-pink-100 bg-white hover:border-pink-200/60 transition-colors"
                   >
                     <div className="flex items-center space-x-3">
                       {chainMeta && <ChainIcon chain={chainMeta.icon} size={22} />}
                       <div>
                         <div className="flex items-center gap-2">
-                          <p className="font-bold text-sm text-gray-800">${launch.ticker}</p>
-                          <p className="text-xs text-gray-400">{launch.name}</p>
+                          <p className="font-bold text-sm text-pink-900">${launch.ticker}</p>
+                          <p className="text-xs text-pink-400">{launch.name}</p>
                           {launch.verified && (
-                            <span className="text-[9px] bg-green-100 text-green-600 border border-green-200 px-1.5 py-0.5 rounded-full font-bold">✓ Verified</span>
+                            <span className="text-[9px] bg-emerald-100 text-emerald-500 border border-emerald-200 px-1.5 py-0.5 rounded-full font-bold">✓ Verified</span>
                           )}
                         </div>
-                        <p className="text-[10px] text-gray-400 font-mono">
+                        <p className="text-[10px] text-pink-400 font-mono">
                           {new Date(launch.createdAt).toLocaleDateString()} · Supply: {formatSupply(launch.totalSupply)}
                         </p>
                       </div>
@@ -284,7 +284,7 @@ export default function Portfolio() {
             <Card key={stat.label} className="border-pink-100 shadow-sm text-center">
               <CardContent className="p-4">
                 <p className="text-2xl font-extrabold text-pink-500">{stat.value}</p>
-                <p className="text-xs text-gray-400 font-medium mt-1">{stat.label}</p>
+                <p className="text-xs text-pink-400 font-medium mt-1">{stat.label}</p>
               </CardContent>
             </Card>
           ))}

@@ -61,9 +61,9 @@ export default function WalletModal({ onClose }: WalletModalProps) {
     return (
       <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
         <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
-        <div className="relative bg-white rounded-3xl shadow-2xl border border-pink-200 w-full max-w-sm overflow-hidden">
+        <div className="relative bg-white rounded-3xl shadow-2xl border border-pink-200/60 w-full max-w-sm overflow-hidden">
           {/* Header */}
-          <div className="bg-gradient-to-r from-pink-500 via-rose-500 to-red-400 px-6 py-4 flex items-center justify-between">
+          <div className="bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 px-6 py-4 flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <Wallet className="w-5 h-5 text-white" />
               <span className="text-white font-bold text-lg">My Wallet</span>
@@ -75,11 +75,11 @@ export default function WalletModal({ onClose }: WalletModalProps) {
 
           <div className="p-6 space-y-4">
             {/* Address display */}
-            <div className="bg-pink-50 border border-pink-200 rounded-2xl p-4 text-center">
-              <div className="w-14 h-14 rounded-full bg-gradient-to-br from-pink-400 to-red-400 mx-auto mb-3 flex items-center justify-center shadow-lg shadow-pink-200">
+            <div className="bg-pink-50 border border-pink-200/60 rounded-2xl p-4 text-center">
+              <div className="w-14 h-14 rounded-full bg-gradient-to-br from-pink-300 via-pink-400 to-pink-500 mx-auto mb-3 flex items-center justify-center shadow-lg shadow-pink-200">
                 <Wallet className="w-6 h-6 text-white" />
               </div>
-              <p className="font-mono font-bold text-gray-800 text-sm mb-1">
+              <p className="font-mono font-bold text-pink-900 text-sm mb-1">
                 {isConnected ? shortAddress : solana.publicKey ? shortPk(solana.publicKey) : ""}
               </p>
               <p className="text-xs text-pink-500 font-semibold">
@@ -122,14 +122,14 @@ export default function WalletModal({ onClose }: WalletModalProps) {
                         className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border transition-all ${
                           chain?.id === c.id
                             ? "border-pink-400 bg-pink-50 text-pink-700 font-bold"
-                            : "border-pink-100 bg-white hover:border-pink-200 text-gray-700"
+                            : "border-pink-100 bg-white hover:border-pink-200/60 text-pink-800"
                         }`}
                       >
                         <div className="flex items-center space-x-3">
                           <ChainIcon chain={c.icon} size={22} />
                           <div className="text-left">
                             <span className="font-semibold text-sm">{c.name}</span>
-                            <p className="text-[10px] text-gray-400">{c.symbol} · native token</p>
+                            <p className="text-[10px] text-pink-400">{c.symbol} · native token</p>
                           </div>
                         </div>
                         {chain?.id === c.id && <CheckCircle2 className="w-4 h-4 text-pink-500" />}
@@ -153,7 +153,7 @@ export default function WalletModal({ onClose }: WalletModalProps) {
                 ) : (
                   <button
                     onClick={() => { disconnect(); onClose(); }}
-                    className="w-full flex items-center justify-center space-x-2 bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 font-bold py-3 rounded-xl transition-all"
+                    className="w-full flex items-center justify-center space-x-2 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-600 font-bold py-3 rounded-xl transition-all"
                   >
                     <LogOut className="w-4 h-4" />
                     <span>Disconnect</span>
@@ -165,7 +165,7 @@ export default function WalletModal({ onClose }: WalletModalProps) {
             {solana.connected && (
               <button
                 onClick={() => { solana.disconnect(); onClose(); }}
-                className="w-full flex items-center justify-center space-x-2 bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 font-bold py-3 rounded-xl transition-all"
+                className="w-full flex items-center justify-center space-x-2 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-600 font-bold py-3 rounded-xl transition-all"
               >
                 <LogOut className="w-4 h-4" />
                 <span>Disconnect X1 Wallet</span>
@@ -181,9 +181,9 @@ export default function WalletModal({ onClose }: WalletModalProps) {
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-white rounded-3xl shadow-2xl border border-pink-200 w-full max-w-sm overflow-hidden">
+      <div className="relative bg-white rounded-3xl shadow-2xl border border-pink-200/60 w-full max-w-sm overflow-hidden">
         {/* Header */}
-        <div className="bg-gradient-to-r from-pink-500 via-rose-500 to-red-400 px-6 py-4 flex items-center justify-between">
+        <div className="bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 px-6 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <Wallet className="w-5 h-5 text-white" />
             <span className="text-white font-bold text-lg">Connect Wallet</span>
@@ -197,13 +197,13 @@ export default function WalletModal({ onClose }: WalletModalProps) {
         <div className="flex border-b border-pink-100">
           <button
             onClick={() => setSection("evm")}
-            className={`flex-1 py-3 text-sm font-bold transition-all ${section === "evm" ? "text-pink-600 border-b-2 border-pink-500" : "text-gray-400 hover:text-pink-400"}`}
+            className={`flex-1 py-3 text-sm font-bold transition-all ${section === "evm" ? "text-pink-600 border-b-2 border-pink-500" : "text-pink-400 hover:text-pink-400"}`}
           >
             EVM Chains
           </button>
           <button
             onClick={() => setSection("x1")}
-            className={`flex-1 py-3 text-sm font-bold transition-all flex items-center justify-center gap-1.5 ${section === "x1" ? "text-purple-600 border-b-2 border-purple-500" : "text-gray-400 hover:text-purple-400"}`}
+            className={`flex-1 py-3 text-sm font-bold transition-all flex items-center justify-center gap-1.5 ${section === "x1" ? "text-purple-600 border-b-2 border-purple-500" : "text-pink-400 hover:text-purple-400"}`}
           >
             <Zap className="w-3.5 h-3.5" />
             SVM Chains
@@ -213,7 +213,7 @@ export default function WalletModal({ onClose }: WalletModalProps) {
         <div className="p-6 space-y-3">
           {section === "evm" ? (
             <>
-              <p className="text-sm text-gray-500 text-center mb-4">
+              <p className="text-sm text-pink-600/80 text-center mb-4">
                 Choose your wallet to connect to Barbie Fun
               </p>
 
@@ -227,15 +227,15 @@ export default function WalletModal({ onClose }: WalletModalProps) {
                     key={connector.uid}
                     onClick={() => connect({ connector })}
                     disabled={isPending}
-                    className="w-full flex items-center justify-between px-4 py-3.5 bg-white hover:bg-pink-50 border border-pink-100 hover:border-pink-300 rounded-2xl transition-all group disabled:opacity-60"
+                    className="w-full flex items-center justify-between px-4 py-3.5 bg-white hover:bg-pink-50 border border-pink-100 hover:border-pink-300/60 rounded-2xl transition-all group disabled:opacity-60"
                   >
                     <div className="flex items-center space-x-3">
                       <div className="w-9 h-9 rounded-full bg-pink-50 flex items-center justify-center shrink-0">
                         <meta.icon className="w-4.5 h-4.5 text-pink-500" />
                       </div>
                       <div className="text-left">
-                        <p className="font-bold text-gray-800 text-sm">{meta.name}</p>
-                        <p className="text-xs text-gray-400">
+                        <p className="font-bold text-pink-900 text-sm">{meta.name}</p>
+                        <p className="text-xs text-pink-400">
                           {connector.id === "injected" ? "Browser extension" :
                            connector.id === "walletConnect" ? "QR code / deep link" :
                            "Connect securely"}
@@ -248,7 +248,7 @@ export default function WalletModal({ onClose }: WalletModalProps) {
               })}
 
               {error && (
-                <div className="flex items-center space-x-2 bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-600">
+                <div className="flex items-center space-x-2 bg-rose-50 border border-rose-200 rounded-xl px-4 py-3 text-sm text-rose-600">
                   <AlertCircle className="w-4 h-4 shrink-0" />
                   <span>{error.message.slice(0, 80)}</span>
                 </div>
@@ -271,7 +271,7 @@ export default function WalletModal({ onClose }: WalletModalProps) {
                 ))}
               </div>
 
-              <p className="text-xs text-gray-400 text-center mb-1">
+              <p className="text-xs text-pink-400 text-center mb-1">
                 X1 and Solana run on the Solana VM. Connect with a compatible wallet below.
               </p>
 
@@ -300,8 +300,8 @@ export default function WalletModal({ onClose }: WalletModalProps) {
                     </svg>
                   </div>
                   <div className="text-left">
-                    <p className="font-bold text-gray-800 text-sm">Phantom</p>
-                    <p className="text-xs text-gray-400">
+                    <p className="font-bold text-pink-900 text-sm">Phantom</p>
+                    <p className="text-xs text-pink-400">
                       {phantomAvailable ? "Detected — ready to connect" : "Click to install"}
                     </p>
                   </div>
@@ -325,8 +325,8 @@ export default function WalletModal({ onClose }: WalletModalProps) {
                     </svg>
                   </div>
                   <div className="text-left">
-                    <p className="font-bold text-gray-800 text-sm">Backpack</p>
-                    <p className="text-xs text-gray-400">
+                    <p className="font-bold text-pink-900 text-sm">Backpack</p>
+                    <p className="text-xs text-pink-400">
                       {backpackAvailable ? "Detected — ready to connect" : "Click to install"}
                     </p>
                   </div>
@@ -346,8 +346,8 @@ export default function WalletModal({ onClose }: WalletModalProps) {
                     <ChainIcon chain="x1" size={36} />
                   </div>
                   <div className="text-left">
-                    <p className="font-bold text-gray-800 text-sm">X1 Web Wallet</p>
-                    <p className="text-xs text-gray-400">Opens wallet.x1.xyz in new tab</p>
+                    <p className="font-bold text-pink-900 text-sm">X1 Web Wallet</p>
+                    <p className="text-xs text-pink-400">Opens wallet.x1.xyz in new tab</p>
                   </div>
                 </div>
                 <ExternalLink className="w-4 h-4 text-purple-400 group-hover:text-purple-600 transition-colors" />
@@ -365,15 +365,15 @@ export default function WalletModal({ onClose }: WalletModalProps) {
                     <ChainIcon chain="solana" size={36} />
                   </div>
                   <div className="text-left">
-                    <p className="font-bold text-gray-800 text-sm">Jupiter · Solana</p>
-                    <p className="text-xs text-gray-400">Trade on jup.ag in new tab</p>
+                    <p className="font-bold text-pink-900 text-sm">Jupiter · Solana</p>
+                    <p className="text-xs text-pink-400">Trade on jup.ag in new tab</p>
                   </div>
                 </div>
                 <ExternalLink className="w-4 h-4 text-purple-400 group-hover:text-purple-600 transition-colors" />
               </a>
 
               {solana.error && (
-                <div className="flex items-center space-x-2 bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-600">
+                <div className="flex items-center space-x-2 bg-rose-50 border border-rose-200 rounded-xl px-4 py-3 text-sm text-rose-600">
                   <AlertCircle className="w-4 h-4 shrink-0" />
                   <span>{solana.error.slice(0, 100)}</span>
                 </div>

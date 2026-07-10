@@ -31,7 +31,7 @@ export default function Ticker() {
   const loop = [...items, ...items, ...items];
 
   return (
-    <div className="bg-gradient-to-r from-pink-500 via-red-400 to-pink-500 border-b border-pink-300 overflow-hidden py-1.5 flex items-center text-xs font-mono">
+    <div className="bg-gradient-to-r from-pink-400 via-pink-500 to-pink-400 border-b border-pink-300/60 overflow-hidden py-1.5 flex items-center text-xs font-mono">
       <div className="animate-marquee whitespace-nowrap flex items-center space-x-8">
         {loop.map((item, i) => (
           <span key={i} className="font-semibold text-white flex items-center gap-1.5">

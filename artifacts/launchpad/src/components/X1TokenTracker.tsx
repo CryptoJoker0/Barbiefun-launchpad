@@ -271,44 +271,44 @@ export default function X1TokenTracker() {
       <div className="flex items-center justify-between px-4 py-2.5 bg-gradient-to-r from-orange-500/10 to-transparent border-b border-orange-100">
         <div className="flex items-center space-x-2">
           <div className="flex space-x-1">
-            <span className="w-2.5 h-2.5 rounded-full bg-red-400" />
+            <span className="w-2.5 h-2.5 rounded-full bg-rose-400" />
             <span className="w-2.5 h-2.5 rounded-full bg-yellow-400" />
-            <span className="w-2.5 h-2.5 rounded-full bg-green-400" />
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
           </div>
           <div className="flex items-center gap-1.5 ml-1">
             <ChainIcon chain="x1" size={16} />
-            <span className="text-[11px] font-bold text-orange-600 uppercase tracking-widest">
+            <span className="text-[11px] font-bold text-pink-600 uppercase tracking-widest">
               X1 Token Tracker
             </span>
-            <Flame className="w-3 h-3 text-orange-400" />
+            <Flame className="w-3 h-3 text-pink-400" />
           </div>
         </div>
         <div className="flex items-center space-x-2">
-          <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${isLoading ? "bg-yellow-400" : isSnapshot ? "bg-orange-300" : hasData ? "bg-green-400" : "bg-gray-300"}`} />
-          <span className="text-[10px] text-orange-400 font-semibold">
+          <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${isLoading ? "bg-yellow-400" : isSnapshot ? "bg-orange-300" : hasData ? "bg-emerald-400" : "bg-gray-300"}`} />
+          <span className="text-[10px] text-pink-400 font-semibold">
             {isLoading ? "Loading…" : hasData ? source : "Offline"}
           </span>
-          {hasData && !isSnapshot ? <Wifi className="w-3 h-3 text-green-500" /> : <WifiOff className="w-3 h-3 text-gray-300" />}
-          <button onClick={() => refetch()} className="text-orange-300 hover:text-orange-500 transition-colors" title="Refresh">
+          {hasData && !isSnapshot ? <Wifi className="w-3 h-3 text-emerald-400" /> : <WifiOff className="w-3 h-3 text-pink-300" />}
+          <button onClick={() => refetch()} className="text-orange-300 hover:text-pink-500 transition-colors" title="Refresh">
             <RefreshCw className="w-3 h-3" />
           </button>
         </div>
       </div>
       {isSnapshot && (
-        <div className="px-4 py-1.5 bg-orange-50/60 border-b border-orange-100 text-[10px] text-orange-500 font-semibold flex items-center justify-between">
+        <div className="px-4 py-1.5 bg-pink-50/60 border-b border-orange-100 text-[10px] text-pink-500 font-semibold flex items-center justify-between">
           <span>Showing featured X1 projects — live API unavailable</span>
-          <a href="https://x1.ninja" target="_blank" rel="noopener noreferrer" className="text-orange-600 hover:text-orange-700 underline">
+          <a href="https://x1.ninja" target="_blank" rel="noopener noreferrer" className="text-pink-600 hover:text-orange-700 underline">
             View live on x1.ninja
           </a>
         </div>
       )}
 
       {/* Column headers */}
-      <div className="grid grid-cols-5 text-[11px] font-mono border-b border-orange-50 bg-orange-50/40">
-        <div className="col-span-2 px-3 py-1.5 text-orange-400 font-bold">TOKEN</div>
-        <div className="px-2 py-1.5 text-orange-400 font-bold text-right">PRICE</div>
-        <div className="px-2 py-1.5 text-orange-400 font-bold text-right">24H</div>
-        <div className="px-2 py-1.5 text-orange-400 font-bold text-right">VOL</div>
+      <div className="grid grid-cols-5 text-[11px] font-mono border-b border-orange-50 bg-pink-50/40">
+        <div className="col-span-2 px-3 py-1.5 text-pink-400 font-bold">TOKEN</div>
+        <div className="px-2 py-1.5 text-pink-400 font-bold text-right">PRICE</div>
+        <div className="px-2 py-1.5 text-pink-400 font-bold text-right">24H</div>
+        <div className="px-2 py-1.5 text-pink-400 font-bold text-right">VOL</div>
       </div>
 
       {/* Rows */}
@@ -317,12 +317,12 @@ export default function X1TokenTracker() {
           {[...Array(5)].map((_, i) => (
             <div key={i} className="grid grid-cols-5 py-2.5 px-2 animate-pulse">
               <div className="col-span-2 flex items-center gap-2 pl-1">
-                <div className="w-5 h-5 rounded-full bg-orange-100" />
-                <div className="h-3 w-16 bg-orange-100 rounded" />
+                <div className="w-5 h-5 rounded-full bg-pink-100" />
+                <div className="h-3 w-16 bg-pink-100 rounded" />
               </div>
-              <div className="flex items-center justify-end pr-1"><div className="h-3 w-14 bg-orange-100 rounded" /></div>
-              <div className="flex items-center justify-end pr-1"><div className="h-3 w-10 bg-orange-100 rounded" /></div>
-              <div className="flex items-center justify-end pr-1"><div className="h-3 w-12 bg-orange-100 rounded" /></div>
+              <div className="flex items-center justify-end pr-1"><div className="h-3 w-14 bg-pink-100 rounded" /></div>
+              <div className="flex items-center justify-end pr-1"><div className="h-3 w-10 bg-pink-100 rounded" /></div>
+              <div className="flex items-center justify-end pr-1"><div className="h-3 w-12 bg-pink-100 rounded" /></div>
             </div>
           ))}
         </div>
@@ -333,7 +333,7 @@ export default function X1TokenTracker() {
             return (
               <div
                 key={`${token.address}-${i}`}
-                className="grid grid-cols-5 text-xs font-mono py-2.5 px-2 hover:bg-orange-50/50 transition-colors group"
+                className="grid grid-cols-5 text-xs font-mono py-2.5 px-2 hover:bg-pink-50/50 transition-colors group"
               >
                 {/* Token */}
                 <div className="col-span-2 flex items-center space-x-2 min-w-0 pl-1">
@@ -345,24 +345,24 @@ export default function X1TokenTracker() {
                     </div>
                   )}
                   <div className="min-w-0">
-                    <div className="font-bold text-gray-800 text-[11px] truncate">{token.symbol}</div>
-                    <div className="text-[9px] text-gray-400 truncate">{token.name}</div>
+                    <div className="font-bold text-pink-900 text-[11px] truncate">{token.symbol}</div>
+                    <div className="text-[9px] text-pink-400 truncate">{token.name}</div>
                   </div>
                   {token.pairUrl && (
                     <a href={token.pairUrl} target="_blank" rel="noopener noreferrer"
-                      className="opacity-0 group-hover:opacity-100 transition-opacity text-orange-400 hover:text-orange-600 shrink-0">
+                      className="opacity-0 group-hover:opacity-100 transition-opacity text-pink-400 hover:text-pink-600 shrink-0">
                       <ExternalLink className="w-2.5 h-2.5" />
                     </a>
                   )}
                 </div>
                 {/* Price */}
                 <div className="flex items-center justify-end px-1">
-                  <span className="text-gray-700 font-semibold text-[10px]">
+                  <span className="text-pink-800 font-semibold text-[10px]">
                     {fmt(token.priceUsd)}
                   </span>
                 </div>
                 {/* 24h change */}
-                <div className={`flex items-center justify-end px-1 text-[10px] font-bold ${token.priceChange24h === null ? "text-gray-300" : up ? "text-green-500" : "text-red-500"}`}>
+                <div className={`flex items-center justify-end px-1 text-[10px] font-bold ${token.priceChange24h === null ? "text-pink-300" : up ? "text-emerald-400" : "text-rose-500"}`}>
                   {token.priceChange24h !== null ? (
                     <>
                       {up ? <TrendingUp className="w-2.5 h-2.5 mr-0.5 inline" /> : <TrendingDown className="w-2.5 h-2.5 mr-0.5 inline" />}
@@ -372,7 +372,7 @@ export default function X1TokenTracker() {
                 </div>
                 {/* Volume */}
                 <div className="flex items-center justify-end px-1">
-                  <span className="text-[10px] text-gray-500">{fmt(token.volume24h)}</span>
+                  <span className="text-[10px] text-pink-600/80">{fmt(token.volume24h)}</span>
                 </div>
               </div>
             );
@@ -381,15 +381,15 @@ export default function X1TokenTracker() {
       ) : (
         /* Safety-net fallback — only reachable if FEATURED_X1_TOKENS is ever emptied */
         <div className="py-8 px-4 text-center">
-          <div className="w-12 h-12 rounded-full bg-orange-50 border border-orange-200 flex items-center justify-center mx-auto mb-3">
-            <BarChart2 className="w-5 h-5 text-orange-400" />
+          <div className="w-12 h-12 rounded-full bg-pink-50 border border-pink-200/60 flex items-center justify-center mx-auto mb-3">
+            <BarChart2 className="w-5 h-5 text-pink-400" />
           </div>
-          <p className="text-sm font-bold text-gray-700 mb-1">X1 token data unavailable</p>
-          <p className="text-xs text-gray-400 mb-4">
+          <p className="text-sm font-bold text-pink-800 mb-1">X1 token data unavailable</p>
+          <p className="text-xs text-pink-400 mb-4">
             Live X1 token prices require a public API. Visit x1.ninja directly for real-time data.
           </p>
           <a href="https://x1.ninja" target="_blank" rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 text-xs font-bold bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-full transition-colors">
+            className="inline-flex items-center gap-1.5 text-xs font-bold bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 rounded-full transition-colors">
             <ChainIcon chain="x1" size={14} />
             Open x1.ninja
             <ExternalLink className="w-3 h-3" />
@@ -399,8 +399,8 @@ export default function X1TokenTracker() {
 
       {/* Footer */}
       {hasData && (
-        <div className="border-t border-orange-50 px-3 py-1.5 flex items-center justify-between bg-orange-50/30">
-          <span className="text-[9px] text-gray-400">
+        <div className="border-t border-orange-50 px-3 py-1.5 flex items-center justify-between bg-pink-50/30">
+          <span className="text-[9px] text-pink-400">
             {isSnapshot
               ? "Snapshot data"
               : lastUpdated
@@ -408,7 +408,7 @@ export default function X1TokenTracker() {
                 : "X1 Blockchain"}
           </span>
           <a href="https://x1.ninja" target="_blank" rel="noopener noreferrer"
-            className="text-[9px] text-orange-400 hover:text-orange-600 font-semibold flex items-center gap-0.5">
+            className="text-[9px] text-pink-400 hover:text-pink-600 font-semibold flex items-center gap-0.5">
             x1.ninja <ExternalLink className="w-2.5 h-2.5 inline" />
           </a>
         </div>

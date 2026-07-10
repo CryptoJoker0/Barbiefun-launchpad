@@ -22,14 +22,14 @@ export default function Contact() {
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-gradient-to-br from-pink-500 to-red-400 shadow-xl shadow-pink-200 mb-2"
+          className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-gradient-to-br from-pink-400 via-pink-500 to-pink-600 shadow-xl shadow-pink-200 mb-2"
         >
           <Mail className="w-10 h-10 text-white" />
         </motion.div>
-        <h1 className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-pink-500 to-red-400 bg-clip-text text-transparent">
+        <h1 className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 bg-clip-text text-transparent">
           Contact Us
         </h1>
-        <p className="text-gray-500 max-w-md mx-auto text-lg">
+        <p className="text-pink-600/80 max-w-md mx-auto text-lg">
           Have a question, partnership proposal, or need support? Reach us below — we're friendly.
         </p>
       </div>
@@ -42,16 +42,16 @@ export default function Contact() {
         className="bg-white border-2 border-pink-100 rounded-3xl p-8 shadow-lg hover:shadow-xl transition-shadow"
       >
         <div className="flex items-center gap-3 mb-5">
-          <div className="w-10 h-10 rounded-xl bg-pink-50 flex items-center justify-center border border-pink-200">
+          <div className="w-10 h-10 rounded-xl bg-pink-50 flex items-center justify-center border border-pink-200/60">
             <Mail className="w-5 h-5 text-pink-500" />
           </div>
           <div>
-            <p className="text-xs text-gray-400 font-semibold uppercase tracking-widest">Email</p>
-            <p className="font-bold text-gray-800">Official Contact</p>
+            <p className="text-xs text-pink-400 font-semibold uppercase tracking-widest">Email</p>
+            <p className="font-bold text-pink-900">Official Contact</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-3 bg-pink-50 border border-pink-200 rounded-2xl p-4">
+        <div className="flex items-center gap-3 bg-pink-50 border border-pink-200/60 rounded-2xl p-4">
           <a
             href={`mailto:${EMAIL}`}
             className="font-mono font-bold text-pink-600 text-lg flex-1 hover:text-pink-700 transition-colors truncate"
@@ -62,7 +62,7 @@ export default function Contact() {
             onClick={copyEmail}
             className={`shrink-0 flex items-center gap-1.5 text-sm font-bold px-4 py-2 rounded-full transition-all ${
               copied
-                ? "bg-green-500 text-white"
+                ? "bg-emerald-400 text-white"
                 : "bg-pink-500 hover:bg-pink-600 text-white"
             }`}
           >
@@ -80,7 +80,7 @@ export default function Contact() {
           </button>
         </div>
 
-        <p className="text-sm text-gray-400 mt-3 text-center">
+        <p className="text-sm text-pink-400 mt-3 text-center">
           We typically reply within 24-48 hours.
         </p>
       </motion.div>
@@ -92,11 +92,11 @@ export default function Contact() {
         transition={{ delay: 0.2 }}
         className="bg-gradient-to-br from-pink-50 to-rose-50 border border-pink-100 rounded-3xl p-8 shadow-sm"
       >
-        <h2 className="text-xl font-extrabold text-gray-800 mb-2 flex items-center gap-2">
+        <h2 className="text-xl font-extrabold text-pink-900 mb-2 flex items-center gap-2">
           <Heart className="w-5 h-5 text-pink-500 fill-pink-500" />
           Community
         </h2>
-        <p className="text-sm text-gray-500 mb-6">
+        <p className="text-sm text-pink-600/80 mb-6">
           Join thousands of Barbie&apos;s degens — get token launches, alpha, and Barbie vibes.
         </p>
 
@@ -105,32 +105,32 @@ export default function Contact() {
             href={TELEGRAM}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-3 bg-white border border-pink-100 rounded-2xl p-4 hover:border-pink-300 hover:shadow-md transition-all group"
+            className="flex items-center gap-3 bg-white border border-pink-100 rounded-2xl p-4 hover:border-pink-300/60 hover:shadow-md transition-all group"
           >
             <div className="w-10 h-10 rounded-xl bg-[#229ED9]/10 flex items-center justify-center shrink-0">
               <MessageCircle className="w-5 h-5 text-[#229ED9]" />
             </div>
             <div>
-              <p className="font-bold text-gray-800 text-sm">Telegram</p>
-              <p className="text-xs text-gray-400">@barbiefunv2</p>
+              <p className="font-bold text-pink-900 text-sm">Telegram</p>
+              <p className="text-xs text-pink-400">@barbiefunv2</p>
             </div>
-            <ExternalLink className="w-4 h-4 text-gray-300 group-hover:text-pink-400 ml-auto transition-colors" />
+            <ExternalLink className="w-4 h-4 text-pink-300 group-hover:text-pink-400 ml-auto transition-colors" />
           </a>
 
           <a
             href={TWITTER}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-3 bg-white border border-pink-100 rounded-2xl p-4 hover:border-pink-300 hover:shadow-md transition-all group"
+            className="flex items-center gap-3 bg-white border border-pink-100 rounded-2xl p-4 hover:border-pink-300/60 hover:shadow-md transition-all group"
           >
-            <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center shrink-0">
-              <Twitter className="w-5 h-5 text-gray-800" />
+            <div className="w-10 h-10 rounded-xl bg-pink-50/50 flex items-center justify-center shrink-0">
+              <Twitter className="w-5 h-5 text-pink-900" />
             </div>
             <div>
-              <p className="font-bold text-gray-800 text-sm">X (Twitter)</p>
-              <p className="text-xs text-gray-400">@Amanchain50</p>
+              <p className="font-bold text-pink-900 text-sm">X (Twitter)</p>
+              <p className="text-xs text-pink-400">@Amanchain50</p>
             </div>
-            <ExternalLink className="w-4 h-4 text-gray-300 group-hover:text-pink-400 ml-auto transition-colors" />
+            <ExternalLink className="w-4 h-4 text-pink-300 group-hover:text-pink-400 ml-auto transition-colors" />
           </a>
         </div>
       </motion.div>
@@ -142,7 +142,7 @@ export default function Contact() {
         transition={{ delay: 0.3 }}
         className="bg-white border border-pink-100 rounded-3xl p-8 shadow-sm"
       >
-        <h2 className="text-xl font-extrabold text-gray-800 mb-6">Common Questions</h2>
+        <h2 className="text-xl font-extrabold text-pink-900 mb-6">Common Questions</h2>
         <div className="space-y-4">
           {[
             {
@@ -163,8 +163,8 @@ export default function Contact() {
             },
           ].map((item) => (
             <div key={item.q} className="border-b border-pink-50 pb-4 last:border-0 last:pb-0">
-              <p className="font-bold text-gray-800 text-sm mb-1">{item.q}</p>
-              <p className="text-sm text-gray-500">{item.a}</p>
+              <p className="font-bold text-pink-900 text-sm mb-1">{item.q}</p>
+              <p className="text-sm text-pink-600/80">{item.a}</p>
             </div>
           ))}
         </div>

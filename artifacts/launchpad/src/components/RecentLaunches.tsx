@@ -32,7 +32,7 @@ export default function RecentLaunches({ launches }: { launches: Launch[] }) {
       </div>
 
       {recent.length === 0 ? (
-        <p className="text-sm text-gray-400 text-center py-6">
+        <p className="text-sm text-pink-400 text-center py-6">
           No tokens launched yet — be the first to launch on Barbie Fun.
         </p>
       ) : (
@@ -45,16 +45,16 @@ export default function RecentLaunches({ launches }: { launches: Launch[] }) {
               <Link key={launch.id} href={`/token/${launch.id}`}>
                 <div className="flex items-center justify-between py-3 group cursor-pointer">
                   <div className="flex items-center space-x-3 min-w-0">
-                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-pink-300 to-red-300 flex items-center justify-center text-white font-black text-[10px] shrink-0">
+                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-pink-300 to-pink-400 flex items-center justify-center text-white font-black text-[10px] shrink-0">
                       {launch.ticker.slice(0, 2)}
                     </div>
                     <div className="min-w-0">
-                      <p className="font-bold text-gray-800 text-sm truncate flex items-center gap-1">
+                      <p className="font-bold text-pink-900 text-sm truncate flex items-center gap-1">
                         {launch.name}
                         {launch.verified && <BadgeCheck className="w-3.5 h-3.5 text-primary shrink-0" />}
                         <span className="text-pink-400 font-mono font-semibold">${launch.ticker}</span>
                       </p>
-                      <div className="flex items-center gap-2 text-[11px] text-gray-400">
+                      <div className="flex items-center gap-2 text-[11px] text-pink-400">
                         {chainMeta && (
                           <span className="flex items-center gap-1">
                             <ChainIcon chain={chainMeta.icon} size={12} />

@@ -22,15 +22,15 @@ export default function TokenCard({ launch }: { launch: Launch }) {
 
   return (
     <Link href={`/token/${launch.id}`}>
-      <div className="relative group cursor-pointer rounded-2xl border border-pink-100 bg-white overflow-hidden transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:border-pink-300 hover:shadow-pink-100">
+      <div className="relative group cursor-pointer rounded-2xl border border-pink-100 bg-white overflow-hidden transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:border-pink-300/60 hover:shadow-pink-100">
         <div className="p-4">
           <div className="flex items-start justify-between mb-3">
             <div className="flex items-center space-x-2.5 min-w-0">
-              <div className="w-10 h-10 rounded-full border-2 border-pink-100 shadow-sm shrink-0 bg-gradient-to-br from-pink-300 to-red-300 flex items-center justify-center text-white font-black text-xs">
+              <div className="w-10 h-10 rounded-full border-2 border-pink-100 shadow-sm shrink-0 bg-gradient-to-br from-pink-300 to-pink-400 flex items-center justify-center text-white font-black text-xs">
                 {launch.ticker.slice(0, 2)}
               </div>
               <div className="min-w-0">
-                <h3 className="font-bold text-gray-800 text-sm leading-tight truncate flex items-center gap-1">
+                <h3 className="font-bold text-pink-900 text-sm leading-tight truncate flex items-center gap-1">
                   {launch.name}
                   {launch.verified && <BadgeCheck className="w-3.5 h-3.5 text-primary shrink-0" />}
                 </h3>
@@ -40,7 +40,7 @@ export default function TokenCard({ launch }: { launch: Launch }) {
             {chainMeta && (
               <div className="flex items-center space-x-1 shrink-0 bg-pink-50 border border-pink-100 rounded-full px-2 py-1">
                 <ChainIcon chain={chainMeta.icon} size={14} />
-                <span className="text-[10px] font-bold text-gray-600">{chainMeta.symbol}</span>
+                <span className="text-[10px] font-bold text-pink-700">{chainMeta.symbol}</span>
               </div>
             )}
           </div>
@@ -48,11 +48,11 @@ export default function TokenCard({ launch }: { launch: Launch }) {
           <div className="grid grid-cols-2 gap-2 text-[11px] mb-2.5">
             <div className="bg-pink-50 rounded-lg px-2.5 py-1.5">
               <div className="text-pink-300 font-semibold mb-0.5">SUPPLY</div>
-              <div className="font-mono font-bold text-gray-700">{formatSupply(launch.totalSupply)}</div>
+              <div className="font-mono font-bold text-pink-800">{formatSupply(launch.totalSupply)}</div>
             </div>
             <div className="bg-pink-50 rounded-lg px-2.5 py-1.5">
               <div className="text-pink-300 font-semibold mb-0.5">DEPLOYER</div>
-              <div className="font-mono font-bold text-gray-700 truncate">{launch.deployer.slice(0, 6)}…{launch.deployer.slice(-4)}</div>
+              <div className="font-mono font-bold text-pink-800 truncate">{launch.deployer.slice(0, 6)}…{launch.deployer.slice(-4)}</div>
             </div>
           </div>
 

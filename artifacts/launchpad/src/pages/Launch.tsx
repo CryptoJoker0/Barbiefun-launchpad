@@ -188,10 +188,10 @@ export default function Launch() {
   if (successData) {
     return (
       <div className="max-w-2xl mx-auto py-12 animate-in slide-in-from-bottom-8 duration-500">
-        <Card className="border-pink-200 shadow-xl text-center py-12">
+        <Card className="border-pink-200/60 shadow-xl text-center py-12">
           <CardContent className="space-y-6 flex flex-col items-center">
             <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", bounce: 0.5 }}
-              className="w-24 h-24 rounded-full bg-gradient-to-br from-pink-400 to-red-400 flex items-center justify-center shadow-lg">
+              className="w-24 h-24 rounded-full bg-gradient-to-br from-pink-300 via-pink-400 to-pink-500 flex items-center justify-center shadow-lg">
               <CheckCircle2 className="w-12 h-12 text-white" />
             </motion.div>
             <div className="space-y-2">
@@ -201,10 +201,10 @@ export default function Launch() {
               </p>
             </div>
             <div className="w-full max-w-md space-y-4">
-              <div className="bg-pink-50 border border-pink-200 p-4 rounded-2xl text-left">
+              <div className="bg-pink-50 border border-pink-200/60 p-4 rounded-2xl text-left">
                 <Label className="text-pink-500 text-xs font-bold uppercase tracking-wide mb-2 block">Fee Transaction</Label>
                 <div className="flex items-center justify-between bg-white p-3 rounded-xl border border-pink-100">
-                  <span className="font-mono text-xs text-gray-600 truncate">{successData.txHash}</span>
+                  <span className="font-mono text-xs text-pink-700 truncate">{successData.txHash}</span>
                   {successData.explorerBase && (
                     <a href={`${successData.explorerBase}${successData.txHash}`} target="_blank" rel="noopener noreferrer"
                       className="ml-2 shrink-0 text-pink-500 hover:text-pink-700">
@@ -222,7 +222,7 @@ export default function Launch() {
             </div>
             <div className="flex flex-wrap gap-3 justify-center mt-2">
               <Link href="/" className="flex-1 min-w-[140px]">
-                <Button className="w-full bg-gradient-to-r from-pink-500 to-red-500 text-white font-bold rounded-full">
+                <Button className="w-full bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 text-white font-bold rounded-full">
                   Back to Home
                 </Button>
               </Link>
@@ -238,7 +238,7 @@ export default function Launch() {
     <div className="max-w-3xl mx-auto py-8 pb-20 animate-in fade-in duration-500">
       <div className="mb-8 text-center">
         <h1 className="text-4xl font-extrabold tracking-tight mb-2">
-          <span className="bg-gradient-to-r from-pink-500 to-red-400 bg-clip-text text-transparent">Launch Your Token</span>
+          <span className="bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 bg-clip-text text-transparent">Launch Your Token</span>
         </h1>
         <p className="text-pink-600 font-medium">Fair launch, locked liquidity, zero team tokens.</p>
       </div>
@@ -254,23 +254,23 @@ export default function Launch() {
 
       {/* ── EVM wallet banner ── */}
       {!isSvmMode && !isConnected && (
-        <div className="mb-6 bg-pink-50 border border-pink-200 rounded-2xl p-4 flex items-center justify-between gap-4">
+        <div className="mb-6 bg-pink-50 border border-pink-200/60 rounded-2xl p-4 flex items-center justify-between gap-4">
           <div className="flex items-center space-x-3">
             <Wallet className="w-5 h-5 text-pink-500 shrink-0" />
             <p className="text-sm font-semibold text-pink-700">Connect your EVM wallet to pay the launch fee on-chain</p>
           </div>
-          <Button onClick={() => setWalletOpen(true)} size="sm" className="bg-gradient-to-r from-pink-500 to-red-500 text-white font-bold rounded-full shrink-0">
+          <Button onClick={() => setWalletOpen(true)} size="sm" className="bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 text-white font-bold rounded-full shrink-0">
             Connect
           </Button>
         </div>
       )}
       {!isSvmMode && isConnected && (
-        <div className="mb-6 bg-green-50 border border-green-200 rounded-2xl p-4 flex items-center justify-between">
+        <div className="mb-6 bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <CheckCircle2 className="w-5 h-5 text-green-500 shrink-0" />
+            <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
             <div>
-              <p className="text-sm font-bold text-green-700">EVM wallet connected</p>
-              <p className="text-xs text-green-500 font-mono">{address?.slice(0, 12)}…{address?.slice(-6)}</p>
+              <p className="text-sm font-bold text-emerald-600">EVM wallet connected</p>
+              <p className="text-xs text-emerald-400 font-mono">{address?.slice(0, 12)}…{address?.slice(-6)}</p>
             </div>
           </div>
         </div>
@@ -314,10 +314,10 @@ export default function Launch() {
               {SUPPORTED_CHAINS.map((c) => (
                 <button key={c.id} type="button" onClick={() => selectEvmChain(c.id)}
                   className={`flex flex-col items-center justify-center gap-1.5 rounded-2xl border-2 p-3 transition-all ${
-                    selectedEvmId === c.id ? "border-pink-500 bg-pink-50 shadow-md" : "border-pink-100 hover:border-pink-300"
+                    selectedEvmId === c.id ? "border-pink-500 bg-pink-50 shadow-md" : "border-pink-100 hover:border-pink-300/60"
                   }`}>
                   <ChainIcon chain={c.icon} size={28} />
-                  <span className="text-xs font-bold text-gray-700 text-center leading-tight">{c.name}</span>
+                  <span className="text-xs font-bold text-pink-800 text-center leading-tight">{c.name}</span>
                   <span className="text-[9px] text-pink-400 font-semibold">{c.symbol}</span>
                 </button>
               ))}
@@ -361,53 +361,53 @@ export default function Launch() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <Label className="font-semibold text-gray-700 mb-1.5 block">Token Name *</Label>
-                  <Input placeholder="e.g. Barbie Coin" required value={formData.name} onChange={fd("name")} className="border-pink-200 focus:border-pink-400" />
+                  <Label className="font-semibold text-pink-800 mb-1.5 block">Token Name *</Label>
+                  <Input placeholder="e.g. Barbie Coin" required value={formData.name} onChange={fd("name")} className="border-pink-200/60 focus:border-pink-400" />
                 </div>
                 <div>
-                  <Label className="font-semibold text-gray-700 mb-1.5 block">Ticker Symbol *</Label>
+                  <Label className="font-semibold text-pink-800 mb-1.5 block">Ticker Symbol *</Label>
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-pink-400 font-bold">$</span>
                     <Input placeholder="BARBIE" required maxLength={10}
                       value={formData.ticker} onChange={(e) => setFormData({ ...formData, ticker: e.target.value.toUpperCase() })}
-                      className="pl-7 border-pink-200 focus:border-pink-400 uppercase" />
+                      className="pl-7 border-pink-200/60 focus:border-pink-400 uppercase" />
                   </div>
                 </div>
                 <div>
-                  <Label className="font-semibold text-gray-700 mb-1.5 block">Total Supply</Label>
-                  <Input type="number" value={formData.supply} onChange={fd("supply")} className="border-pink-200 focus:border-pink-400" />
+                  <Label className="font-semibold text-pink-800 mb-1.5 block">Total Supply</Label>
+                  <Input type="number" value={formData.supply} onChange={fd("supply")} className="border-pink-200/60 focus:border-pink-400" />
                   <p className="text-xs text-pink-400 mt-1">All supply minted to your wallet on deploy</p>
                 </div>
                 {/* SVM-specific fields */}
                 {isSvmMode && (
                   <>
                     <div>
-                      <Label className="font-semibold text-gray-700 mb-1.5 block">Decimals</Label>
-                      <Input type="number" min="0" max="9" value={formData.decimals} onChange={fd("decimals")} className="border-pink-200 focus:border-pink-400" />
+                      <Label className="font-semibold text-pink-800 mb-1.5 block">Decimals</Label>
+                      <Input type="number" min="0" max="9" value={formData.decimals} onChange={fd("decimals")} className="border-pink-200/60 focus:border-pink-400" />
                       <p className="text-xs text-pink-400 mt-1">Standard SPL token uses 9 decimals</p>
                     </div>
                     <div className="space-y-2">
-                      <Label className="font-semibold text-gray-700 block">Authority Settings</Label>
+                      <Label className="font-semibold text-pink-800 block">Authority Settings</Label>
                       <div className="flex items-center gap-3">
                         <label className="flex items-center gap-2 cursor-pointer">
                           <input type="checkbox" checked={formData.mintAuthority}
                             onChange={(e) => setFormData({ ...formData, mintAuthority: e.target.checked })}
-                            className="rounded border-pink-300 text-pink-500" />
-                          <span className="text-sm font-medium text-gray-700">Mint authority</span>
+                            className="rounded border-pink-300/60 text-pink-500" />
+                          <span className="text-sm font-medium text-pink-800">Mint authority</span>
                         </label>
                         <label className="flex items-center gap-2 cursor-pointer">
                           <input type="checkbox" checked={formData.freezeAuthority}
                             onChange={(e) => setFormData({ ...formData, freezeAuthority: e.target.checked })}
-                            className="rounded border-pink-300 text-pink-500" />
-                          <span className="text-sm font-medium text-gray-700">Freeze authority</span>
+                            className="rounded border-pink-300/60 text-pink-500" />
+                          <span className="text-sm font-medium text-pink-800">Freeze authority</span>
                         </label>
                       </div>
                     </div>
                   </>
                 )}
                 <div>
-                  <Label className="font-semibold text-gray-700 mb-1.5 block">Description</Label>
-                  <Textarea placeholder="Tell the community about your token…" value={formData.description} onChange={fd("description")} className="border-pink-200 focus:border-pink-400 resize-none" rows={3} />
+                  <Label className="font-semibold text-pink-800 mb-1.5 block">Description</Label>
+                  <Textarea placeholder="Tell the community about your token…" value={formData.description} onChange={fd("description")} className="border-pink-200/60 focus:border-pink-400 resize-none" rows={3} />
                 </div>
               </CardContent>
             </Card>
@@ -420,7 +420,7 @@ export default function Launch() {
                   <CardDescription>Upload a square image (PNG/SVG, max 2MB)</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <label className="flex flex-col items-center justify-center w-full h-36 border-2 border-dashed border-pink-300 rounded-2xl cursor-pointer hover:bg-pink-50 transition-colors">
+                  <label className="flex flex-col items-center justify-center w-full h-36 border-2 border-dashed border-pink-300/60 rounded-2xl cursor-pointer hover:bg-pink-50 transition-colors">
                     <Upload className="w-8 h-8 text-pink-400 mb-2" />
                     <span className="text-sm font-semibold text-pink-500">Click to upload</span>
                     <input type="file" className="hidden" accept="image/*" />
@@ -433,16 +433,16 @@ export default function Launch() {
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div>
-                    <Label className="font-semibold text-gray-700 mb-1.5 block">Website</Label>
-                    <Input placeholder="https://yourtoken.com" value={formData.website} onChange={fd("website")} className="border-pink-200 focus:border-pink-400" />
+                    <Label className="font-semibold text-pink-800 mb-1.5 block">Website</Label>
+                    <Input placeholder="https://yourtoken.com" value={formData.website} onChange={fd("website")} className="border-pink-200/60 focus:border-pink-400" />
                   </div>
                   <div>
-                    <Label className="font-semibold text-gray-700 mb-1.5 block">Twitter / X</Label>
-                    <Input placeholder="https://x.com/yourtoken" value={formData.twitter} onChange={fd("twitter")} className="border-pink-200 focus:border-pink-400" />
+                    <Label className="font-semibold text-pink-800 mb-1.5 block">Twitter / X</Label>
+                    <Input placeholder="https://x.com/yourtoken" value={formData.twitter} onChange={fd("twitter")} className="border-pink-200/60 focus:border-pink-400" />
                   </div>
                   <div>
-                    <Label className="font-semibold text-gray-700 mb-1.5 block">Telegram</Label>
-                    <Input placeholder="https://t.me/yourtoken" value={formData.telegram} onChange={fd("telegram")} className="border-pink-200 focus:border-pink-400" />
+                    <Label className="font-semibold text-pink-800 mb-1.5 block">Telegram</Label>
+                    <Input placeholder="https://t.me/yourtoken" value={formData.telegram} onChange={fd("telegram")} className="border-pink-200/60 focus:border-pink-400" />
                   </div>
                 </CardContent>
               </Card>
@@ -452,12 +452,12 @@ export default function Launch() {
           {/* ── EVM fee + submit ── */}
           {selectedEvmChain && (
             <form onSubmit={handleEvmSubmit} className="space-y-6">
-              <div className="bg-white border-2 border-pink-200 rounded-2xl p-5 flex items-center justify-between flex-wrap gap-3">
+              <div className="bg-white border-2 border-pink-200/60 rounded-2xl p-5 flex items-center justify-between flex-wrap gap-3">
                 <div className="flex items-center space-x-3">
                   <ChainIcon chain={selectedEvmChain.icon} size={32} />
                   <div>
                     <p className="text-xs uppercase tracking-wide font-bold text-pink-400">3. Launch Fee</p>
-                    <p className="text-2xl font-extrabold text-gray-800">
+                    <p className="text-2xl font-extrabold text-pink-900">
                       ${LAUNCH_FEE_USD.toFixed(2)}
                       <span className="text-base font-semibold text-pink-500 ml-2">
                         ≈ {evmFee.loading ? "…" : `${formatNativeAmount(evmFee.native)} ${selectedEvmChain.symbol}`}
@@ -465,11 +465,11 @@ export default function Launch() {
                     </p>
                   </div>
                 </div>
-                <span className={`text-xs font-bold px-3 py-1 rounded-full ${evmFee.isLive ? "bg-green-50 text-green-600 border border-green-200" : "bg-gray-50 text-gray-500 border border-gray-200"}`}>
+                <span className={`text-xs font-bold px-3 py-1 rounded-full ${evmFee.isLive ? "bg-emerald-50 text-emerald-500 border border-emerald-200" : "bg-pink-50/50 text-pink-600/80 border border-pink-200/60"}`}>
                   {evmFee.isLive ? "● Live price" : "Est. price"}
                 </span>
               </div>
-              <div className="bg-pink-50 border border-pink-200 rounded-2xl p-5 flex items-start space-x-3">
+              <div className="bg-pink-50 border border-pink-200/60 rounded-2xl p-5 flex items-start space-x-3">
                 <AlertCircle className="w-5 h-5 text-pink-500 mt-0.5 shrink-0" />
                 <p className="text-sm text-pink-700">
                   <strong className="block mb-1">Fair Launch — All launches on Barbie Fun are fair.</strong>
@@ -477,7 +477,7 @@ export default function Launch() {
                 </p>
               </div>
               <Button type="submit" size="lg" disabled={isSending || !treasuryEvm}
-                className="w-full bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 text-white font-extrabold text-lg h-14 rounded-full shadow-lg hover:shadow-pink-300/60 disabled:opacity-50">
+                className="w-full bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 hover:from-pink-500 hover:via-pink-600 hover:to-pink-700 text-white font-extrabold text-lg h-14 rounded-full shadow-lg hover:shadow-pink-300/60 disabled:opacity-50">
                 {isSending ? (
                   <span className="flex items-center space-x-2">
                     <span className="w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
@@ -505,7 +505,7 @@ export default function Launch() {
                   <ChainIcon chain={selectedSvmChain.icon} size={32} />
                   <div>
                     <p className="text-xs uppercase tracking-wide font-bold text-purple-400">3. Launch Fee</p>
-                    <p className="text-2xl font-extrabold text-gray-800">
+                    <p className="text-2xl font-extrabold text-pink-900">
                       ${LAUNCH_FEE_USD.toFixed(2)} USD
                       <span className="text-sm font-semibold text-purple-500 ml-2">
                         in {selectedSvmChain.symbol}
@@ -520,7 +520,7 @@ export default function Launch() {
                       <span className="font-mono text-xs text-purple-800 truncate flex-1">{SOL_TREASURY}</span>
                       <button type="button" onClick={() => { navigator.clipboard.writeText(SOL_TREASURY!); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
                         className="shrink-0 text-purple-400 hover:text-purple-600 transition-colors">
-                        {copied ? <CheckCircle2 className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5" />}
+                        {copied ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
                       </button>
                     </div>
                     <p className="text-xs text-purple-400 mt-1">
@@ -539,7 +539,7 @@ export default function Launch() {
 
               {/* Transaction signature */}
               <div className="space-y-2">
-                <Label htmlFor="svm-sig" className="font-semibold text-gray-700">
+                <Label htmlFor="svm-sig" className="font-semibold text-pink-800">
                   Transaction Signature *
                 </Label>
                 <Input
@@ -550,7 +550,7 @@ export default function Launch() {
                   className="font-mono border-purple-200 focus:border-purple-400"
                 />
                 {svmTxSig && !isValidSvmSig(svmTxSig) && (
-                  <p className="text-xs text-red-500 flex items-center gap-1">
+                  <p className="text-xs text-rose-500 flex items-center gap-1">
                     <AlertCircle className="w-3.5 h-3.5" />
                     Invalid signature — paste the full base58 transaction signature.
                   </p>

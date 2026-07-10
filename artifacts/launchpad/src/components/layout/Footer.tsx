@@ -23,12 +23,12 @@ export default function Footer() {
           {/* Brand */}
           <div className="space-y-3 col-span-1 sm:col-span-2 md:col-span-1">
             <div className="flex items-center gap-2">
-              <img src="/logo.png" alt="Barbie Fun" className="w-8 h-8 rounded-full object-cover border border-pink-300" />
-              <span className="font-extrabold text-lg bg-gradient-to-r from-pink-500 to-red-400 bg-clip-text text-transparent">
+              <img src="/logo.png" alt="Barbie Fun" className="w-8 h-8 rounded-full object-cover border border-pink-300/60" />
+              <span className="font-extrabold text-lg bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 bg-clip-text text-transparent">
                 Barbie Fun
               </span>
             </div>
-            <p className="text-xs text-gray-400 leading-relaxed max-w-xs">
+            <p className="text-xs text-pink-400 leading-relaxed max-w-xs">
               Fair-launch token protocol across 6 EVM chains + 2 SVM chains.
               Own by nobody — zero team, only Barbie's.
             </p>
@@ -39,14 +39,14 @@ export default function Footer() {
               </a>
               <a href={TWITTER} target="_blank" rel="noopener noreferrer"
                 className="w-8 h-8 rounded-full bg-pink-50 border border-pink-100 hover:bg-pink-100 flex items-center justify-center transition-colors">
-                <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 fill-current text-gray-800"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.261 5.636 5.903-5.636zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 fill-current text-pink-900"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.261 5.636 5.903-5.636zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
               </a>
             </div>
           </div>
 
           {/* Platform */}
           <div>
-            <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">Platform</p>
+            <p className="text-xs font-bold text-pink-600/80 uppercase tracking-widest mb-4">Platform</p>
             <ul className="space-y-2">
               {[
                 { label: "Home", href: "/" },
@@ -57,7 +57,7 @@ export default function Footer() {
                 { label: "Get Verified", href: "/verify" },
               ].map(({ label, href }) => (
                 <li key={href}>
-                  <Link href={href} className="text-sm text-gray-500 hover:text-pink-500 font-medium transition-colors">
+                  <Link href={href} className="text-sm text-pink-600/80 hover:text-pink-500 font-medium transition-colors">
                     {label}
                   </Link>
                 </li>
@@ -67,7 +67,7 @@ export default function Footer() {
 
           {/* Resources */}
           <div>
-            <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">Resources</p>
+            <p className="text-xs font-bold text-pink-600/80 uppercase tracking-widest mb-4">Resources</p>
             <ul className="space-y-2">
               {[
                 { label: "Whitepaper", href: `${import.meta.env.BASE_URL}barbiefun-whitepaper.pdf`, external: true },
@@ -79,11 +79,11 @@ export default function Footer() {
                 <li key={href}>
                   {external ? (
                     <a href={href} target="_blank" rel="noopener noreferrer"
-                      className="text-sm text-gray-500 hover:text-pink-500 font-medium transition-colors flex items-center gap-1">
+                      className="text-sm text-pink-600/80 hover:text-pink-500 font-medium transition-colors flex items-center gap-1">
                       {label} <ExternalLink className="w-3 h-3" />
                     </a>
                   ) : (
-                    <Link href={href} className="text-sm text-gray-500 hover:text-pink-500 font-medium transition-colors">
+                    <Link href={href} className="text-sm text-pink-600/80 hover:text-pink-500 font-medium transition-colors">
                       {label}
                     </Link>
                   )}
@@ -94,10 +94,10 @@ export default function Footer() {
 
           {/* Contact */}
           <div>
-            <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">Contact</p>
+            <p className="text-xs font-bold text-pink-600/80 uppercase tracking-widest mb-4">Contact</p>
             <div className="space-y-3">
-              <p className="text-xs text-gray-400">Official email</p>
-              <div className="flex items-center gap-2 bg-pink-50 border border-pink-200 rounded-xl px-3 py-2.5">
+              <p className="text-xs text-pink-400">Official email</p>
+              <div className="flex items-center gap-2 bg-pink-50 border border-pink-200/60 rounded-xl px-3 py-2.5">
                 <Mail className="w-3.5 h-3.5 text-pink-400 shrink-0" />
                 <a href={`mailto:${EMAIL}`} className="text-xs font-mono text-pink-600 hover:text-pink-700 truncate flex-1 font-semibold">
                   {EMAIL}
@@ -105,17 +105,17 @@ export default function Footer() {
                 <button onClick={copyEmail} title="Copy email"
                   className="shrink-0 text-pink-400 hover:text-pink-600 transition-colors">
                   {copied
-                    ? <CheckCircle2 className="w-3.5 h-3.5 text-green-500" />
+                    ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
                     : <Copy className="w-3.5 h-3.5" />
                   }
                 </button>
               </div>
-              <p className="text-xs text-gray-400">Replies within 24-48 hours.</p>
+              <p className="text-xs text-pink-400">Replies within 24-48 hours.</p>
             </div>
           </div>
         </div>
 
-        <div className="border-t border-pink-100 mt-8 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-400">
+        <div className="border-t border-pink-100 mt-8 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-pink-400">
           <p>© {new Date().getFullYear()} Barbie Fun. Zero team, only Barbie&apos;s.</p>
           <p className="flex items-center gap-1">
             Made with <Heart className="w-3 h-3 text-pink-400 fill-pink-400" /> for the community

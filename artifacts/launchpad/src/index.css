@@ -100,45 +100,45 @@
   --elevate-1: rgba(236,72,153,0.04);
   --elevate-2: rgba(236,72,153,0.08);
 
-  --background: 330 60% 97%;
-  --foreground: 330 25% 15%;
+  --background: 330 100% 98%;
+  --foreground: 330 40% 15%;
 
-  --border: 330 50% 88%;
+  --border: 330 70% 92%;
 
   --card: 0 0% 100%;
-  --card-foreground: 330 25% 15%;
-  --card-border: 330 50% 88%;
+  --card-foreground: 330 40% 15%;
+  --card-border: 330 70% 92%;
 
   --sidebar: 0 0% 100%;
-  --sidebar-foreground: 330 25% 15%;
-  --sidebar-border: 330 50% 88%;
-  --sidebar-primary: 330 86% 60%;
+  --sidebar-foreground: 330 40% 15%;
+  --sidebar-border: 330 70% 92%;
+  --sidebar-primary: 330 85% 60%;
   --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 330 60% 94%;
-  --sidebar-accent-foreground: 330 25% 15%;
-  --sidebar-ring: 330 86% 60%;
+  --sidebar-accent: 330 100% 95%;
+  --sidebar-accent-foreground: 330 40% 15%;
+  --sidebar-ring: 330 85% 60%;
 
   --popover: 0 0% 100%;
-  --popover-foreground: 330 25% 15%;
-  --popover-border: 330 50% 88%;
+  --popover-foreground: 330 40% 15%;
+  --popover-border: 330 70% 92%;
 
-  --primary: 330 86% 60%;
+  --primary: 330 85% 60%;
   --primary-foreground: 0 0% 100%;
 
-  --secondary: 330 60% 94%;
-  --secondary-foreground: 330 25% 15%;
+  --secondary: 330 100% 95%;
+  --secondary-foreground: 330 40% 15%;
 
-  --muted: 330 40% 95%;
-  --muted-foreground: 330 20% 50%;
+  --muted: 330 80% 96%;
+  --muted-foreground: 330 30% 45%;
 
-  --accent: 330 86% 60%;
-  --accent-foreground: 0 0% 100%;
+  --accent: 330 100% 94%;
+  --accent-foreground: 330 40% 15%;
 
-  --destructive: 0 84% 55%;
+  --destructive: 340 85% 60%;
   --destructive-foreground: 0 0% 100%;
 
-  --input: 330 50% 88%;
-  --ring: 330 86% 60%;
+  --input: 330 70% 92%;
+  --ring: 330 85% 60%;
 
   --chart-1: 330 86% 60%;
   --chart-2: 0 84% 55%;
@@ -150,14 +150,14 @@
   --app-font-serif: Georgia, serif;
   --app-font-mono: 'Space Mono', 'Menlo', monospace;
   --radius: .75rem;
-  --shadow-2xs: 0px 1px 3px 0px rgba(236,72,153,0.08);
-  --shadow-xs: 0px 2px 4px 0px rgba(236,72,153,0.10);
-  --shadow-sm: 0px 2px 8px 0px rgba(236,72,153,0.12), 0px 1px 2px -1px rgba(236,72,153,0.08);
-  --shadow: 0px 4px 12px 0px rgba(236,72,153,0.15), 0px 1px 2px -1px rgba(236,72,153,0.10);
-  --shadow-md: 0px 6px 18px 0px rgba(236,72,153,0.15), 0px 2px 4px -1px rgba(236,72,153,0.10);
-  --shadow-lg: 0px 10px 28px 0px rgba(236,72,153,0.18), 0px 4px 6px -1px rgba(236,72,153,0.12);
-  --shadow-xl: 0px 16px 40px 0px rgba(236,72,153,0.20), 0px 8px 10px -1px rgba(236,72,153,0.14);
-  --shadow-2xl: 0px 24px 60px 0px rgba(236,72,153,0.25);
+  --shadow-2xs: 0px 1px 3px 0px rgba(244,114,182,0.15);
+  --shadow-xs: 0px 2px 4px 0px rgba(244,114,182,0.20);
+  --shadow-sm: 0px 2px 8px 0px rgba(244,114,182,0.25), 0px 1px 2px -1px rgba(244,114,182,0.15);
+  --shadow: 0px 4px 12px 0px rgba(244,114,182,0.30), 0px 1px 2px -1px rgba(244,114,182,0.20);
+  --shadow-md: 0px 6px 18px 0px rgba(244,114,182,0.35), 0px 2px 4px -1px rgba(244,114,182,0.25);
+  --shadow-lg: 0px 10px 28px 0px rgba(244,114,182,0.40), 0px 4px 6px -1px rgba(244,114,182,0.30);
+  --shadow-xl: 0px 16px 40px 0px rgba(244,114,182,0.45), 0px 8px 10px -1px rgba(244,114,182,0.35);
+  --shadow-2xl: 0px 24px 60px 0px rgba(244,114,182,0.50);
   --tracking-normal: 0em;
   --spacing: 0.25rem;
 
@@ -197,7 +197,7 @@
   }
 
   .wallet-btn {
-    background: linear-gradient(135deg, #ec4899, #ef4444, #ffffff, #ec4899);
+    background: linear-gradient(135deg, #ec4899, #f43f5e, #ffffff, #ec4899);
     background-size: 300% 300%;
     animation: wallet-shimmer 3s ease infinite;
     color: #be185d;

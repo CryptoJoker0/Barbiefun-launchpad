@@ -80,20 +80,20 @@ export default function LiveTerminal() {
       <div className="flex items-center justify-between px-4 py-2.5 bg-gradient-to-r from-pink-500/10 to-transparent border-b border-pink-100">
         <div className="flex items-center space-x-2">
           <div className="flex space-x-1">
-            <span className="w-2.5 h-2.5 rounded-full bg-red-400" />
+            <span className="w-2.5 h-2.5 rounded-full bg-rose-400" />
             <span className="w-2.5 h-2.5 rounded-full bg-yellow-400" />
-            <span className="w-2.5 h-2.5 rounded-full bg-green-400" />
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
           </div>
           <span className="text-[11px] font-bold text-pink-500 uppercase tracking-widest ml-1">
             Live Terminal
           </span>
         </div>
         <div className="flex items-center space-x-1.5">
-          <div className={`w-1.5 h-1.5 rounded-full ${isLoading ? "bg-yellow-400" : items.length ? "bg-green-400" : "bg-gray-300"} animate-pulse`} />
+          <div className={`w-1.5 h-1.5 rounded-full ${isLoading ? "bg-yellow-400" : items.length ? "bg-emerald-400" : "bg-gray-300"} animate-pulse`} />
           <span className="text-[10px] text-pink-400 font-semibold">
             {items.length ? "DexScreener LIVE" : isLoading ? "Connecting…" : "No live data"}
           </span>
-          {items.length ? <Wifi className="w-3 h-3 text-green-500" /> : <WifiOff className="w-3 h-3 text-gray-300" />}
+          {items.length ? <Wifi className="w-3 h-3 text-emerald-400" /> : <WifiOff className="w-3 h-3 text-pink-300" />}
         </div>
       </div>
 
@@ -125,20 +125,20 @@ export default function LiveTerminal() {
                   className={`w-full grid grid-cols-5 text-xs font-mono py-2 px-2 hover:bg-pink-50/60 transition-colors text-left ${isSelected ? "bg-pink-50/80 border-l-2 border-pink-400" : ""}`}
                 >
                   <div className="col-span-2 flex items-center space-x-2 min-w-0">
-                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-pink-200 to-red-200 shrink-0 flex items-center justify-center text-[9px] font-black text-pink-600">
+                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-pink-200 to-pink-300 shrink-0 flex items-center justify-center text-[9px] font-black text-pink-600">
                       {item.ticker.slice(0, 2)}
                     </div>
                     <div className="min-w-0">
-                      <div className="font-bold text-gray-800 truncate text-[11px]">{item.ticker}</div>
-                      <div className="text-[9px] text-green-500 font-bold">LIVE</div>
+                      <div className="font-bold text-pink-900 truncate text-[11px]">{item.ticker}</div>
+                      <div className="text-[9px] text-emerald-400 font-bold">LIVE</div>
                     </div>
                   </div>
                   <div className="px-1 py-0 flex items-center justify-end">
-                    <span className="text-gray-700 font-semibold text-[10px]">
+                    <span className="text-pink-800 font-semibold text-[10px]">
                       {livePrice < 0.001 ? livePrice.toExponential(2) : livePrice < 1 ? `$${livePrice.toFixed(6)}` : `$${livePrice.toFixed(4)}`}
                     </span>
                   </div>
-                  <div className={`flex items-center justify-end px-1 text-[10px] font-bold ${up ? "text-green-500" : "text-red-500"}`}>
+                  <div className={`flex items-center justify-end px-1 text-[10px] font-bold ${up ? "text-emerald-400" : "text-rose-500"}`}>
                     {up ? "▲" : "▼"} {Math.abs(item.change ?? 0).toFixed(1)}%
                   </div>
                   <div className="px-1">
@@ -146,12 +146,12 @@ export default function LiveTerminal() {
                       <AreaChart data={item.sparkline}>
                         <defs>
                           <linearGradient id={`sg-${item.id}`} x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor={up ? "#22c55e" : "#ef4444"} stopOpacity={0.3} />
-                            <stop offset="95%" stopColor={up ? "#22c55e" : "#ef4444"} stopOpacity={0} />
+                            <stop offset="5%" stopColor={up ? "#22c55e" : "#f43f5e"} stopOpacity={0.3} />
+                            <stop offset="95%" stopColor={up ? "#22c55e" : "#f43f5e"} stopOpacity={0} />
                           </linearGradient>
                         </defs>
                         <YAxis domain={["dataMin", "dataMax"]} hide />
-                        <Area type="monotone" dataKey="v" stroke={up ? "#22c55e" : "#ef4444"}
+                        <Area type="monotone" dataKey="v" stroke={up ? "#22c55e" : "#f43f5e"}
                           strokeWidth={1.5} fill={`url(#sg-${item.id})`} dot={false} />
                       </AreaChart>
                     </ResponsiveContainer>
@@ -166,11 +166,11 @@ export default function LiveTerminal() {
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center space-x-2">
                   <Zap className="w-3.5 h-3.5 text-pink-500" />
-                  <span className="font-bold text-sm text-gray-800">${selected.ticker}</span>
-                  <span className="text-xs text-gray-400">{selected.name}</span>
-                  <span className="text-[9px] bg-green-50 text-green-600 border border-green-200 px-1.5 py-0.5 rounded-full font-bold">LIVE</span>
+                  <span className="font-bold text-sm text-pink-900">${selected.ticker}</span>
+                  <span className="text-xs text-pink-400">{selected.name}</span>
+                  <span className="text-[9px] bg-emerald-50 text-emerald-500 border border-emerald-200 px-1.5 py-0.5 rounded-full font-bold">LIVE</span>
                 </div>
-                <div className={`text-xs font-bold ${isPositive ? "text-green-500" : "text-red-500"}`}>
+                <div className={`text-xs font-bold ${isPositive ? "text-emerald-400" : "text-rose-500"}`}>
                   {isPositive ? <TrendingUp className="w-3.5 h-3.5 inline mr-0.5" /> : <TrendingDown className="w-3.5 h-3.5 inline mr-0.5" />}
                   {formatPercent(selected.change ?? 0)}
                 </div>
@@ -178,17 +178,17 @@ export default function LiveTerminal() {
               <div className="grid grid-cols-3 gap-2 text-[10px]">
                 <div>
                   <div className="text-pink-400 font-semibold">PRICE</div>
-                  <div className="font-mono font-bold text-gray-800">
+                  <div className="font-mono font-bold text-pink-900">
                     {selected.price < 0.001 ? `$${selected.price.toExponential(3)}` : formatCurrency(getPrice(selected))}
                   </div>
                 </div>
                 <div>
                   <div className="text-pink-400 font-semibold">VOLUME 24H</div>
-                  <div className="font-mono font-bold text-gray-800">{formatCurrency(selected.volume)}</div>
+                  <div className="font-mono font-bold text-pink-900">{formatCurrency(selected.volume)}</div>
                 </div>
                 <div>
                   <div className="text-pink-400 font-semibold">CHAIN</div>
-                  <div className="font-mono font-bold text-gray-800">BSC</div>
+                  <div className="font-mono font-bold text-pink-900">BSC</div>
                 </div>
               </div>
               {selected.pairUrl && (

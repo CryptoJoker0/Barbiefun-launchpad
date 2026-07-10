@@ -160,10 +160,10 @@ export default function Verify() {
                 {successData.tier === "fast" ? "within a few hours" : "within 24-48 hours"}.
               </p>
             </div>
-            <div className="w-full bg-pink-50 border border-pink-200 p-4 rounded-2xl text-left">
+            <div className="w-full bg-pink-50 border border-pink-200/60 p-4 rounded-2xl text-left">
               <Label className="text-pink-500 text-xs font-bold uppercase tracking-wide mb-2 block">Fee Transaction Hash</Label>
               <div className="flex items-center justify-between bg-white p-3 rounded-xl border border-pink-100">
-                <span className="font-mono text-xs text-gray-600 truncate">{successData.txHash}</span>
+                <span className="font-mono text-xs text-pink-700 truncate">{successData.txHash}</span>
                 {successData.explorer && (
                   <a href={`${successData.explorer}${successData.txHash}`} target="_blank" rel="noopener noreferrer"
                     className="ml-2 shrink-0 text-pink-500 hover:text-pink-700">
@@ -224,12 +224,12 @@ export default function Verify() {
 
       {/* EVM wallet banner */}
       {isEvmSelected && !isConnected && (
-        <div className="mb-6 bg-pink-50 border border-pink-200 rounded-2xl p-4 flex items-center justify-between gap-4">
+        <div className="mb-6 bg-pink-50 border border-pink-200/60 rounded-2xl p-4 flex items-center justify-between gap-4">
           <div className="flex items-center space-x-3">
             <Wallet className="w-5 h-5 text-pink-500 shrink-0" />
             <p className="text-sm font-semibold text-pink-700">Connect your EVM wallet to pay the verification fee on-chain</p>
           </div>
-          <Button onClick={() => setWalletOpen(true)} size="sm" className="bg-gradient-to-r from-pink-500 to-red-500 text-white font-bold rounded-full shrink-0">
+          <Button onClick={() => setWalletOpen(true)} size="sm" className="bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 text-white font-bold rounded-full shrink-0">
             Connect
           </Button>
         </div>
@@ -256,7 +256,7 @@ export default function Verify() {
                         { id: "fast" as const, label: "Fast-Track", price: VERIFICATION_FEE_FAST_USD, desc: "Jumps the queue, reviewed within hours" },
                       ].map((t) => (
                         <button key={t.id} type="button" onClick={() => setTier(t.id)}
-                          className={`text-left rounded-2xl border-2 p-4 transition-all ${tier === t.id ? "border-pink-500 bg-pink-50 shadow-md" : "border-border hover:border-pink-300"}`}>
+                          className={`text-left rounded-2xl border-2 p-4 transition-all ${tier === t.id ? "border-pink-500 bg-pink-50 shadow-md" : "border-border hover:border-pink-300/60"}`}>
                           <div className="flex items-center justify-between mb-1">
                             <span className="font-bold text-sm flex items-center gap-1">
                               {t.id === "fast" && <Zap className="w-3.5 h-3.5 text-amber-500" />}{t.label}
@@ -278,10 +278,10 @@ export default function Verify() {
                         {SUPPORTED_CHAINS.map((c) => (
                           <button key={c.id} type="button" onClick={() => handleEvmChainSelect(c.id)}
                             className={`flex flex-col items-center justify-center gap-1.5 rounded-2xl border-2 p-3 transition-all ${
-                              selectedEvmId === c.id ? "border-pink-500 bg-pink-50 shadow-md" : "border-border hover:border-pink-300"
+                              selectedEvmId === c.id ? "border-pink-500 bg-pink-50 shadow-md" : "border-border hover:border-pink-300/60"
                             }`}>
                             <ChainIcon chain={c.icon} size={24} />
-                            <span className="text-xs font-bold text-gray-700 text-center leading-tight">{c.name}</span>
+                            <span className="text-xs font-bold text-pink-800 text-center leading-tight">{c.name}</span>
                           </button>
                         ))}
                       </div>
@@ -303,12 +303,12 @@ export default function Verify() {
                       </p>
                     )}
                     {selectedEvmChain && (
-                      <div className="bg-white border-2 border-pink-200 rounded-2xl p-4 flex items-center justify-between flex-wrap gap-3">
+                      <div className="bg-white border-2 border-pink-200/60 rounded-2xl p-4 flex items-center justify-between flex-wrap gap-3">
                         <div className="flex items-center space-x-3">
                           <ChainIcon chain={selectedEvmChain.icon} size={28} />
                           <div>
                             <p className="text-xs uppercase tracking-wide font-bold text-pink-400">Verification Fee</p>
-                            <p className="text-xl font-extrabold text-gray-800">
+                            <p className="text-xl font-extrabold text-pink-900">
                               ${feeUsd.toFixed(2)}
                               <span className="text-sm font-semibold text-pink-500 ml-2">
                                 ≈ {evmFee.loading ? "…" : `${formatNativeAmount(evmFee.native)} ${selectedEvmChain.symbol}`}
@@ -316,7 +316,7 @@ export default function Verify() {
                             </p>
                           </div>
                         </div>
-                        <span className={`text-xs font-bold px-3 py-1 rounded-full ${evmFee.isLive ? "bg-green-50 text-green-600 border border-green-200" : "bg-gray-50 text-gray-500 border border-gray-200"}`}>
+                        <span className={`text-xs font-bold px-3 py-1 rounded-full ${evmFee.isLive ? "bg-emerald-50 text-emerald-500 border border-emerald-200" : "bg-pink-50/50 text-pink-600/80 border border-pink-200/60"}`}>
                           {evmFee.isLive ? "● Live price" : "Est. price"}
                         </span>
                       </div>
@@ -376,7 +376,7 @@ export default function Verify() {
                 <CardFooter className="bg-muted/10 border-t border-border mt-6 pt-6">
                   <Button type="submit" size="lg"
                     disabled={isSending || !selectedEvmChain || !treasuryConfigured}
-                    className="w-full bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 text-white font-extrabold text-base h-12 rounded-full shadow-md disabled:opacity-50">
+                    className="w-full bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 hover:from-pink-500 hover:via-pink-600 hover:to-pink-700 text-white font-extrabold text-base h-12 rounded-full shadow-md disabled:opacity-50">
                     {isSending ? (
                       <span className="flex items-center justify-center space-x-2">
                         <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
@@ -480,7 +480,7 @@ export default function Verify() {
                               <span className="font-mono text-xs text-purple-800 truncate flex-1">{SOL_TREASURY}</span>
                               <button type="button" onClick={() => { navigator.clipboard.writeText(SOL_TREASURY!); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
                                 className="shrink-0 text-purple-400 hover:text-purple-600">
-                                {copied ? <CheckCircle2 className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5" />}
+                                {copied ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
                               </button>
                             </div>
                             <p className="text-xs text-purple-400 mt-1">
@@ -511,7 +511,7 @@ export default function Verify() {
                           required
                         />
                         {svmTxSig && !isValidSvmSig(svmTxSig) && (
-                          <p className="text-xs text-red-500 flex items-center gap-1">
+                          <p className="text-xs text-rose-500 flex items-center gap-1">
                             <AlertCircle className="w-3.5 h-3.5" />
                             Invalid signature format — paste the full base58 transaction signature.
                           </p>
@@ -626,7 +626,7 @@ export default function Verify() {
           {/* Chain explorers quick-link */}
           <Card className="border-border/50 rounded-3xl">
             <CardHeader>
-              <CardTitle className="text-sm font-bold text-gray-600">Chain Explorers</CardTitle>
+              <CardTitle className="text-sm font-bold text-pink-700">Chain Explorers</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
               {[
@@ -637,7 +637,7 @@ export default function Verify() {
                 { name: "OKX Explorer", url: "https://www.okx.com/explorer/xlayer", icon: "xlayer" },
               ].map((ex) => (
                 <a key={ex.name} href={ex.url} target="_blank" rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-xs text-gray-500 hover:text-pink-500 font-medium transition-colors">
+                  className="flex items-center gap-2 text-xs text-pink-600/80 hover:text-pink-500 font-medium transition-colors">
                   <ChainIcon chain={ex.icon} size={14} />
                   {ex.name}
                   <ExternalLink className="w-3 h-3 ml-auto" />
@@ -675,7 +675,7 @@ export default function Verify() {
                     <div key={launch.id}
                       className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl border border-border bg-muted/10">
                       <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-pink-300 to-red-300 flex items-center justify-center text-white font-black text-[10px] shrink-0">
+                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-pink-300 to-pink-400 flex items-center justify-center text-white font-black text-[10px] shrink-0">
                           {launch.ticker.slice(0, 2)}
                         </div>
                         <div className="min-w-0">
@@ -694,7 +694,7 @@ export default function Verify() {
                         </div>
                       </div>
                       <Button size="sm" variant={launch.verified ? "outline" : "default"}
-                        className={launch.verified ? "rounded-full border-red-200 text-red-500 hover:bg-red-50" : "rounded-full bg-primary text-primary-foreground"}
+                        className={launch.verified ? "rounded-full border-rose-200 text-rose-500 hover:bg-rose-50" : "rounded-full bg-primary text-primary-foreground"}
                         onClick={() => toggleVerified(launch.id, !launch.verified)}>
                         {launch.verified ? "Revoke" : "Approve"}
                       </Button>
