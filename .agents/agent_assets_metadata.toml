@@ -6,3 +6,9 @@ id = "fqs82U_Nn8xOdYE12MTrR"
 uri = "file://barbie-fun-demo.tar.gz"
 type = "unspecified"
 title = "Barbie Fun — Demo Source (tar.gz)"
+
+[[outputs]]
+id = "jt-GRWcobb7hd9ulIzrjY"
+uri = "file://artifacts/marketing-video/public/audio/bg_music.mp3"
+type = "audio"
+title = "background music"
