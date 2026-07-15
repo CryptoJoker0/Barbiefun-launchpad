@@ -1,8 +1,3 @@
-/**
- * Admin Dashboard — platform-wide analytics and controls.
- * Reads from localStorage-backed launch records; replace with real API
- * calls once a backend is wired in.
- */
 import { useState } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { Rocket, DollarSign, CheckCircle2, Link2, TrendingUp, BadgeCheck, Activity, Settings, ShieldCheck, Zap, AlertCircle } from "lucide-react";
@@ -10,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ChainIcon from "@/components/ChainIcon";
 import { SUPPORTED_CHAINS, DISPLAY_CHAINS } from "@/lib/wagmi";
 import { getLaunches, setLaunchVerified } from "@/lib/launches";
+import { LAUNCH_FEE_USD } from "@/lib/pricing";
 
 // NOTE: VITE_* env vars are included in the client bundle and visible in browser
 // devtools — this gate is a UX deterrent only, not a security boundary.
@@ -55,6 +51,7 @@ export default function Admin() {
         <form onSubmit={handleAuth} className="space-y-4">
           <input
             type="password"
+            autoComplete="current-password"
             value={pw}
             onChange={(e) => setPw(e.target.value)}
             placeholder="Admin password"
@@ -86,7 +83,7 @@ export default function Admin() {
 
   // Compute stats
   const totalLaunches = launches.length;
-  const totalRevenue = totalLaunches * 5;
+  const totalRevenue = totalLaunches * LAUNCH_FEE_USD;
   const verifiedCount = launches.filter((l) => l.verified).length;
   const evmChains = SUPPORTED_CHAINS.length;
   const svmChains = DISPLAY_CHAINS.filter((c) => c.isSvm).length;
@@ -325,7 +322,7 @@ export default function Admin() {
                 <Rocket className="w-4 h-4" />
                 All Launches ({launches.length})
               </div>
-              <span className="text-xs text-pink-400 font-normal">Revenue: ${launches.length * 5}</span>
+              <span className="text-xs text-pink-400 font-normal">Revenue: ${launches.length * LAUNCH_FEE_USD}</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -444,7 +441,8 @@ export default function Admin() {
             </CardHeader>
             <CardContent className="space-y-4 text-sm">
               {[
-                { key: "VITE_LAUNCH_FEE_TREASURY_ADDRESS", label: "Treasury Address", description: "Wallet that receives $5 launch fees" },
+                { key: "VITE_LAUNCH_FEE_TREASURY_ADDRESS", label: "EVM Treasury Address", description: `Wallet that receives ${LAUNCH_FEE_USD} launch fees on EVM chains` },
+                { key: "VITE_SOLANA_TREASURY_ADDRESS", label: "Solana / X1 Treasury Address", description: `Wallet that receives ${LAUNCH_FEE_USD} launch fees on SVM chains` },
                 { key: "VITE_WALLETCONNECT_PROJECT_ID", label: "WalletConnect Project ID", description: "Enables WalletConnect QR modal" },
                 { key: "VITE_ADMIN_PASSWORD", label: "Admin Password", description: "Protects this dashboard" },
               ].map((setting) => {
