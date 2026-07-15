@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
-import { Rocket, DollarSign, CheckCircle2, Link2, TrendingUp, BadgeCheck, Activity, Settings, ShieldCheck, Zap, AlertCircle } from "lucide-react";
+import { Rocket, DollarSign, CheckCircle2, Link2, TrendingUp, BadgeCheck, Activity, Settings, ShieldCheck, Zap, AlertCircle, Plus, X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ChainIcon from "@/components/ChainIcon";
 import { SUPPORTED_CHAINS, DISPLAY_CHAINS } from "@/lib/wagmi";
-import { getLaunches, setLaunchVerified } from "@/lib/launches";
+import { getLaunches, setLaunchVerified, addLaunch, type Launch } from "@/lib/launches";
 import { LAUNCH_FEE_USD } from "@/lib/pricing";
 
 // NOTE: VITE_* env vars are included in the client bundle and visible in browser
@@ -18,8 +18,55 @@ export default function Admin() {
   const [authenticated, setAuthenticated] = useState(!ADMIN_PASSWORD);
   const [pw, setPw] = useState("");
   const [pwError, setPwError] = useState(false);
-  const [tab, setTab] = useState<"overview" | "launches" | "chains" | "settings">("overview");
+  const [tab, setTab] = useState<"overview" | "launches" | "chains" | "add" | "settings">("overview");
   const [launches, setLaunches] = useState(() => getLaunches());
+
+  const BLANK_ADD_FORM = {
+    name: "", ticker: "", description: "",
+    website: "", twitter: "", telegram: "",
+    totalSupply: "", chainId: "", deployer: "", feeTxHash: "",
+    verified: false,
+  };
+  const [addForm, setAddForm] = useState(BLANK_ADD_FORM);
+  const [addSuccess, setAddSuccess] = useState<string | null>(null);
+  const [addError, setAddError] = useState<string | null>(null);
+
+  const handleAddToken = (e: React.FormEvent) => {
+    e.preventDefault();
+    setAddError(null);
+
+    const chainId = Number(addForm.chainId);
+    const allChains = [...SUPPORTED_CHAINS, ...DISPLAY_CHAINS];
+    const chainMeta = allChains.find((c) => c.id === chainId);
+    if (!chainMeta) { setAddError("Select a valid chain."); return; }
+    if (!addForm.name.trim() || !addForm.ticker.trim()) { setAddError("Name and ticker are required."); return; }
+    if (!addForm.totalSupply.trim()) { setAddError("Total supply is required."); return; }
+    if (!addForm.deployer.trim()) { setAddError("Deployer / contract address is required."); return; }
+    if (!addForm.feeTxHash.trim()) { setAddError("Fee tx hash is required."); return; }
+
+    const newLaunch: Launch = {
+      id: `admin-${Date.now()}`,
+      name: addForm.name.trim(),
+      ticker: addForm.ticker.trim().toUpperCase().replace(/^\$/, ""),
+      description: addForm.description.trim(),
+      website: addForm.website.trim() || undefined,
+      twitter: addForm.twitter.trim() || undefined,
+      telegram: addForm.telegram.trim() || undefined,
+      totalSupply: addForm.totalSupply.trim(),
+      chainId,
+      chainName: chainMeta.name,
+      deployer: addForm.deployer.trim(),
+      feeTxHash: addForm.feeTxHash.trim(),
+      createdAt: new Date().toISOString(),
+      verified: addForm.verified,
+    };
+
+    addLaunch(newLaunch);
+    refresh();
+    setAddSuccess(`${newLaunch.ticker} added — it now appears on the home page.`);
+    setAddForm(BLANK_ADD_FORM);
+    setTimeout(() => setAddSuccess(null), 6000);
+  };
 
   const handleAuth = (e: React.FormEvent) => {
     e.preventDefault();
@@ -105,6 +152,7 @@ export default function Admin() {
     { id: "overview", label: "Overview", icon: Activity },
     { id: "launches", label: "Launches", icon: Rocket },
     { id: "chains", label: "Chains", icon: Link2 },
+    { id: "add", label: "Add Token", icon: Plus },
     { id: "settings", label: "Settings", icon: Settings },
   ] as const;
 
@@ -426,6 +474,198 @@ export default function Admin() {
               </Card>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* ADD TOKEN TAB */}
+      {tab === "add" && (
+        <div className="max-w-2xl space-y-4">
+          {addSuccess && (
+            <div className="flex items-center justify-between gap-3 bg-emerald-50 border border-emerald-200 rounded-2xl px-4 py-3">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                <p className="text-sm font-semibold text-emerald-700">{addSuccess}</p>
+              </div>
+              <button onClick={() => setAddSuccess(null)}><X className="w-4 h-4 text-emerald-400 hover:text-emerald-600" /></button>
+            </div>
+          )}
+          {addError && (
+            <div className="flex items-center gap-2 bg-rose-50 border border-rose-200 rounded-2xl px-4 py-3">
+              <AlertCircle className="w-4 h-4 text-rose-500 shrink-0" />
+              <p className="text-sm font-semibold text-rose-700">{addError}</p>
+            </div>
+          )}
+
+          <Card className="border-pink-100 shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-sm font-bold text-pink-600 flex items-center gap-2">
+                <Plus className="w-4 h-4" />
+                Add Token to Recently Launched
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleAddToken} className="space-y-5">
+
+                {/* Chain */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-pink-700 uppercase tracking-wide">Chain *</label>
+                  <select
+                    value={addForm.chainId}
+                    onChange={(e) => setAddForm((f) => ({ ...f, chainId: e.target.value }))}
+                    required
+                    className="w-full border border-pink-200/60 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300 bg-white"
+                  >
+                    <option value="">Select chain…</option>
+                    <optgroup label="EVM Chains">
+                      {SUPPORTED_CHAINS.map((c) => (
+                        <option key={c.id} value={c.id}>{c.name} ({c.symbol})</option>
+                      ))}
+                    </optgroup>
+                    <optgroup label="SVM Chains">
+                      {DISPLAY_CHAINS.filter((c) => c.isSvm).map((c) => (
+                        <option key={c.id} value={c.id}>{c.name} ({c.symbol})</option>
+                      ))}
+                    </optgroup>
+                  </select>
+                </div>
+
+                {/* Name + Ticker */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-pink-700 uppercase tracking-wide">Token Name *</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Barbie Coin"
+                      value={addForm.name}
+                      onChange={(e) => setAddForm((f) => ({ ...f, name: e.target.value }))}
+                      required
+                      className="w-full border border-pink-200/60 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-pink-700 uppercase tracking-wide">Ticker *</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. BARB"
+                      value={addForm.ticker}
+                      onChange={(e) => setAddForm((f) => ({ ...f, ticker: e.target.value }))}
+                      required
+                      className="w-full border border-pink-200/60 rounded-xl px-3 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-pink-300"
+                    />
+                  </div>
+                </div>
+
+                {/* Description */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-pink-700 uppercase tracking-wide">Description *</label>
+                  <textarea
+                    placeholder="Brief description of the token / project…"
+                    value={addForm.description}
+                    onChange={(e) => setAddForm((f) => ({ ...f, description: e.target.value }))}
+                    required
+                    rows={3}
+                    className="w-full border border-pink-200/60 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300 resize-none"
+                  />
+                </div>
+
+                {/* Total Supply */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-pink-700 uppercase tracking-wide">Total Supply *</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. 1000000000"
+                    value={addForm.totalSupply}
+                    onChange={(e) => setAddForm((f) => ({ ...f, totalSupply: e.target.value }))}
+                    required
+                    className="w-full border border-pink-200/60 rounded-xl px-3 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-pink-300"
+                  />
+                </div>
+
+                {/* Deployer */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-pink-700 uppercase tracking-wide">Deployer / Contract Address *</label>
+                  <input
+                    type="text"
+                    placeholder="0x… or base58 pubkey"
+                    value={addForm.deployer}
+                    onChange={(e) => setAddForm((f) => ({ ...f, deployer: e.target.value }))}
+                    required
+                    className="w-full border border-pink-200/60 rounded-xl px-3 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-pink-300"
+                  />
+                </div>
+
+                {/* Fee Tx Hash */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-pink-700 uppercase tracking-wide">Fee Tx Hash *</label>
+                  <input
+                    type="text"
+                    placeholder="Transaction hash of the launch fee payment"
+                    value={addForm.feeTxHash}
+                    onChange={(e) => setAddForm((f) => ({ ...f, feeTxHash: e.target.value }))}
+                    required
+                    className="w-full border border-pink-200/60 rounded-xl px-3 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-pink-300"
+                  />
+                </div>
+
+                {/* Socials */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-pink-700 uppercase tracking-wide">Website</label>
+                    <input
+                      type="url"
+                      placeholder="https://"
+                      value={addForm.website}
+                      onChange={(e) => setAddForm((f) => ({ ...f, website: e.target.value }))}
+                      className="w-full border border-pink-200/60 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-pink-700 uppercase tracking-wide">Twitter / X</label>
+                    <input
+                      type="url"
+                      placeholder="https://x.com/…"
+                      value={addForm.twitter}
+                      onChange={(e) => setAddForm((f) => ({ ...f, twitter: e.target.value }))}
+                      className="w-full border border-pink-200/60 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-pink-700 uppercase tracking-wide">Telegram</label>
+                    <input
+                      type="url"
+                      placeholder="https://t.me/…"
+                      value={addForm.telegram}
+                      onChange={(e) => setAddForm((f) => ({ ...f, telegram: e.target.value }))}
+                      className="w-full border border-pink-200/60 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300"
+                    />
+                  </div>
+                </div>
+
+                {/* Verified toggle */}
+                <div className="flex items-center gap-3 py-3 px-4 bg-emerald-50 border border-emerald-100 rounded-xl">
+                  <input
+                    type="checkbox"
+                    id="add-verified"
+                    checked={addForm.verified}
+                    onChange={(e) => setAddForm((f) => ({ ...f, verified: e.target.checked }))}
+                    className="w-4 h-4 accent-emerald-500 cursor-pointer"
+                  />
+                  <label htmlFor="add-verified" className="text-sm font-semibold text-emerald-700 cursor-pointer select-none">
+                    Mark as Verified immediately
+                    <span className="block text-xs font-normal text-emerald-500 mt-0.5">Shows the blue checkmark on the token card</span>
+                  </label>
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 hover:from-pink-500 hover:via-pink-600 hover:to-pink-700 text-white font-extrabold text-sm h-12 rounded-xl shadow-md transition-all flex items-center justify-center gap-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  Add Token to Launchpad
+                </button>
+              </form>
+            </CardContent>
+          </Card>
         </div>
       )}
 
