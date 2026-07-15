@@ -18,10 +18,12 @@ import {
   useFeeNative,
   formatNativeAmount,
   verificationFeeUsd,
+  useNativeTokenPriceUsd,
   VERIFICATION_FEE_STANDARD_USD,
   VERIFICATION_FEE_FAST_USD,
   type VerificationTier,
 } from "@/lib/pricing";
+import { verifySvmPayment } from "@/lib/svmVerify";
 
 // ---------------------------------------------------------------------------
 // Chain explorer URLs
@@ -70,6 +72,7 @@ export default function Verify() {
   const [selectedSvm,    setSelectedSvm]    = useState<SvmChainKey | null>(null);
   const [svmTxSig,       setSvmTxSig]       = useState("");
   const [svmSubmitting,  setSvmSubmitting]  = useState(false);
+  const [svmVerifyError, setSvmVerifyError] = useState<string | null>(null);
   const [successData,    setSuccessData]    = useState<{
     tier: VerificationTier;
     txHash: string;
@@ -83,6 +86,8 @@ export default function Verify() {
   const selectedSvmMeta  = SVM_CHAINS.find((c) => c.key === selectedSvm);
   const feeUsd = verificationFeeUsd(tier);
   const evmFee = useFeeNative(feeUsd, selectedEvmChain?.symbol ?? "", selectedEvmChain?.isStableGas);
+  const solPriceQuery = useNativeTokenPriceUsd("SOL");
+  const solFee = useFeeNative(feeUsd, "SOL");
   const treasuryConfigured = !!EVM_TREASURY && isAddress(EVM_TREASURY);
   const anySvmConnected = solana.connected;
 
@@ -98,6 +103,7 @@ export default function Verify() {
     setSelectedSvm(key);
     setSelectedEvmId(null);
     setSvmTxSig("");
+    setSvmVerifyError(null);
   };
 
   // EVM submit
@@ -122,14 +128,52 @@ export default function Verify() {
     }
   };
 
-  // SVM submit (manual signature)
+  // SVM submit — real on-chain verification
   const handleSvmSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!selectedSvmMeta) return;
     if (!isValidSvmSig(svmTxSig)) return;
+    if (!SOL_TREASURY) return;
+
     setSvmSubmitting(true);
-    await new Promise((r) => setTimeout(r, 800)); // simulate brief confirmation
-    setSuccessData({ tier, txHash: svmTxSig.trim(), chainName: selectedSvmMeta.name, explorer: selectedSvmMeta.explorer });
+    setSvmVerifyError(null);
+
+    // Determine which RPC to call and how many lamports to expect.
+    // For Solana we have a live SOL/USD price; for X1 (XN) we skip the
+    // amount check since XN has no reliable public price feed.
+    const rpcUrl =
+      selectedSvm === "solana"
+        ? SOLANA_CHAIN_INFO.rpc
+        : X1_CHAIN_INFO.rpc;
+
+    let minLamports = 0;
+    if (selectedSvm === "solana") {
+      const solPrice =
+        solPriceQuery.data ??
+        175; // static fallback — only used if CoinGecko is unreachable
+      // Require at least 95 % of the expected amount (5 % slippage buffer)
+      minLamports = Math.floor((feeUsd / solPrice) * 1e9 * 0.95);
+    }
+
+    const result = await verifySvmPayment(
+      svmTxSig,
+      rpcUrl,
+      SOL_TREASURY,
+      minLamports,
+    );
+
+    if (!result.ok) {
+      setSvmVerifyError(result.message);
+      setSvmSubmitting(false);
+      return;
+    }
+
+    setSuccessData({
+      tier,
+      txHash: svmTxSig.trim(),
+      chainName: selectedSvmMeta.name,
+      explorer: selectedSvmMeta.explorer,
+    });
     setSvmSubmitting(false);
   };
 
@@ -462,9 +506,23 @@ export default function Verify() {
                     <div className="space-y-4">
                       <h3 className="text-lg font-bold border-b border-purple-100 pb-2">Pay Verification Fee</h3>
                       <div className="bg-purple-50 border border-purple-200 rounded-2xl p-4 space-y-3">
-                        <div className="flex items-center justify-between">
+                        <div className="flex items-center justify-between flex-wrap gap-2">
                           <p className="text-sm font-bold text-purple-700">Amount to send</p>
-                          <p className="text-lg font-extrabold text-purple-800">${feeUsd} USD in {selectedSvmMeta.symbol}</p>
+                          <div className="text-right">
+                            <p className="text-lg font-extrabold text-purple-800">
+                              ${feeUsd} USD
+                              {selectedSvm === "solana" && solFee.native !== null && (
+                                <span className="text-sm font-semibold text-purple-500 ml-2">
+                                  ≈ {formatNativeAmount(solFee.native)} SOL
+                                </span>
+                              )}
+                            </p>
+                            {selectedSvm === "solana" && (
+                              <p className={`text-[10px] font-semibold ${solFee.isLive ? "text-emerald-500" : "text-purple-400"}`}>
+                                {solFee.isLive ? "● Live SOL price" : "Est. price"}
+                              </p>
+                            )}
+                          </div>
                         </div>
                         {SOL_TREASURY ? (
                           <div>
@@ -499,7 +557,7 @@ export default function Verify() {
                           id="svm-tx-sig"
                           placeholder="Paste your tx signature after sending the fee…"
                           value={svmTxSig}
-                          onChange={(e) => setSvmTxSig(e.target.value)}
+                          onChange={(e) => { setSvmTxSig(e.target.value); setSvmVerifyError(null); }}
                           className="font-mono border-purple-200 focus:border-purple-400"
                           required
                         />
@@ -516,6 +574,12 @@ export default function Verify() {
                               Verify on {selectedSvmMeta.name === "Solana" ? "Solscan" : "X1 Explorer"}
                               <ExternalLink className="w-3 h-3" />
                             </a>
+                          </div>
+                        )}
+                        {svmVerifyError && (
+                          <div className="flex items-start gap-2 bg-rose-50 border border-rose-200 rounded-xl px-3 py-2 mt-1">
+                            <AlertCircle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
+                            <p className="text-xs text-rose-700 font-medium">{svmVerifyError}</p>
                           </div>
                         )}
                       </div>
