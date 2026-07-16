@@ -13,8 +13,8 @@ import ChainIcon from "@/components/ChainIcon";
 import { getLaunches } from "@/lib/launches";
 import { SUPPORTED_CHAINS, DISPLAY_CHAINS } from "@/lib/wagmi";
 
-const TELEGRAM_URL = "https://t.me/barbiefunv2";
-const TWITTER_URL = "https://x.com/Amanchain50";
+const TELEGRAM_URL = "https://t.me/barbiefunv2/65";
+const TWITTER_URL = "https://x.com/BARBIEFUNV2";
 
 export default function Home() {
   const [tab, setTab] = useState("new");
@@ -296,28 +296,110 @@ export default function Home() {
       </section>
 
       {/* Community Section */}
-      <section className="rounded-3xl bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 p-8 sm:p-12 text-white text-center shadow-xl">
-        <h2 className="text-3xl sm:text-4xl font-extrabold mb-3 flex items-center justify-center gap-2">
-          Join the Barbie&apos;s Community <Heart className="w-7 h-7 fill-current" />
-        </h2>
-        <p className="text-pink-100 text-lg mb-8 max-w-xl mx-auto">
-          Connect with thousands of degens on Telegram and X. Get alpha, token launches, and Barbie vibes.
-        </p>
-        <div className="flex flex-wrap items-center justify-center gap-4">
-          <a href={TELEGRAM_URL} target="_blank" rel="noopener noreferrer">
-            <button className="flex items-center space-x-2 bg-white text-pink-600 font-bold px-6 py-3 rounded-full shadow-md hover:shadow-lg hover:scale-105 transition-all">
-              <svg viewBox="0 0 24 24" className="w-5 h-5 fill-[#229ED9]"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
-              <span>Telegram</span>
-            </button>
-          </a>
-          <a href={TWITTER_URL} target="_blank" rel="noopener noreferrer">
-            <button className="flex items-center space-x-2 bg-white text-pink-600 font-bold px-6 py-3 rounded-full shadow-md hover:shadow-lg hover:scale-105 transition-all">
-              <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.261 5.636 5.903-5.636zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-              <span>Follow on X</span>
-            </button>
-          </a>
+      <motion.section
+        className="relative overflow-hidden rounded-3xl text-white text-center shadow-2xl"
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.3 }}
+        transition={{ duration: 0.7, ease: "easeOut" }}
+      >
+        {/* Animated gradient background */}
+        <motion.div
+          className="absolute inset-0 bg-gradient-to-r from-pink-400 via-fuchsia-500 to-pink-600"
+          animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
+          transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
+          style={{ backgroundSize: "200% 200%" }}
+        />
+
+        {/* Floating sparkle blobs */}
+        {[
+          { top: "10%", left: "5%", size: 80, delay: 0 },
+          { top: "60%", left: "90%", size: 60, delay: 1.2 },
+          { top: "75%", left: "12%", size: 50, delay: 0.6 },
+          { top: "20%", left: "80%", size: 70, delay: 1.8 },
+        ].map((blob, i) => (
+          <motion.div
+            key={i}
+            className="absolute rounded-full bg-white/10 backdrop-blur-sm"
+            style={{ top: blob.top, left: blob.left, width: blob.size, height: blob.size }}
+            animate={{ y: [0, -18, 0], scale: [1, 1.15, 1], opacity: [0.5, 0.9, 0.5] }}
+            transition={{ duration: 3.5, repeat: Infinity, delay: blob.delay, ease: "easeInOut" }}
+          />
+        ))}
+
+        <div className="relative z-10 p-8 sm:p-14">
+          {/* Bouncing hearts row */}
+          <div className="flex justify-center gap-3 mb-4">
+            {["💖", "✨", "💅", "✨", "💖"].map((emoji, i) => (
+              <motion.span
+                key={i}
+                className="text-2xl"
+                animate={{ y: [0, -10, 0] }}
+                transition={{ duration: 1.4, repeat: Infinity, delay: i * 0.18, ease: "easeInOut" }}
+              >
+                {emoji}
+              </motion.span>
+            ))}
+          </div>
+
+          {/* Headline with shimmer */}
+          <motion.h2
+            className="text-3xl sm:text-5xl font-extrabold mb-4 tracking-tight drop-shadow-lg"
+            animate={{ scale: [1, 1.03, 1] }}
+            transition={{ duration: 2.8, repeat: Infinity, ease: "easeInOut" }}
+          >
+            Join the Barbie Community
+          </motion.h2>
+
+          <motion.p
+            className="text-pink-100 text-lg mb-10 max-w-xl mx-auto"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.3, duration: 0.6 }}
+          >
+            Connect with thousands of degens on Telegram and X. Get alpha, token launches, and Barbie vibes. 💕
+          </motion.p>
+
+          <div className="flex flex-wrap items-center justify-center gap-5">
+            {/* Telegram button */}
+            <motion.a
+              href={TELEGRAM_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              whileHover={{ scale: 1.1, rotate: -2 }}
+              whileTap={{ scale: 0.95 }}
+              animate={{ y: [0, -5, 0] }}
+              transition={{ y: { duration: 2.2, repeat: Infinity, ease: "easeInOut" }, scale: { type: "spring", stiffness: 300 } }}
+            >
+              <span className="flex items-center space-x-2 bg-white text-pink-600 font-bold px-7 py-3.5 rounded-full shadow-lg text-base">
+                <svg viewBox="0 0 24 24" className="w-5 h-5 fill-[#229ED9]">
+                  <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+                </svg>
+                <span>Join Telegram</span>
+              </span>
+            </motion.a>
+
+            {/* X / Twitter button */}
+            <motion.a
+              href={TWITTER_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              whileHover={{ scale: 1.1, rotate: 2 }}
+              whileTap={{ scale: 0.95 }}
+              animate={{ y: [0, -5, 0] }}
+              transition={{ y: { duration: 2.2, repeat: Infinity, delay: 0.6, ease: "easeInOut" }, scale: { type: "spring", stiffness: 300 } }}
+            >
+              <span className="flex items-center space-x-2 bg-white text-pink-600 font-bold px-7 py-3.5 rounded-full shadow-lg text-base">
+                <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current">
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.261 5.636 5.903-5.636zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                </svg>
+                <span>Follow on X</span>
+              </span>
+            </motion.a>
+          </div>
         </div>
-      </section>
+      </motion.section>
     </div>
   );
 }
