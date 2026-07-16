@@ -4,7 +4,8 @@ import { Rocket, DollarSign, CheckCircle2, Link2, TrendingUp, BadgeCheck, Activi
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ChainIcon from "@/components/ChainIcon";
 import { SUPPORTED_CHAINS, DISPLAY_CHAINS } from "@/lib/wagmi";
-import { getLaunches, setLaunchVerified, addLaunch, type Launch } from "@/lib/launches";
+import { type Launch } from "@/lib/launches";
+import { useLaunches, useAddLaunch, useSetVerified } from "@/hooks/useLaunches";
 import { LAUNCH_FEE_USD } from "@/lib/pricing";
 
 // NOTE: VITE_* env vars are included in the client bundle and visible in browser
@@ -18,8 +19,10 @@ export default function Admin() {
   const [authenticated, setAuthenticated] = useState(!ADMIN_PASSWORD);
   const [pw, setPw] = useState("");
   const [pwError, setPwError] = useState(false);
-  const [tab, setTab] = useState<"overview" | "launches" | "chains" | "add" | "settings">("overview");
-  const [launches, setLaunches] = useState(() => getLaunches());
+  const [tab, setTab] = useState<"overview" | "launches" | "chains" | "add" | "referrals" | "settings">("overview");
+  const { data: launches = [], refetch } = useLaunches();
+  const addLaunchMutation = useAddLaunch();
+  const setVerifiedMutation = useSetVerified();
 
   const BLANK_ADD_FORM = {
     name: "", ticker: "", description: "",
@@ -31,7 +34,7 @@ export default function Admin() {
   const [addSuccess, setAddSuccess] = useState<string | null>(null);
   const [addError, setAddError] = useState<string | null>(null);
 
-  const handleAddToken = (e: React.FormEvent) => {
+  const handleAddToken = async (e: React.FormEvent) => {
     e.preventDefault();
     setAddError(null);
 
@@ -44,28 +47,29 @@ export default function Admin() {
     if (!addForm.deployer.trim()) { setAddError("Deployer / contract address is required."); return; }
     if (!addForm.feeTxHash.trim()) { setAddError("Fee tx hash is required."); return; }
 
-    const newLaunch: Launch = {
-      id: `admin-${Date.now()}`,
-      name: addForm.name.trim(),
-      ticker: addForm.ticker.trim().toUpperCase().replace(/^\$/, ""),
-      description: addForm.description.trim(),
-      website: addForm.website.trim() || undefined,
-      twitter: addForm.twitter.trim() || undefined,
-      telegram: addForm.telegram.trim() || undefined,
-      totalSupply: addForm.totalSupply.trim(),
-      chainId,
-      chainName: chainMeta.name,
-      deployer: addForm.deployer.trim(),
-      feeTxHash: addForm.feeTxHash.trim(),
-      createdAt: new Date().toISOString(),
-      verified: addForm.verified,
-    };
-
-    addLaunch(newLaunch);
-    refresh();
-    setAddSuccess(`${newLaunch.ticker} added — it now appears on the home page.`);
-    setAddForm(BLANK_ADD_FORM);
-    setTimeout(() => setAddSuccess(null), 6000);
+    const ticker = addForm.ticker.trim().toUpperCase().replace(/^\$/, "");
+    try {
+      await addLaunchMutation.mutateAsync({
+        id: `admin-${Date.now()}`,
+        name: addForm.name.trim(),
+        ticker,
+        description: addForm.description.trim(),
+        website: addForm.website.trim() || null,
+        twitter: addForm.twitter.trim() || null,
+        telegram: addForm.telegram.trim() || null,
+        totalSupply: addForm.totalSupply.trim(),
+        chainId,
+        chainName: chainMeta.name,
+        deployer: addForm.deployer.trim(),
+        feeTxHash: addForm.feeTxHash.trim(),
+        verified: addForm.verified,
+      });
+      setAddSuccess(`${ticker} added — it now appears on the home page.`);
+      setAddForm(BLANK_ADD_FORM);
+      setTimeout(() => setAddSuccess(null), 6000);
+    } catch (err: any) {
+      setAddError(err?.message ?? "Failed to add token. Please try again.");
+    }
   };
 
   const handleAuth = (e: React.FormEvent) => {
@@ -78,11 +82,12 @@ export default function Admin() {
     }
   };
 
-  const refresh = () => setLaunches(getLaunches());
+  const refresh = () => refetch();
 
-  const toggleVerify = (id: string, current: boolean) => {
-    setLaunchVerified(id, !current);
-    refresh();
+  const toggleVerify = async (id: string, current: boolean) => {
+    try {
+      await setVerifiedMutation.mutateAsync({ id, verified: !current });
+    } catch { /* React Query invalidates on success; silent on error */ }
   };
 
   if (!authenticated) {
@@ -148,11 +153,22 @@ export default function Admin() {
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     .slice(0, 10);
 
+  // Referral breakdown
+  const referralCounts = launches
+    .filter((l) => l.referredBy)
+    .reduce<Record<string, number>>((acc, l) => {
+      const key = l.referredBy!;
+      acc[key] = (acc[key] ?? 0) + 1;
+      return acc;
+    }, {});
+  const referralRows = Object.entries(referralCounts).sort((a, b) => b[1] - a[1]);
+
   const tabs = [
     { id: "overview", label: "Overview", icon: Activity },
     { id: "launches", label: "Launches", icon: Rocket },
     { id: "chains", label: "Chains", icon: Link2 },
     { id: "add", label: "Add Token", icon: Plus },
+    { id: "referrals", label: "Referrals", icon: TrendingUp },
     { id: "settings", label: "Settings", icon: Settings },
   ] as const;
 
@@ -664,6 +680,63 @@ export default function Admin() {
                   Add Token to Launchpad
                 </button>
               </form>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* REFERRALS TAB */}
+      {tab === "referrals" && (
+        <div className="space-y-4">
+          <div className="grid grid-cols-3 gap-4">
+            {[
+              { label: "Referred Launches", value: launches.filter((l) => l.referredBy).length, color: "text-pink-900" },
+              { label: "Organic Launches", value: launches.filter((l) => !l.referredBy).length, color: "text-pink-900" },
+              { label: "Unique Referrers", value: referralRows.length, color: "text-purple-700" },
+            ].map((s) => (
+              <Card key={s.label} className="border-pink-100 shadow-sm">
+                <CardContent className="p-5 text-center">
+                  <p className={`text-3xl font-extrabold ${s.color}`}>{s.value}</p>
+                  <p className="text-xs text-pink-400 mt-1">{s.label}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          <Card className="border-pink-100 shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-sm font-bold text-pink-600 flex items-center gap-2">
+                <TrendingUp className="w-4 h-4" />
+                Referrer Leaderboard
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {referralRows.length === 0 ? (
+                <div className="py-10 text-center space-y-2">
+                  <p className="text-sm text-pink-400">No referral activity yet.</p>
+                  <p className="text-xs text-pink-300">Share a referral link: <code className="bg-pink-50 border border-pink-100 rounded px-1.5 py-0.5 text-pink-600">https://yoursite.com/?ref=yourwallet</code></p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-pink-100">
+                        <th className="text-left py-2 px-3 text-xs font-bold text-pink-400 uppercase tracking-wider">Referrer</th>
+                        <th className="text-left py-2 px-3 text-xs font-bold text-pink-400 uppercase tracking-wider">Launches</th>
+                        <th className="text-left py-2 px-3 text-xs font-bold text-pink-400 uppercase tracking-wider">Revenue</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-pink-50">
+                      {referralRows.map(([ref, count]) => (
+                        <tr key={ref} className="hover:bg-pink-50/40 transition-colors">
+                          <td className="py-2.5 px-3 font-mono text-xs text-pink-700 max-w-[280px] truncate">{ref}</td>
+                          <td className="py-2.5 px-3 font-bold text-pink-900">{count}</td>
+                          <td className="py-2.5 px-3 font-semibold text-emerald-600">${count * LAUNCH_FEE_USD}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>

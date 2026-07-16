@@ -3,10 +3,11 @@ import { useParams, Link } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { getLaunchById, formatSupply } from "@/lib/launches";
+import { formatSupply } from "@/lib/launches";
+import { useLaunchById, useLaunches } from "@/hooks/useLaunches";
 import { SUPPORTED_CHAINS, DISPLAY_CHAINS } from "@/lib/wagmi";
 import ChainIcon from "@/components/ChainIcon";
-import { CheckCircle, ExternalLink, Copy, Clock, Info, Rocket, BadgeCheck } from "lucide-react";
+import { CheckCircle, ExternalLink, Copy, Clock, Info, Rocket, BadgeCheck, ShieldCheck, Share2, AlertTriangle } from "lucide-react";
 
 const CHAIN_EXPLORERS: Record<number, string> = {
   56:      "https://bscscan.com/tx/",
@@ -22,14 +23,25 @@ const CHAIN_EXPLORERS: Record<number, string> = {
 export default function TokenDetail() {
   const { id } = useParams();
   const [copied, setCopied] = useState(false);
-  const launch = id ? getLaunchById(id) : undefined;
+  const [shareMsg, setShareMsg] = useState<string | null>(null);
+  const { data: launch, isLoading } = useLaunchById(id);
+  const { data: allLaunches = [] } = useLaunches();
+
+  if (isLoading) {
+    return (
+      <div className="max-w-lg mx-auto py-16 text-center">
+        <div className="w-8 h-8 border-2 border-pink-300 border-t-pink-500 rounded-full animate-spin mx-auto mb-3" />
+        <p className="text-sm text-pink-400">Loading token…</p>
+      </div>
+    );
+  }
 
   if (!launch) {
     return (
       <div className="max-w-lg mx-auto py-16 text-center">
         <Info className="w-8 h-8 text-pink-200 mx-auto mb-3" />
         <h2 className="text-xl font-bold text-pink-800 mb-2">Launch not found</h2>
-        <p className="text-sm text-pink-400 mb-6">This token launch record doesn&apos;t exist in this browser&apos;s history.</p>
+        <p className="text-sm text-pink-400 mb-6">This token launch record doesn&apos;t exist or hasn&apos;t been confirmed yet.</p>
         <Link href="/">
           <Button className="bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 text-white font-bold rounded-full">Back to Terminal</Button>
         </Link>
@@ -43,10 +55,22 @@ export default function TokenDetail() {
   const explorerBase = CHAIN_EXPLORERS[launch.chainId];
   const explorerUrl = explorerBase ? `${explorerBase}${launch.feeTxHash}` : undefined;
 
+  const isSvmChain = launch.chainId < 0;
+  const deployerLaunches = allLaunches.filter(
+    (l) => l.deployer === launch.deployer && l.id !== launch.id,
+  );
+
   const copyDeployer = () => {
     navigator.clipboard.writeText(launch.deployer);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const shareToken = () => {
+    const ogUrl = `${window.location.origin}/api/og/${launch.id}`;
+    navigator.clipboard.writeText(ogUrl);
+    setShareMsg("Share link copied!");
+    setTimeout(() => setShareMsg(null), 2500);
   };
 
   return (
@@ -137,9 +161,36 @@ export default function TokenDetail() {
             )}
           </div>
         )}
+
+        {/* Deployer History */}
+        {deployerLaunches.length > 0 && (
+          <div className="bg-white border border-pink-100 rounded-2xl p-5 shadow-sm">
+            <h3 className="font-bold text-pink-900 mb-3 text-sm flex items-center gap-2">
+              <Rocket className="w-4 h-4 text-pink-400" />
+              Other launches by this deployer ({deployerLaunches.length})
+            </h3>
+            <div className="space-y-2">
+              {deployerLaunches.slice(0, 5).map((l) => {
+                const cm = SUPPORTED_CHAINS.find((c) => c.id === l.chainId) ?? DISPLAY_CHAINS.find((c) => c.id === l.chainId);
+                return (
+                  <Link key={l.id} href={`/token/${l.id}`}>
+                    <div className="flex items-center justify-between py-2 px-3 rounded-xl border border-pink-50 hover:border-pink-200 hover:bg-pink-50/40 transition-colors cursor-pointer">
+                      <div className="flex items-center gap-2">
+                        {cm && <ChainIcon chain={cm.icon} size={14} />}
+                        <span className="font-bold text-sm text-pink-900">${l.ticker}</span>
+                        <span className="text-xs text-pink-400">{l.name}</span>
+                      </div>
+                      <span className="text-[10px] text-pink-300">{new Date(l.createdAt).toLocaleDateString()}</span>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Right: fee & chain info */}
+      {/* Right: fee & chain info + safety */}
       <div className="space-y-4">
         <div className="bg-white border border-pink-100 rounded-2xl shadow-sm overflow-hidden sticky top-20">
           <div className="bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 px-5 py-3">
@@ -160,6 +211,15 @@ export default function TokenDetail() {
               </div>
             </div>
 
+            {/* Share button */}
+            <button
+              onClick={shareToken}
+              className="w-full flex items-center justify-center gap-2 text-sm font-semibold text-pink-600 border border-pink-200/60 rounded-xl py-2.5 hover:bg-pink-50 transition-colors"
+            >
+              <Share2 className="w-4 h-4" />
+              {shareMsg ?? "Copy Share Link"}
+            </button>
+
             {chainMeta && (
               <a href={chainMeta.dex} target="_blank" rel="noopener noreferrer">
                 <Button className="w-full bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 text-white font-extrabold text-base h-12 rounded-xl">
@@ -178,6 +238,55 @@ export default function TokenDetail() {
             <div className="text-center text-xs text-pink-300 pt-1">
               Fee payment verified on-chain — no fabricated data
             </div>
+          </div>
+        </div>
+
+        {/* Token Safety card */}
+        <div className="bg-white border border-pink-100 rounded-2xl shadow-sm overflow-hidden">
+          <div className="flex items-center gap-2 px-5 py-3 border-b border-pink-100">
+            <ShieldCheck className="w-4 h-4 text-pink-500" />
+            <h3 className="font-extrabold text-pink-900 text-sm">Token Safety</h3>
+            <span className="text-[10px] text-pink-400 ml-auto">Self-reported at launch</span>
+          </div>
+          <div className="p-5 space-y-3">
+            {[
+              {
+                label: "Mint Authority",
+                safe: launch.mintAuthority === false,
+                safeLabel: "Renounced",
+                riskLabel: "Active",
+                show: true,
+              },
+              {
+                label: "Freeze Authority",
+                safe: launch.freezeAuthority === false,
+                safeLabel: "Disabled",
+                riskLabel: "Active",
+                show: isSvmChain,
+              },
+              { label: "Fair Launch", safe: true, safeLabel: "100% to creator", riskLabel: "", show: true },
+              { label: "Fee Proof", safe: true, safeLabel: "On-chain tx", riskLabel: "", show: true },
+            ]
+              .filter((r) => r.show)
+              .map((row) => (
+                <div key={row.label} className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-pink-700">{row.label}</span>
+                  <span
+                    className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border flex items-center gap-1 ${
+                      row.safe
+                        ? "bg-emerald-50 text-emerald-600 border-emerald-200"
+                        : "bg-amber-50 text-amber-600 border-amber-200"
+                    }`}
+                  >
+                    {row.safe ? (
+                      <CheckCircle className="w-3 h-3" />
+                    ) : (
+                      <AlertTriangle className="w-3 h-3" />
+                    )}
+                    {row.safe ? row.safeLabel : row.riskLabel}
+                  </span>
+                </div>
+              ))}
           </div>
         </div>
       </div>

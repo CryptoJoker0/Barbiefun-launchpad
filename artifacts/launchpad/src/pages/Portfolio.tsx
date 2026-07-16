@@ -7,9 +7,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import WalletModal from "@/components/WalletModal";
 import ChainIcon from "@/components/ChainIcon";
 import { SUPPORTED_CHAINS, DISPLAY_CHAINS } from "@/lib/wagmi";
-import { getLaunches, formatSupply } from "@/lib/launches";
+import { formatSupply } from "@/lib/launches";
 import { formatNativeAmount } from "@/lib/pricing";
 import { useSolanaWallet } from "@/hooks/useSolanaWallet";
+import { useLaunches } from "@/hooks/useLaunches";
 
 function ChainBalance({ chainMeta }: { chainMeta: typeof SUPPORTED_CHAINS[0] }) {
   const { address } = useAccount();
@@ -59,7 +60,8 @@ export default function Portfolio() {
   const [walletOpen, setWalletOpen] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  const myLaunches = getLaunches().filter(
+  const { data: allLaunches = [] } = useLaunches();
+  const myLaunches = allLaunches.filter(
     (l) => address && l.deployer.toLowerCase() === address.toLowerCase()
   );
 

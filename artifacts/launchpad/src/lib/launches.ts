@@ -1,73 +1,86 @@
 /**
- * Real, client-recorded launches — no fabricated/mock tokens.
+ * Launch data module — all reads/writes go through the shared REST API.
  *
- * This app does not yet run its own indexer/backend, so there is no
- * cross-user token database. Instead, every wallet that successfully pays
- * the on-chain launch fee through this app gets a genuine record saved to
- * their own browser (localStorage), keyed by chain + tx hash. This keeps
- * the Discovery feed and token pages showing only real, user-originated
- * activity instead of seeded demo data.
- *
- * Swapping this for a real backend later only requires replacing the
- * functions below (get/add) with API calls — every consumer already goes
- * through this module.
+ * The API server persists launches in PostgreSQL so every user sees the
+ * same feed. This module is the single point of contact: swap the fetch
+ * calls here if the API URL ever changes.
  */
+
+const API_BASE = "/api";
+
+// ── Types ─────────────────────────────────────────────────────────────────────
 
 export type Launch = {
   id: string;
   name: string;
   ticker: string;
   description: string;
-  website?: string;
-  twitter?: string;
-  telegram?: string;
+  website?: string | null;
+  twitter?: string | null;
+  telegram?: string | null;
   totalSupply: string;
   chainId: number;
   chainName: string;
   deployer: string;
   feeTxHash: string;
-  createdAt: string;
-  /** true once a team reviewer has approved the project's Verify application */
+  createdAt: string; // ISO date string from the API
   verified?: boolean;
+  /** true = mint authority still active; false = renounced */
+  mintAuthority?: boolean;
+  /** true = freeze authority still active; false = disabled (SVM only) */
+  freezeAuthority?: boolean;
+  /** Referral code captured from ?ref= at the time of launch */
+  referredBy?: string | null;
 };
 
-const STORAGE_KEY = "barbiefun.launches.v1";
+export type CreateLaunch = Omit<Launch, "createdAt">;
 
-export function getLaunches(): Launch[] {
-  if (typeof window === "undefined") return [];
+// ── Internal fetch helper ─────────────────────────────────────────────────────
+
+async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
+  const res = await fetch(`${API_BASE}${path}`, {
+    headers: { "Content-Type": "application/json" },
+    ...options,
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => res.statusText);
+    throw new Error(`API ${res.status}: ${text}`);
+  }
+  return res.json() as Promise<T>;
+}
+
+// ── API functions ─────────────────────────────────────────────────────────────
+
+export async function getLaunches(): Promise<Launch[]> {
+  return apiFetch<Launch[]>("/launches");
+}
+
+export async function addLaunch(launch: CreateLaunch): Promise<Launch> {
+  return apiFetch<Launch>("/launches", {
+    method: "POST",
+    body: JSON.stringify(launch),
+  });
+}
+
+export async function getLaunchById(id: string): Promise<Launch | undefined> {
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
+    return await apiFetch<Launch>(`/launches/${id}`);
   } catch {
-    return [];
+    return undefined;
   }
 }
 
-export function addLaunch(launch: Launch): void {
-  if (typeof window === "undefined") return;
-  const existing = getLaunches();
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify([launch, ...existing]));
+export async function setLaunchVerified(
+  id: string,
+  verified: boolean,
+): Promise<void> {
+  await apiFetch(`/launches/${id}/verify`, {
+    method: "PATCH",
+    body: JSON.stringify({ verified }),
+  });
 }
 
-export function getLaunchById(id: string): Launch | undefined {
-  return getLaunches().find((l) => l.id === id);
-}
-
-/**
- * Marks a launch verified/unverified. This is the reviewer-side action a
- * team member takes after evaluating a Verify application (see Verify.tsx).
- * There's no backend yet, so the decision is persisted to the same
- * localStorage record the rest of the app already reads from — swapping
- * this for a real review-queue API later is a drop-in replacement.
- */
-export function setLaunchVerified(id: string, verified: boolean): void {
-  if (typeof window === "undefined") return;
-  const existing = getLaunches();
-  const updated = existing.map((l) => (l.id === id ? { ...l, verified } : l));
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-}
+// ── Utilities ─────────────────────────────────────────────────────────────────
 
 export function formatSupply(value: string): string {
   const n = Number(value);

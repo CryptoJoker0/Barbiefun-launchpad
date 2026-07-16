@@ -10,8 +10,8 @@ import TokenCard from "@/components/TokenCard";
 import NativeTokenPrices from "@/components/NativeTokenPrices";
 import X1TokenTracker from "@/components/X1TokenTracker";
 import ChainIcon from "@/components/ChainIcon";
-import { getLaunches } from "@/lib/launches";
 import { SUPPORTED_CHAINS, DISPLAY_CHAINS } from "@/lib/wagmi";
+import { useLaunches } from "@/hooks/useLaunches";
 
 const TELEGRAM_URL = "https://t.me/barbiefunv2/65";
 const TWITTER_URL = "https://x.com/BARBIEFUNV2";
@@ -19,7 +19,7 @@ const TWITTER_URL = "https://x.com/BARBIEFUNV2";
 export default function Home() {
   const [tab, setTab] = useState("new");
   const [search, setSearch] = useState("");
-  const launches = getLaunches();
+  const { data: launches = [], isLoading } = useLaunches();
 
   const getFiltered = () => {
     switch (tab) {
@@ -236,7 +236,23 @@ export default function Home() {
             </TabsList>
           </div>
 
-          {filteredLaunches.length === 0 ? (
+          {isLoading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="bg-white border border-pink-100 rounded-2xl p-5 shadow-sm animate-pulse space-y-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-pink-100" />
+                    <div className="flex-1 space-y-2">
+                      <div className="h-3 bg-pink-100 rounded w-3/4" />
+                      <div className="h-2.5 bg-pink-50 rounded w-1/2" />
+                    </div>
+                  </div>
+                  <div className="h-2 bg-pink-50 rounded" />
+                  <div className="h-2 bg-pink-50 rounded w-2/3" />
+                </div>
+              ))}
+            </div>
+          ) : filteredLaunches.length === 0 ? (
             <div className="bg-white border border-dashed border-pink-200/60 rounded-2xl py-16 px-6 text-center">
               {query ? (
                 <>

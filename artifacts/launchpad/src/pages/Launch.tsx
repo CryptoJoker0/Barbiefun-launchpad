@@ -25,9 +25,10 @@ import WalletModal from "@/components/WalletModal";
 import ChainIcon from "@/components/ChainIcon";
 import { SUPPORTED_CHAINS, DISPLAY_CHAINS } from "@/lib/wagmi";
 import { useLaunchFeeNative, formatNativeAmount, LAUNCH_FEE_USD, useNativeTokenPriceUsd } from "@/lib/pricing";
-import { addLaunch } from "@/lib/launches";
 import { useSolanaWallet } from "@/hooks/useSolanaWallet";
 import { verifySvmPayment } from "@/lib/svmVerify";
+import { useAddLaunch } from "@/hooks/useLaunches";
+import { getReferral } from "@/hooks/useReferral";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -88,6 +89,7 @@ export default function Launch() {
   const evmFee = useLaunchFeeNative(selectedEvmChain?.symbol ?? "", selectedEvmChain?.isStableGas);
   const treasuryEvm = !!EVM_TREASURY && isAddress(EVM_TREASURY);
   const solPriceUsd = useNativeTokenPriceUsd("SOL");
+  const addLaunchMutation = useAddLaunch();
 
   // ── Handlers ──────────────────────────────────────────────────────────────
 
@@ -123,20 +125,22 @@ export default function Launch() {
 
       const txHash = await sendTransactionAsync({ to: EVM_TREASURY as `0x${string}`, value });
 
-      addLaunch({
+      await addLaunchMutation.mutateAsync({
         id: `${selectedEvmChain.id}-${txHash}`,
         name: formData.name,
         ticker: formData.ticker || "TOKEN",
         description: formData.description,
-        website: formData.website || undefined,
-        twitter: formData.twitter || undefined,
-        telegram: formData.telegram || undefined,
+        website: formData.website || null,
+        twitter: formData.twitter || null,
+        telegram: formData.telegram || null,
         totalSupply: formData.supply,
         chainId: selectedEvmChain.id,
         chainName: selectedEvmChain.name,
         deployer: address!,
         feeTxHash: txHash,
-        createdAt: new Date().toISOString(),
+        mintAuthority: formData.mintAuthority,
+        freezeAuthority: formData.freezeAuthority,
+        referredBy: getReferral(),
       });
 
       setSuccessData({
@@ -177,20 +181,22 @@ export default function Launch() {
         return;
       }
       const deployer = solana.publicKey ?? "unknown";
-      addLaunch({
+      await addLaunchMutation.mutateAsync({
         id: `${selectedSvmChain.id}-${svmTxSig.slice(0, 20)}`,
         name: formData.name,
         ticker: formData.ticker || "TOKEN",
         description: formData.description,
-        website: formData.website || undefined,
-        twitter: formData.twitter || undefined,
-        telegram: formData.telegram || undefined,
+        website: formData.website || null,
+        twitter: formData.twitter || null,
+        telegram: formData.telegram || null,
         totalSupply: formData.supply,
         chainId: selectedSvmChain.id,
         chainName: selectedSvmChain.name,
         deployer,
         feeTxHash: svmTxSig.trim(),
-        createdAt: new Date().toISOString(),
+        mintAuthority: formData.mintAuthority,
+        freezeAuthority: formData.freezeAuthority,
+        referredBy: getReferral(),
       });
       const explorer = selectedSvmChain.id === -2 ? "https://solscan.io/tx/" : "https://explorer.x1.xyz/tx/";
       setSuccessData({

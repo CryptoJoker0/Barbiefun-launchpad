@@ -1,6 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import { Rocket, ArrowLeftRight, Link2, Heart, PartyPopper } from "lucide-react";
-import { getLaunches } from "@/lib/launches";
+import { useLaunches } from "@/hooks/useLaunches";
 import { SUPPORTED_CHAINS, DISPLAY_CHAINS } from "@/lib/wagmi";
 
 type TickerItem = { icon: LucideIcon; text: string };
@@ -16,7 +16,8 @@ const ANNOUNCEMENTS: TickerItem[] = [
 ];
 
 export default function Ticker() {
-  const launches = getLaunches().slice(0, 10);
+  const { data: allLaunches = [] } = useLaunches();
+  const launches = allLaunches.slice(0, 10);
 
   const items: TickerItem[] = launches.length > 0
     ? launches.map((l) => {

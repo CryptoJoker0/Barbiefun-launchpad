@@ -1,4 +1,5 @@
 import { Switch, Route, Router as WouterRouter } from "wouter";
+import { useReferral } from "@/hooks/useReferral";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { WagmiProvider } from "wagmi";
 import { Toaster } from "@/components/ui/toaster";
@@ -25,6 +26,7 @@ const queryClient = new QueryClient({
 });
 
 function Router() {
+  useReferral();
   return (
     <div className="min-h-screen bg-background flex flex-col font-sans text-foreground">
       <Ticker />
