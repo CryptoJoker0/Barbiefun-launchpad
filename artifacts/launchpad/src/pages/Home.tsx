@@ -328,19 +328,20 @@ export default function Home() {
         ))}
 
         <div className="relative z-10 p-8 sm:p-14">
-          {/* Bouncing hearts row */}
-          <div className="flex justify-center gap-3 mb-4">
-            {["💖", "✨", "💅", "✨", "💖"].map((emoji, i) => (
-              <motion.span
-                key={i}
-                className="text-2xl"
-                animate={{ y: [0, -10, 0] }}
-                transition={{ duration: 1.4, repeat: Infinity, delay: i * 0.18, ease: "easeInOut" }}
-              >
-                {emoji}
-              </motion.span>
-            ))}
-          </div>
+          {/* Hero image */}
+          <motion.div
+            className="flex justify-center mb-6"
+            animate={{ y: [0, -12, 0] }}
+            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <motion.img
+              src="/barbie-fun-banner.png"
+              alt="Barbie Fun"
+              className="w-52 sm:w-64 rounded-3xl shadow-2xl ring-4 ring-white/30"
+              animate={{ rotate: [-1.5, 1.5, -1.5] }}
+              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+            />
+          </motion.div>
 
           {/* Headline with shimmer */}
           <motion.h2
