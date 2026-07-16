@@ -24,9 +24,10 @@ import { parseEther, parseUnits, isAddress } from "viem";
 import WalletModal from "@/components/WalletModal";
 import ChainIcon from "@/components/ChainIcon";
 import { SUPPORTED_CHAINS, DISPLAY_CHAINS } from "@/lib/wagmi";
-import { useLaunchFeeNative, formatNativeAmount, LAUNCH_FEE_USD } from "@/lib/pricing";
+import { useLaunchFeeNative, formatNativeAmount, LAUNCH_FEE_USD, useNativeTokenPriceUsd } from "@/lib/pricing";
 import { addLaunch } from "@/lib/launches";
 import { useSolanaWallet } from "@/hooks/useSolanaWallet";
+import { verifySvmPayment } from "@/lib/svmVerify";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -67,6 +68,7 @@ export default function Launch() {
   const [selectedSvmId,  setSelectedSvmId]  = useState<number | null>(null); // -1 or -2
   const [svmTxSig,       setSvmTxSig]       = useState("");
   const [svmSubmitting,  setSvmSubmitting]  = useState(false);
+  const [svmVerifyError, setSvmVerifyError] = useState<string | null>(null);
   const [successData,    setSuccessData]    = useState<{
     ticker: string; txHash: string; chainId: number; chainName: string; explorerBase: string;
   } | null>(null);
@@ -85,6 +87,7 @@ export default function Launch() {
   const isSvmMode        = selectedSvmId !== null;
   const evmFee = useLaunchFeeNative(selectedEvmChain?.symbol ?? "", selectedEvmChain?.isStableGas);
   const treasuryEvm = !!EVM_TREASURY && isAddress(EVM_TREASURY);
+  const solPriceUsd = useNativeTokenPriceUsd("SOL");
 
   // ── Handlers ──────────────────────────────────────────────────────────────
 
@@ -153,8 +156,26 @@ export default function Launch() {
     e.preventDefault();
     if (!selectedSvmChain || !isValidSvmSig(svmTxSig)) return;
     setSvmSubmitting(true);
+    setSvmVerifyError(null);
     try {
-      await new Promise((r) => setTimeout(r, 800));
+      // Compute minimum lamports for Solana (skip for X1 — no reliable price feed)
+      let minLamports = 0;
+      if (selectedSvmChain.id === -2 && typeof solPriceUsd === "number" && solPriceUsd > 0) {
+        minLamports = Math.floor((LAUNCH_FEE_USD / solPriceUsd) * 1e9 * 0.95);
+      }
+
+      const result = await verifySvmPayment(
+        svmTxSig.trim(),
+        (selectedSvmChain as any).rpc,
+        SOL_TREASURY ?? "",
+        minLamports,
+      );
+
+      if (!result.ok) {
+        setSvmVerifyError(result.message);
+        setSvmSubmitting(false);
+        return;
+      }
       const deployer = solana.publicKey ?? "unknown";
       addLaunch({
         id: `${selectedSvmChain.id}-${svmTxSig.slice(0, 20)}`,
@@ -546,7 +567,7 @@ export default function Launch() {
                   id="svm-sig"
                   placeholder={`Paste your ${selectedSvmChain.name} tx signature after sending the fee…`}
                   value={svmTxSig}
-                  onChange={(e) => setSvmTxSig(e.target.value)}
+                  onChange={(e) => { setSvmTxSig(e.target.value); setSvmVerifyError(null); }}
                   className="font-mono border-purple-200 focus:border-purple-400"
                 />
                 {svmTxSig && !isValidSvmSig(svmTxSig) && (
@@ -572,6 +593,13 @@ export default function Launch() {
                   All {selectedSvmChain.name} launches on Barbie Fun are fair — 100% of the initial supply mints to your wallet. The fee records your launch request; SPL token contract deployment follows.
                 </p>
               </div>
+
+              {svmVerifyError && (
+                <div className="flex items-start gap-2 rounded-xl bg-rose-50 border border-rose-200 px-4 py-3">
+                  <AlertCircle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
+                  <p className="text-xs text-rose-700 font-medium">{svmVerifyError}</p>
+                </div>
+              )}
 
               <Button type="submit" size="lg"
                 disabled={svmSubmitting || !solana.connected || !isValidSvmSig(svmTxSig)}

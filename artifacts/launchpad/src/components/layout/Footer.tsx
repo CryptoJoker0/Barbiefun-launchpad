@@ -3,8 +3,8 @@ import { Link } from "wouter";
 import { Copy, CheckCircle2, Mail, ExternalLink, Heart } from "lucide-react";
 
 const EMAIL = "barbiefunlaunchpad@gmail.com";
-const TELEGRAM = "https://t.me/barbiefunv2";
-const TWITTER = "https://x.com/Amanchain50";
+const TELEGRAM = "https://t.me/barbiefunv2/65";
+const TWITTER = "https://x.com/BARBIEFUNV2";
 
 export default function Footer() {
   const [copied, setCopied] = useState(false);

@@ -15,8 +15,8 @@ import ChainIcon from "@/components/ChainIcon";
 import { SUPPORTED_CHAINS, DISPLAY_CHAINS } from "@/lib/wagmi";
 import { useSolanaWallet } from "@/hooks/useSolanaWallet";
 
-const TELEGRAM_URL = "https://t.me/barbiefunv2";
-const TWITTER_URL  = "https://x.com/Amanchain50";
+const TELEGRAM_URL = "https://t.me/barbiefunv2/65";
+const TWITTER_URL  = "https://x.com/BARBIEFUNV2";
 const WHITEPAPER_URL = `${import.meta.env.BASE_URL}barbiefun-whitepaper.pdf`;
 
 export default function Navbar() {
