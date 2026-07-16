@@ -5,7 +5,7 @@
  *   1. x1scr.xyz  — preferred: xDEX AMM pools + Degen Launchpad bonding-curve tokens
  *   2. DexScreener search — fallback for any pairs indexed under "xone" chain
  *   3. Curated featured projects — a hand-picked snapshot of top X1 ecosystem
- *      tokens (X1 Brains, Degen, Capy, Xenium, Shib, Theo AI) with links to their
+ *      tokens (X1 Brains, Degen, Xenium, Theo AI) with links to their
  *      live pair pages on x1.ninja, shown when no live API is reachable.
  *
  * The component NEVER breaks the page — every error path renders a fallback UI.
@@ -69,19 +69,6 @@ const FEATURED_X1_TOKENS: X1Token[] = [
     source: "static",
   },
   {
-    address: "GdKcXA1Q78Bquke5jyZUR1C8YMN6VYT9AUheN1RwKLfe",
-    name: "Capy X1",
-    symbol: "CAPY",
-    priceUsd: 0.0000221,
-    priceChange24h: -12.59,
-    volume24h: 456.56,
-    liquidity: 5050,
-    marketCap: 22210,
-    logo: "https://gptree.vip/token-profiles/AnvCcvnY4DLRW42EZBEAb1QeU6Pt9aab-logo-1778358724024-176411d4099bf9af.webp",
-    pairUrl: "https://x1.ninja/pair/GdKcXA1Q78Bquke5jyZUR1C8YMN6VYT9AUheN1RwKLfe",
-    source: "static",
-  },
-  {
     address: "8EUkm5ChdmLm9pxKX3Q99APck1URfVqP9m9R3FQcP6Tb",
     name: "Xenium",
     symbol: "XNM",
@@ -92,18 +79,6 @@ const FEATURED_X1_TOKENS: X1Token[] = [
     marketCap: 336710,
     logo: "https://explorer.xenblocks.io/tokens/xnm.png",
     pairUrl: "https://x1.ninja/pair/8EUkm5ChdmLm9pxKX3Q99APck1URfVqP9m9R3FQcP6Tb",
-    source: "static",
-  },
-  {
-    address: "EcmFn1chD6T9rE3XctPUDxjcqEDT3n2YeQJH627rSCD5",
-    name: "Shib Inu",
-    symbol: "SHIB",
-    priceUsd: 0.0000018,
-    priceChange24h: -0.84,
-    volume24h: 35.63,
-    liquidity: 6230,
-    marketCap: 697820000,
-    pairUrl: "https://x1.ninja/pair/EcmFn1chD6T9rE3XctPUDxjcqEDT3n2YeQJH627rSCD5",
     source: "static",
   },
   {
