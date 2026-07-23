@@ -22,6 +22,8 @@ export const launchesTable = pgTable("launches", {
   freezeAuthority: boolean("freeze_authority").notNull().default(false),
   /** Wallet address or username of the referrer, captured via ?ref= URL param */
   referredBy: text("referred_by"),
+  /** Object storage path for the token logo, e.g. /objects/uploads/<uuid> */
+  logoUrl: text("logo_url"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

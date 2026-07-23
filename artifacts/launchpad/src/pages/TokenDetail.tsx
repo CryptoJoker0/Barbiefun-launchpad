@@ -7,7 +7,10 @@ import { formatSupply } from "@/lib/launches";
 import { useLaunchById, useLaunches } from "@/hooks/useLaunches";
 import { SUPPORTED_CHAINS, DISPLAY_CHAINS } from "@/lib/wagmi";
 import ChainIcon from "@/components/ChainIcon";
-import { CheckCircle, ExternalLink, Copy, Clock, Info, Rocket, BadgeCheck, ShieldCheck, Share2, AlertTriangle } from "lucide-react";
+import {
+  CheckCircle, ExternalLink, Copy, Clock, Info, Rocket,
+  BadgeCheck, ShieldCheck, Share2, AlertTriangle, Search, TrendingUp,
+} from "lucide-react";
 
 const CHAIN_EXPLORERS: Record<number, string> = {
   56:      "https://bscscan.com/tx/",
@@ -18,6 +21,18 @@ const CHAIN_EXPLORERS: Record<number, string> = {
   4663:    "https://robinhoodchain.blockscout.com/tx/",
   [-1]:    "https://explorer.x1.xyz/tx/",
   [-2]:    "https://solscan.io/tx/",
+};
+
+/** DexScreener search URL per chain — universal DEX search by ticker */
+const DEXSCREENER_CHAIN: Record<number, string> = {
+  56:      "https://dexscreener.com/bsc",
+  8453:    "https://dexscreener.com/base",
+  196:     "https://dexscreener.com/xlayer",
+  4217:    "https://dexscreener.com/tempo",
+  5042002: "https://dexscreener.com/arc",
+  4663:    "https://dexscreener.com/robinhoodchain",
+  [-1]:    "https://dexscreener.com/x1",
+  [-2]:    "https://dexscreener.com/solana",
 };
 
 export default function TokenDetail() {
@@ -54,6 +69,8 @@ export default function TokenDetail() {
     DISPLAY_CHAINS.find((c) => c.id === launch.chainId);
   const explorerBase = CHAIN_EXPLORERS[launch.chainId];
   const explorerUrl = explorerBase ? `${explorerBase}${launch.feeTxHash}` : undefined;
+  const dexScreenerBase = DEXSCREENER_CHAIN[launch.chainId];
+  const dexSearchUrl = dexScreenerBase ? `${dexScreenerBase}?q=${encodeURIComponent(launch.ticker)}` : undefined;
 
   const isSvmChain = launch.chainId < 0;
   const deployerLaunches = allLaunches.filter(
@@ -73,13 +90,31 @@ export default function TokenDetail() {
     setTimeout(() => setShareMsg(null), 2500);
   };
 
+  const logoSrc = launch.logoUrl ? `/api/storage${launch.logoUrl}` : null;
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-in fade-in duration-500 pb-20">
       <div className="lg:col-span-2 space-y-5">
+        {/* Token header */}
         <div className="bg-white border border-pink-100 rounded-2xl p-6 shadow-sm">
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
             <div className="flex items-start space-x-4">
-              <div className="w-16 h-16 rounded-full border-2 border-pink-100 shadow-md shrink-0 bg-gradient-to-br from-pink-300 to-pink-400 flex items-center justify-center text-white font-black">
+              {/* Logo */}
+              {logoSrc ? (
+                <img
+                  src={logoSrc}
+                  alt={launch.ticker}
+                  className="w-16 h-16 rounded-full border-2 border-pink-100 shadow-md shrink-0 object-cover"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).style.display = "none";
+                    (e.currentTarget.nextSibling as HTMLElement | null)?.style.setProperty("display", "flex");
+                  }}
+                />
+              ) : null}
+              <div
+                className="w-16 h-16 rounded-full border-2 border-pink-100 shadow-md shrink-0 bg-gradient-to-br from-pink-300 to-pink-400 items-center justify-center text-white font-black"
+                style={{ display: logoSrc ? "none" : "flex" }}
+              >
                 {launch.ticker.slice(0, 2)}
               </div>
               <div>
@@ -162,6 +197,95 @@ export default function TokenDetail() {
           </div>
         )}
 
+        {/* ── Explorer & DEX Links ─────────────────────────────────────── */}
+        <div className="bg-white border border-pink-100 rounded-2xl p-5 shadow-sm">
+          <div className="flex items-center gap-2 mb-4">
+            <TrendingUp className="w-4 h-4 text-pink-500" />
+            <h3 className="font-extrabold text-pink-900 text-sm">Trade &amp; Explore</h3>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {dexSearchUrl && (
+              <a href={dexSearchUrl} target="_blank" rel="noopener noreferrer"
+                className="flex items-center gap-3 p-3 rounded-xl border border-pink-100 hover:border-pink-300 hover:bg-pink-50/50 transition-all group">
+                <div className="w-8 h-8 rounded-lg bg-pink-50 border border-pink-100 flex items-center justify-center shrink-0 group-hover:bg-pink-100 transition-colors">
+                  <Search className="w-4 h-4 text-pink-500" />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-xs font-bold text-pink-900">DexScreener</div>
+                  <div className="text-[10px] text-pink-400 truncate">Search ${launch.ticker} on {chainMeta?.name ?? launch.chainName}</div>
+                </div>
+                <ExternalLink className="w-3.5 h-3.5 text-pink-300 ml-auto shrink-0" />
+              </a>
+            )}
+            {chainMeta?.dex && (
+              <a href={chainMeta.dex} target="_blank" rel="noopener noreferrer"
+                className="flex items-center gap-3 p-3 rounded-xl border border-pink-100 hover:border-pink-300 hover:bg-pink-50/50 transition-all group">
+                <div className="w-8 h-8 rounded-lg bg-pink-50 border border-pink-100 flex items-center justify-center shrink-0 group-hover:bg-pink-100 transition-colors">
+                  <ChainIcon chain={chainMeta.icon} size={16} />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-xs font-bold text-pink-900">{chainMeta.name} DEX</div>
+                  <div className="text-[10px] text-pink-400 truncate">Trade on the native DEX</div>
+                </div>
+                <ExternalLink className="w-3.5 h-3.5 text-pink-300 ml-auto shrink-0" />
+              </a>
+            )}
+            {explorerUrl && (
+              <a href={explorerUrl} target="_blank" rel="noopener noreferrer"
+                className="flex items-center gap-3 p-3 rounded-xl border border-pink-100 hover:border-pink-300 hover:bg-pink-50/50 transition-all group">
+                <div className="w-8 h-8 rounded-lg bg-pink-50 border border-pink-100 flex items-center justify-center shrink-0 group-hover:bg-pink-100 transition-colors">
+                  <ExternalLink className="w-4 h-4 text-pink-500" />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-xs font-bold text-pink-900">Block Explorer</div>
+                  <div className="text-[10px] text-pink-400 truncate">View fee tx on {chainMeta?.name ?? launch.chainName}</div>
+                </div>
+                <ExternalLink className="w-3.5 h-3.5 text-pink-300 ml-auto shrink-0" />
+              </a>
+            )}
+          </div>
+        </div>
+
+        {/* ── OG Share Preview Card ───────────────────────────────────── */}
+        <div className="bg-white border border-pink-100 rounded-2xl p-5 shadow-sm">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Share2 className="w-4 h-4 text-pink-500" />
+              <h3 className="font-extrabold text-pink-900 text-sm">Share Preview</h3>
+            </div>
+            <span className="text-[10px] text-pink-400 font-semibold">How it looks on Twitter / Telegram</span>
+          </div>
+          {/* Mock social card */}
+          <div className="rounded-xl border border-slate-200 overflow-hidden shadow-sm max-w-sm">
+            <div className="bg-gradient-to-br from-pink-400 via-pink-500 to-pink-600 h-28 flex items-center justify-center relative">
+              {logoSrc ? (
+                <img src={logoSrc} alt={launch.ticker}
+                  className="w-16 h-16 rounded-full border-4 border-white shadow-lg object-cover" />
+              ) : (
+                <div className="w-16 h-16 rounded-full border-4 border-white shadow-lg bg-pink-300 flex items-center justify-center text-white font-black text-xl">
+                  {launch.ticker.slice(0, 2)}
+                </div>
+              )}
+              <span className="absolute bottom-2 right-3 text-white/70 text-[10px] font-bold">barbie.fun</span>
+            </div>
+            <div className="p-3 bg-white">
+              <div className="text-xs font-bold text-slate-800 leading-tight mb-0.5 truncate">
+                ${launch.ticker} — {launch.name} | Barbie Fun
+              </div>
+              <div className="text-[10px] text-slate-500 line-clamp-2">
+                {launch.description?.trim() || `${launch.name} launched on ${launch.chainName} via Barbie Fun. Fair launch, $5 fee.`}
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={shareToken}
+            className="mt-3 flex items-center gap-2 text-sm font-semibold text-pink-600 hover:text-pink-800 transition-colors"
+          >
+            <Copy className="w-3.5 h-3.5" />
+            {shareMsg ?? "Copy share link"}
+          </button>
+        </div>
+
         {/* Deployer History */}
         {deployerLaunches.length > 0 && (
           <div className="bg-white border border-pink-100 rounded-2xl p-5 shadow-sm">
@@ -190,7 +314,7 @@ export default function TokenDetail() {
         )}
       </div>
 
-      {/* Right: fee & chain info + safety */}
+      {/* Right sidebar: fee & chain info + safety */}
       <div className="space-y-4">
         <div className="bg-white border border-pink-100 rounded-2xl shadow-sm overflow-hidden sticky top-20">
           <div className="bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 px-5 py-3">
@@ -211,20 +335,11 @@ export default function TokenDetail() {
               </div>
             </div>
 
-            {/* Share button */}
-            <button
-              onClick={shareToken}
-              className="w-full flex items-center justify-center gap-2 text-sm font-semibold text-pink-600 border border-pink-200/60 rounded-xl py-2.5 hover:bg-pink-50 transition-colors"
-            >
-              <Share2 className="w-4 h-4" />
-              {shareMsg ?? "Copy Share Link"}
-            </button>
-
             {chainMeta && (
-              <a href={chainMeta.dex} target="_blank" rel="noopener noreferrer">
+              <a href={dexSearchUrl ?? chainMeta.dex} target="_blank" rel="noopener noreferrer">
                 <Button className="w-full bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 text-white font-extrabold text-base h-12 rounded-xl">
-                  <ExternalLink className="w-4 h-4 mr-2" />
-                  Open {chainMeta.name} DEX
+                  <TrendingUp className="w-4 h-4 mr-2" />
+                  {dexSearchUrl ? `Find $${launch.ticker}` : `Open ${chainMeta.name} DEX`}
                 </Button>
               </a>
             )}

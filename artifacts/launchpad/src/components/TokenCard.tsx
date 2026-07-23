@@ -26,7 +26,21 @@ export default function TokenCard({ launch }: { launch: Launch }) {
         <div className="p-4">
           <div className="flex items-start justify-between mb-3">
             <div className="flex items-center space-x-2.5 min-w-0">
-              <div className="w-10 h-10 rounded-full border-2 border-pink-100 shadow-sm shrink-0 bg-gradient-to-br from-pink-300 to-pink-400 flex items-center justify-center text-white font-black text-xs">
+              {launch.logoUrl ? (
+                <img
+                  src={`/api/storage${launch.logoUrl}`}
+                  alt={launch.ticker}
+                  className="w-10 h-10 rounded-full border-2 border-pink-100 shadow-sm shrink-0 object-cover"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).style.display = "none";
+                    (e.currentTarget.nextSibling as HTMLElement | null)?.style.setProperty("display", "flex");
+                  }}
+                />
+              ) : null}
+              <div
+                className="w-10 h-10 rounded-full border-2 border-pink-100 shadow-sm shrink-0 bg-gradient-to-br from-pink-300 to-pink-400 items-center justify-center text-white font-black text-xs"
+                style={{ display: launch.logoUrl ? "none" : "flex" }}
+              >
                 {launch.ticker.slice(0, 2)}
               </div>
               <div className="min-w-0">

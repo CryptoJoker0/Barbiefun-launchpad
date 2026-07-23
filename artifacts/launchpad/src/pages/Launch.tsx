@@ -16,8 +16,9 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
   Rocket, CheckCircle2, Upload, AlertCircle, Wallet,
-  ExternalLink, Info, Copy,
+  ExternalLink, Info, Copy, ImageIcon,
 } from "lucide-react";
+import { useUpload } from "@/hooks/useUpload";
 import { motion } from "framer-motion";
 import { useAccount, useSendTransaction, useSwitchChain } from "wagmi";
 import { parseEther, parseUnits, isAddress } from "viem";
@@ -79,6 +80,12 @@ export default function Launch() {
     website: "", twitter: "", telegram: "",
     decimals: "9", mintAuthority: true, freezeAuthority: false,
   });
+  const [logoObjectPath, setLogoObjectPath] = useState<string | null>(null);
+  const [logoPreviewUrl, setLogoPreviewUrl] = useState<string | null>(null);
+  const { uploadFile, isUploading: isUploadingLogo } = useUpload({
+    onSuccess: (res) => setLogoObjectPath(res.objectPath),
+    onError: (err) => console.error("Logo upload failed", err),
+  });
 
   const { sendTransactionAsync, isPending: isSending } = useSendTransaction();
 
@@ -108,6 +115,14 @@ export default function Launch() {
 
   const fd = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setFormData((prev) => ({ ...prev, [field]: e.target.value }));
+
+  const handleLogoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    // Show local preview immediately
+    setLogoPreviewUrl(URL.createObjectURL(file));
+    await uploadFile(file);
+  };
 
   // EVM submit
   const handleEvmSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -141,6 +156,7 @@ export default function Launch() {
         mintAuthority: formData.mintAuthority,
         freezeAuthority: formData.freezeAuthority,
         referredBy: getReferral(),
+        logoUrl: logoObjectPath ?? null,
       });
 
       setSuccessData({
@@ -197,6 +213,7 @@ export default function Launch() {
         mintAuthority: formData.mintAuthority,
         freezeAuthority: formData.freezeAuthority,
         referredBy: getReferral(),
+        logoUrl: logoObjectPath ?? null,
       });
       const explorer = selectedSvmChain.id === -2 ? "https://solscan.io/tx/" : "https://explorer.x1.xyz/tx/";
       setSuccessData({
@@ -447,11 +464,32 @@ export default function Launch() {
                   <CardDescription>Upload a square image (PNG/SVG, max 2MB)</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <label className="flex flex-col items-center justify-center w-full h-36 border-2 border-dashed border-pink-300/60 rounded-2xl cursor-pointer hover:bg-pink-50 transition-colors">
-                    <Upload className="w-8 h-8 text-pink-400 mb-2" />
-                    <span className="text-sm font-semibold text-pink-500">Click to upload</span>
-                    <input type="file" className="hidden" accept="image/*" />
+                  <label className="flex flex-col items-center justify-center w-full h-36 border-2 border-dashed border-pink-300/60 rounded-2xl cursor-pointer hover:bg-pink-50 transition-colors relative overflow-hidden">
+                    {logoPreviewUrl ? (
+                      <img src={logoPreviewUrl} alt="Logo preview" className="absolute inset-0 w-full h-full object-contain p-2" />
+                    ) : isUploadingLogo ? (
+                      <>
+                        <div className="w-6 h-6 border-2 border-pink-300 border-t-pink-500 rounded-full animate-spin mb-2" />
+                        <span className="text-xs font-semibold text-pink-400">Uploading…</span>
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="w-8 h-8 text-pink-400 mb-2" />
+                        <span className="text-sm font-semibold text-pink-500">Click to upload</span>
+                      </>
+                    )}
+                    <input type="file" className="hidden" accept="image/*" onChange={handleLogoChange} />
                   </label>
+                  {logoObjectPath && (
+                    <p className="mt-2 text-xs text-emerald-600 font-semibold flex items-center gap-1">
+                      <CheckCircle2 className="w-3.5 h-3.5" /> Logo uploaded
+                    </p>
+                  )}
+                  {logoPreviewUrl && !logoObjectPath && !isUploadingLogo && (
+                    <p className="mt-2 text-xs text-amber-500 font-semibold flex items-center gap-1">
+                      <ImageIcon className="w-3.5 h-3.5" /> Upload in progress…
+                    </p>
+                  )}
                 </CardContent>
               </Card>
               <Card className="border-pink-100 shadow-sm">

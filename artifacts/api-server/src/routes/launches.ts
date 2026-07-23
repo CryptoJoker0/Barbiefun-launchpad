@@ -31,7 +31,8 @@ router.post("/launches", async (req, res) => {
   try {
     const b = req.body;
     if (!b.id || !b.name || !b.ticker || b.chainId == null || !b.deployer || !b.feeTxHash) {
-      return res.status(400).json({ error: "Missing required fields: id, name, ticker, chainId, deployer, feeTxHash" });
+      res.status(400).json({ error: "Missing required fields: id, name, ticker, chainId, deployer, feeTxHash" });
+      return;
     }
 
     const [launch] = await db
@@ -53,13 +54,15 @@ router.post("/launches", async (req, res) => {
         mintAuthority: Boolean(b.mintAuthority ?? true),
         freezeAuthority: Boolean(b.freezeAuthority ?? false),
         referredBy: b.referredBy ? String(b.referredBy) : null,
+        logoUrl: b.logoUrl ? String(b.logoUrl) : null,
       })
       .returning();
 
     res.status(201).json(launch);
   } catch (err: any) {
     if (err?.code === "23505") {
-      return res.status(409).json({ error: "A launch with this ID already exists" });
+      res.status(409).json({ error: "A launch with this ID already exists" });
+      return;
     }
     res.status(500).json({ error: "Failed to create launch" });
   }
@@ -72,7 +75,7 @@ router.get("/launches/:id", async (req, res) => {
       .select()
       .from(launchesTable)
       .where(eq(launchesTable.id, req.params.id));
-    if (!launch) return res.status(404).json({ error: "Launch not found" });
+    if (!launch) { res.status(404).json({ error: "Launch not found" }); return; }
     res.json(launch);
   } catch {
     res.status(500).json({ error: "Failed to fetch launch" });
@@ -88,7 +91,7 @@ router.patch("/launches/:id/verify", async (req, res) => {
       .set({ verified })
       .where(eq(launchesTable.id, req.params.id))
       .returning();
-    if (!updated) return res.status(404).json({ error: "Launch not found" });
+    if (!updated) { res.status(404).json({ error: "Launch not found" }); return; }
     res.json(updated);
   } catch {
     res.status(500).json({ error: "Failed to update launch" });
@@ -104,7 +107,7 @@ router.get("/og/:id", async (req, res) => {
       .select()
       .from(launchesTable)
       .where(eq(launchesTable.id, req.params.id));
-    if (!launch) return res.status(404).send("Launch not found");
+    if (!launch) { res.status(404).send("Launch not found"); return; }
 
     const baseUrl = process.env.REPLIT_DEV_DOMAIN
       ? `https://${process.env.REPLIT_DEV_DOMAIN}`
@@ -113,7 +116,10 @@ router.get("/og/:id", async (req, res) => {
     const title = esc(`$${launch.ticker} — ${launch.name} | Barbie Fun`);
     const rawDesc = launch.description?.trim() || `${launch.name} launched on ${launch.chainName} via Barbie Fun. Fair launch, $5 fee.`;
     const desc = esc(rawDesc.slice(0, 200));
-    const imageUrl = esc(`${baseUrl}/barbie-fun-banner.png`);
+    // Use token logo if available, otherwise fall back to the generic banner
+    const imageUrl = launch.logoUrl
+      ? esc(`${baseUrl}/api/storage${launch.logoUrl}`)
+      : esc(`${baseUrl}/barbie-fun-banner.png`);
     const tokenUrl = esc(`${baseUrl}/token/${launch.id}`);
 
     res.setHeader("Content-Type", "text/html; charset=utf-8");

@@ -31,6 +31,8 @@ export type Launch = {
   freezeAuthority?: boolean;
   /** Referral code captured from ?ref= at the time of launch */
   referredBy?: string | null;
+  /** Object storage path for the token logo (/objects/uploads/<uuid>) or null */
+  logoUrl?: string | null;
 };
 
 export type CreateLaunch = Omit<Launch, "createdAt">;
