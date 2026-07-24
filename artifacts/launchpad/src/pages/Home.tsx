@@ -3,7 +3,7 @@ import { Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Rocket, Clock, Trophy, ArrowLeftRight, Sparkles, DollarSign, Link2, Heart, BadgeCheck, Search } from "lucide-react";
+import { Rocket, Clock, Trophy, ArrowLeftRight, Sparkles, DollarSign, Link2, Heart, BadgeCheck, Search, Radio, ShieldCheck, Cpu, Zap, Globe, Users } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import RecentLaunches from "@/components/RecentLaunches";
 import TokenCard from "@/components/TokenCard";
@@ -310,6 +310,136 @@ export default function Home() {
           )}
         </Tabs>
       </section>
+
+      {/* Live Stream Section */}
+      <motion.section
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ duration: 0.6 }}
+        className="bg-white border border-pink-100 rounded-3xl overflow-hidden shadow-sm"
+      >
+        <div className="flex items-center justify-between px-6 py-4 border-b border-pink-50">
+          <div className="flex items-center gap-2.5">
+            <div className="relative">
+              <Radio className="w-5 h-5 text-pink-500" />
+              <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-red-500 rounded-full animate-ping" />
+              <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-red-500 rounded-full" />
+            </div>
+            <h2 className="text-lg font-extrabold text-pink-900">Barbie Fun Live</h2>
+            <span className="text-[10px] font-bold bg-red-500 text-white rounded-full px-2 py-0.5 uppercase tracking-widest">Live</span>
+          </div>
+          <a
+            href={TELEGRAM_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs font-semibold text-pink-500 hover:text-pink-700 transition-colors flex items-center gap-1"
+          >
+            Watch on Telegram <ArrowLeftRight className="w-3 h-3" />
+          </a>
+        </div>
+        <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
+          <iframe
+            src="https://www.youtube.com/embed/live_stream?channel=UCBarbieFunV2&autoplay=0&rel=0&modestbranding=1"
+            title="Barbie Fun Live Stream"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            className="absolute inset-0 w-full h-full"
+          />
+        </div>
+        <div className="px-6 py-4 bg-gradient-to-r from-pink-50 to-fuchsia-50 flex flex-wrap items-center gap-4">
+          <div className="flex items-center gap-2 text-sm font-semibold text-pink-700">
+            <Users className="w-4 h-4 text-pink-400" />
+            Live token launches, alpha calls & community events
+          </div>
+          <div className="flex gap-2 ml-auto">
+            <a href={TWITTER_URL} target="_blank" rel="noopener noreferrer"
+              className="flex items-center gap-1.5 bg-white border border-pink-100 hover:border-pink-300 text-pink-600 text-xs font-bold px-3 py-1.5 rounded-full transition-colors shadow-sm">
+              <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 fill-current"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.261 5.636 5.903-5.636zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+              Follow on X
+            </a>
+            <a href={TELEGRAM_URL} target="_blank" rel="noopener noreferrer"
+              className="flex items-center gap-1.5 bg-pink-500 hover:bg-pink-600 text-white text-xs font-bold px-3 py-1.5 rounded-full transition-colors shadow-sm">
+              <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 fill-white"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+              Join Telegram
+            </a>
+          </div>
+        </div>
+      </motion.section>
+
+      {/* BarbieFun Validator Section */}
+      <motion.section
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ duration: 0.6, delay: 0.1 }}
+        className="relative overflow-hidden rounded-3xl border border-pink-100 bg-white shadow-sm"
+      >
+        {/* Subtle animated BG */}
+        <div className="absolute inset-0 bg-gradient-to-br from-pink-50 via-white to-fuchsia-50 pointer-events-none" />
+        <div className="absolute -top-16 -right-16 w-64 h-64 bg-pink-100/40 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-16 -left-16 w-64 h-64 bg-fuchsia-100/40 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="relative z-10 p-6 sm:p-8">
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-pink-400 to-fuchsia-500 flex items-center justify-center shadow-lg shadow-pink-200">
+                <ShieldCheck className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h2 className="text-xl font-extrabold text-pink-900 leading-tight">BarbieFun Validator</h2>
+                <p className="text-xs text-pink-400 font-semibold">Powered by X1 Blockchain · SVM</p>
+              </div>
+            </div>
+            <a
+              href="https://x1.wiki/validator"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-pink-500 to-fuchsia-500 hover:from-pink-600 hover:to-fuchsia-600 text-white text-sm font-bold px-5 py-2.5 rounded-full shadow-md shadow-pink-200 transition-all hover:-translate-y-0.5 w-fit"
+            >
+              <Zap className="w-4 h-4" />
+              Stake &amp; Delegate
+            </a>
+          </div>
+
+          {/* Stats grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
+            {[
+              { icon: ShieldCheck, label: "Network",      value: "X1 Blockchain", sub: "SVM Mainnet" },
+              { icon: Cpu,         label: "Role",         value: "Validator",      sub: "Block producer" },
+              { icon: Globe,       label: "Status",       value: "Active",         sub: "Epoch ongoing", green: true },
+              { icon: Zap,         label: "Commission",   value: "0%",             sub: "No fees to stakers" },
+            ].map(({ icon: Icon, label, value, sub, green }) => (
+              <div key={label} className="bg-pink-50/70 border border-pink-100 rounded-2xl p-4 flex flex-col gap-1">
+                <div className="flex items-center gap-1.5 text-pink-400 mb-1">
+                  <Icon className="w-3.5 h-3.5" />
+                  <span className="text-[10px] font-bold uppercase tracking-widest">{label}</span>
+                </div>
+                <span className={`text-base font-extrabold leading-tight ${green ? "text-emerald-600" : "text-pink-900"}`}>{value}</span>
+                <span className="text-[11px] text-pink-400 font-medium">{sub}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Why stake */}
+          <div className="grid sm:grid-cols-3 gap-3">
+            {[
+              { icon: Heart,       title: "Community-run",  body: "BarbieFun runs its own validator to keep the X1 network decentralised and support the Barbie Fun ecosystem." },
+              { icon: ShieldCheck, title: "Trusted & secure", body: "Operated with 24/7 monitoring, redundant infra, and slashing protection to keep your stake safe." },
+              { icon: Zap,         title: "0% commission",  body: "100% of staking rewards flow straight to delegators — zero fees taken by the validator operator." },
+            ].map(({ icon: Icon, title, body }) => (
+              <div key={title} className="bg-gradient-to-br from-white to-pink-50 border border-pink-100 rounded-2xl p-4">
+                <div className="w-8 h-8 rounded-xl bg-pink-100 flex items-center justify-center mb-3">
+                  <Icon className="w-4 h-4 text-pink-500" />
+                </div>
+                <h3 className="font-bold text-pink-900 text-sm mb-1">{title}</h3>
+                <p className="text-xs text-pink-500 leading-relaxed">{body}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </motion.section>
 
       {/* Community Section */}
       <motion.section

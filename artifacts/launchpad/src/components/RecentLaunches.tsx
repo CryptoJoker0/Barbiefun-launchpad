@@ -45,7 +45,23 @@ export default function RecentLaunches({ launches }: { launches: Launch[] }) {
               <Link key={launch.id} href={`/token/${launch.id}`}>
                 <div className="flex items-center justify-between py-3 group cursor-pointer">
                   <div className="flex items-center space-x-3 min-w-0">
-                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-pink-300 to-pink-400 flex items-center justify-center text-white font-black text-[10px] shrink-0">
+                    {launch.logoUrl ? (
+                      <img
+                        src={`/api/storage${launch.logoUrl}`}
+                        alt={launch.ticker}
+                        className="w-9 h-9 rounded-full border border-pink-100 shrink-0 object-cover"
+                        onError={(e) => {
+                          const el = e.currentTarget;
+                          el.style.display = "none";
+                          const fb = el.nextElementSibling as HTMLElement | null;
+                          if (fb) fb.style.display = "flex";
+                        }}
+                      />
+                    ) : null}
+                    <div
+                      className="w-9 h-9 rounded-full bg-gradient-to-br from-pink-300 to-pink-400 items-center justify-center text-white font-black text-[10px] shrink-0"
+                      style={{ display: launch.logoUrl ? "none" : "flex" }}
+                    >
                       {launch.ticker.slice(0, 2)}
                     </div>
                     <div className="min-w-0">
