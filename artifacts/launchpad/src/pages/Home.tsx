@@ -408,15 +408,15 @@ export default function Home() {
             {[
               { icon: ShieldCheck, label: "Network",      value: "X1 Blockchain", sub: "SVM Mainnet" },
               { icon: Cpu,         label: "Role",         value: "Validator",      sub: "Block producer" },
-              { icon: Globe,       label: "Status",       value: "Active",         sub: "Epoch ongoing", green: true },
+              { icon: Globe,       label: "Status",       value: "Pending",        sub: "Awaiting activation", amber: true },
               { icon: Zap,         label: "Commission",   value: "0%",             sub: "No fees to stakers" },
-            ].map(({ icon: Icon, label, value, sub, green }) => (
+            ].map(({ icon: Icon, label, value, sub, green, amber }: { icon: React.ElementType; label: string; value: string; sub: string; green?: boolean; amber?: boolean }) => (
               <div key={label} className="bg-pink-50/70 border border-pink-100 rounded-2xl p-4 flex flex-col gap-1">
                 <div className="flex items-center gap-1.5 text-pink-400 mb-1">
                   <Icon className="w-3.5 h-3.5" />
                   <span className="text-[10px] font-bold uppercase tracking-widest">{label}</span>
                 </div>
-                <span className={`text-base font-extrabold leading-tight ${green ? "text-emerald-600" : "text-pink-900"}`}>{value}</span>
+                <span className={`text-base font-extrabold leading-tight ${green ? "text-emerald-600" : amber ? "text-amber-500" : "text-pink-900"}`}>{value}</span>
                 <span className="text-[11px] text-pink-400 font-medium">{sub}</span>
               </div>
             ))}
