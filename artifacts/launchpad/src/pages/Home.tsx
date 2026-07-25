@@ -3,7 +3,7 @@ import { Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Rocket, Clock, Trophy, ArrowLeftRight, Sparkles, DollarSign, Link2, Heart, BadgeCheck, Search, Radio, ShieldCheck, Cpu, Zap, Globe, Users } from "lucide-react";
+import { Rocket, Clock, Trophy, ArrowLeftRight, Sparkles, DollarSign, Link2, Heart, BadgeCheck, Search, Radio, ShieldCheck, Cpu, Zap, Globe, Users, ExternalLink, Video } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import RecentLaunches from "@/components/RecentLaunches";
 import TokenCard from "@/components/TokenCard";
@@ -12,6 +12,7 @@ import X1TokenTracker from "@/components/X1TokenTracker";
 import ChainIcon from "@/components/ChainIcon";
 import { SUPPORTED_CHAINS, DISPLAY_CHAINS } from "@/lib/wagmi";
 import { useLaunches } from "@/hooks/useLaunches";
+import { useLiveStream } from "@/hooks/useLiveStream";
 
 const TELEGRAM_URL = "https://t.me/barbiefunv2/65";
 const TWITTER_URL = "https://x.com/BARBIEFUNV2";
@@ -20,6 +21,12 @@ export default function Home() {
   const [tab, setTab] = useState("new");
   const [search, setSearch] = useState("");
   const { data: launches = [], isLoading } = useLaunches();
+  const { data: liveStream } = useLiveStream();
+  const goLiveUrl = liveStream?.goLiveUrl || TELEGRAM_URL;
+  const videoUrl = liveStream?.videoObjectPath
+    ? `/api/storage${liveStream.videoObjectPath}`
+    : null;
+  const hasLivePlayer = Boolean(liveStream?.embedUrl || videoUrl);
 
   const getFiltered = () => {
     switch (tab) {
@@ -327,26 +334,53 @@ export default function Home() {
               <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-red-500 rounded-full" />
             </div>
             <h2 className="text-lg font-extrabold text-pink-900">Barbie Fun Live</h2>
-            <span className="text-[10px] font-bold bg-red-500 text-white rounded-full px-2 py-0.5 uppercase tracking-widest">Live</span>
+            <span className={`text-[10px] font-bold text-white rounded-full px-2 py-0.5 uppercase tracking-widest ${liveStream?.isLive ? "bg-red-500" : "bg-pink-400"}`}>
+              {liveStream?.isLive ? "Live" : "Community"}
+            </span>
           </div>
           <a
-            href={TELEGRAM_URL}
+             href={goLiveUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="text-xs font-semibold text-pink-500 hover:text-pink-700 transition-colors flex items-center gap-1"
           >
-            Watch on Telegram <ArrowLeftRight className="w-3 h-3" />
+             Go Live <ExternalLink className="w-3 h-3" />
           </a>
         </div>
-        <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
-          <iframe
-            src="https://www.youtube.com/embed/live_stream?channel=UCBarbieFunV2&autoplay=0&rel=0&modestbranding=1"
-            title="Barbie Fun Live Stream"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            className="absolute inset-0 w-full h-full"
-          />
-        </div>
+         {hasLivePlayer ? (
+           <div className="relative w-full bg-slate-950" style={{ paddingBottom: "56.25%" }}>
+             {videoUrl ? (
+               <video
+                 controls
+                 playsInline
+                 className="absolute inset-0 w-full h-full object-contain"
+                 aria-label={liveStream?.videoTitle || liveStream?.title || "Barbie Fun video"}
+               >
+                 <source src={videoUrl} />
+                 Your browser does not support embedded video.
+               </video>
+             ) : (
+               <iframe
+                 src={liveStream?.embedUrl || undefined}
+                 title={liveStream?.title || "Barbie Fun Live Stream"}
+                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                 allowFullScreen
+                 className="absolute inset-0 w-full h-full"
+               />
+             )}
+           </div>
+         ) : (
+           <div className="bg-gradient-to-br from-pink-50 via-white to-fuchsia-50 px-6 py-14 text-center">
+             <Video className="w-10 h-10 text-pink-300 mx-auto mb-3" />
+             <h3 className="text-lg font-extrabold text-pink-900 mb-1">No stream is scheduled right now</h3>
+             <p className="text-sm text-pink-500 max-w-md mx-auto mb-5">
+               Follow Barbie Fun for the next launch, community event, and live token announcement.
+             </p>
+             <a href={goLiveUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-full bg-pink-500 hover:bg-pink-600 text-white text-sm font-bold px-5 py-2.5 shadow-sm transition-colors">
+               Go Live <ExternalLink className="w-4 h-4" />
+             </a>
+           </div>
+         )}
         <div className="px-6 py-4 bg-gradient-to-r from-pink-50 to-fuchsia-50 flex flex-wrap items-center gap-4">
           <div className="flex items-center gap-2 text-sm font-semibold text-pink-700">
             <Users className="w-4 h-4 text-pink-400" />
@@ -358,10 +392,10 @@ export default function Home() {
               <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 fill-current"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.261 5.636 5.903-5.636zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
               Follow on X
             </a>
-            <a href={TELEGRAM_URL} target="_blank" rel="noopener noreferrer"
+             <a href={goLiveUrl} target="_blank" rel="noopener noreferrer"
               className="flex items-center gap-1.5 bg-pink-500 hover:bg-pink-600 text-white text-xs font-bold px-3 py-1.5 rounded-full transition-colors shadow-sm">
               <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 fill-white"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
-              Join Telegram
+               Go Live
             </a>
           </div>
         </div>

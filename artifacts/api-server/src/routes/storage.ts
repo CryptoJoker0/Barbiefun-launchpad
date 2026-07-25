@@ -8,9 +8,9 @@ const objectStorageService = new ObjectStorageService();
 /**
  * POST /storage/uploads/request-url
  *
- * Request a presigned URL for logo upload.
+ * Request a presigned URL for logo and live video uploads.
  * No auth required — this is a public launchpad; anyone launching a token
- * may upload a logo. File size is capped at 2 MB server-side.
+ * may upload a logo or a live video. Images are capped at 2 MB and videos at 100 MB.
  */
 router.post(
   "/storage/uploads/request-url",
@@ -21,13 +21,18 @@ router.post(
       return;
     }
 
-    if (size > 2 * 1024 * 1024) {
-      res.status(413).json({ error: "File too large — maximum 2 MB" });
+    const isImage = contentType.startsWith("image/");
+    const isVideo = contentType.startsWith("video/");
+    if (!isImage && !isVideo) {
+      res.status(400).json({ error: "Only image and video uploads are accepted" });
       return;
     }
 
-    if (!contentType.startsWith("image/")) {
-      res.status(400).json({ error: "Only image uploads are accepted" });
+    const maxSize = isVideo ? 100 * 1024 * 1024 : 2 * 1024 * 1024;
+    if (size > maxSize) {
+      res.status(413).json({
+        error: `File too large — maximum ${isVideo ? "100 MB" : "2 MB"}`,
+      });
       return;
     }
 
@@ -45,7 +50,7 @@ router.post(
 /**
  * GET /storage/objects/*
  *
- * Serve uploaded token logos from PRIVATE_OBJECT_DIR.
+ * Serve uploaded token logos and live videos from PRIVATE_OBJECT_DIR.
  * Public — no auth needed; logos are intentionally public.
  */
 router.get("/storage/objects/*path", async (req: Request, res: Response) => {
@@ -62,19 +67,20 @@ router.get("/storage/objects/*path", async (req: Request, res: Response) => {
     // Anything else is served as an inert attachment so browsers never
     // interpret it as HTML/JS on this origin.
     const storedContentType = response.headers.get("content-type") ?? "";
-    const ALLOWED_IMAGE_TYPES = [
+    const ALLOWED_MEDIA_TYPES = [
       "image/png", "image/jpeg", "image/gif", "image/webp",
       "image/svg+xml", "image/bmp", "image/tiff", "image/x-icon",
+      "video/mp4", "video/webm", "video/ogg", "video/quicktime",
     ];
-    const isAllowedImage = ALLOWED_IMAGE_TYPES.some(
+    const isAllowedMedia = ALLOWED_MEDIA_TYPES.some(
       (t) => storedContentType.startsWith(t),
     );
 
     res.setHeader("X-Content-Type-Options", "nosniff");
     res.setHeader("Content-Security-Policy", "default-src 'none'");
 
-    if (!isAllowedImage) {
-      // Force inert download so non-image uploads cannot execute in-browser
+    if (!isAllowedMedia) {
+      // Force inert download so unknown uploaded content cannot execute in-browser
       res.setHeader("Content-Type", "application/octet-stream");
       res.setHeader("Content-Disposition", "attachment");
     } else {

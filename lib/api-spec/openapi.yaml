@@ -10,6 +10,8 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: live-stream
+    description: Public live stream configuration
 paths:
   /healthz:
     get:
@@ -24,6 +26,35 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /live-stream:
+    get:
+      operationId: getLiveStreamSettings
+      tags: [live-stream]
+      summary: Get the current live stream configuration
+      responses:
+        "200":
+          description: Live stream configuration
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LiveStreamSettings"
+    put:
+      operationId: updateLiveStreamSettings
+      tags: [live-stream]
+      summary: Update the live stream configuration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LiveStreamSettingsInput"
+      responses:
+        "200":
+          description: Updated live stream configuration
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LiveStreamSettings"
 components:
   schemas:
     HealthStatus:
@@ -33,4 +64,45 @@ components:
           type: string
       required:
         - status
+    LiveStreamSettings:
+      type: object
+      properties:
+        id:
+          type: string
+        isLive:
+          type: boolean
+        title:
+          type: string
+        embedUrl:
+          type: [string, "null"]
+          format: uri
+        goLiveUrl:
+          type: [string, "null"]
+          format: uri
+        videoObjectPath:
+          type: [string, "null"]
+        videoTitle:
+          type: [string, "null"]
+        updatedAt:
+          type: string
+          format: date-time
+      required: [id, isLive, title, embedUrl, goLiveUrl, videoObjectPath, videoTitle, updatedAt]
+    LiveStreamSettingsInput:
+      type: object
+      properties:
+        isLive:
+          type: boolean
+        title:
+          type: string
+        embedUrl:
+          type: [string, "null"]
+          format: uri
+        goLiveUrl:
+          type: [string, "null"]
+          format: uri
+        videoObjectPath:
+          type: [string, "null"]
+        videoTitle:
+          type: [string, "null"]
+      required: [isLive, title]
 

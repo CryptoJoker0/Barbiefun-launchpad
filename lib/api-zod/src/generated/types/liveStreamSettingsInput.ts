@@ -5,23 +5,7 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
-export interface HealthStatus {
-  status: string;
-}
-export interface LiveStreamSettings {
-  id: string;
-  isLive: boolean;
-  title: string;
-  /** @nullable */
-  embedUrl: string | null;
-  /** @nullable */
-  goLiveUrl: string | null;
-  /** @nullable */
-  videoObjectPath: string | null;
-  /** @nullable */
-  videoTitle: string | null;
-  updatedAt: string;
-}
+
 export interface LiveStreamSettingsInput {
   isLive: boolean;
   title: string;
@@ -34,4 +18,3 @@ export interface LiveStreamSettingsInput {
   /** @nullable */
   videoTitle?: string | null;
 }
-

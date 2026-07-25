@@ -27,15 +27,23 @@ A multi-chain fair-launch token launchpad ("Barbie Fun") — lets users launch, 
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `artifacts/launchpad` — React/Vite public launchpad and admin dashboard.
+- `artifacts/api-server` — Express API, including launch records, live-stream settings, and object-storage routes.
+- `lib/db/src/schema` — Drizzle source of truth for PostgreSQL tables.
+- `lib/api-spec/openapi.yaml` — source of truth for generated API client/Zod types.
+- `artifacts/launchpad/src/pages/Home.tsx` — public live section with embed, uploaded-video, and no-stream states.
+- `artifacts/launchpad/src/pages/Admin.tsx` — admin Live Stream tab for Go Live links, embeds, and video uploads.
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- Live-stream configuration is stored as one database row (`default`) so all visitors see the same current settings.
+- Uploaded videos use the existing two-step presigned Object Storage flow; the API receives metadata and the browser sends file bytes directly to storage.
+- The public page prioritizes an uploaded video over an embed, then shows a useful no-stream state instead of rendering a broken hard-coded iframe.
+- Stream settings are public to read, while the current admin password remains a client-side UX gate and is not a security boundary.
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+Barbie Fun is a multi-chain fair-launch token platform. Visitors can browse launches, inspect supported chains, connect wallets, launch tokens, bridge assets, and follow community activity. Admins can review launches and configure the public live-stream experience.
 
 ## User preferences
 
@@ -43,7 +51,10 @@ _Populate as you build — explicit user instructions worth remembering across s
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- Start the managed services from the Replit workflow list: `artifacts/launchpad: web` and `artifacts/api-server: API Server`.
+- `pnpm run typecheck` is the canonical workspace verification command.
+- Run `pnpm --filter @workspace/db run push` after changing Drizzle schemas, then regenerate API types with `pnpm --filter @workspace/api-spec run codegen` after changing `lib/api-spec/openapi.yaml`.
+- Public video uploads are limited to supported video MIME types and 100 MB; token logos remain limited to images and 2 MB.
 
 ## Pointers
 

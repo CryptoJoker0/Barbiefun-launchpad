@@ -1,12 +1,14 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
-import { Rocket, DollarSign, CheckCircle2, Link2, TrendingUp, BadgeCheck, Activity, Settings, ShieldCheck, Zap, AlertCircle, Plus, X } from "lucide-react";
+import { Rocket, DollarSign, CheckCircle2, Link2, TrendingUp, BadgeCheck, Activity, Settings, ShieldCheck, Zap, AlertCircle, Plus, X, Radio, Upload, Video } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ChainIcon from "@/components/ChainIcon";
 import { SUPPORTED_CHAINS, DISPLAY_CHAINS } from "@/lib/wagmi";
 import { type Launch } from "@/lib/launches";
 import { useLaunches, useAddLaunch, useSetVerified } from "@/hooks/useLaunches";
 import { LAUNCH_FEE_USD } from "@/lib/pricing";
+import { useLiveStream, useUpdateLiveStream } from "@/hooks/useLiveStream";
+import { useUpload } from "@/hooks/useUpload";
 
 // NOTE: VITE_* env vars are included in the client bundle and visible in browser
 // devtools — this gate is a UX deterrent only, not a security boundary.
@@ -19,10 +21,35 @@ export default function Admin() {
   const [authenticated, setAuthenticated] = useState(!ADMIN_PASSWORD);
   const [pw, setPw] = useState("");
   const [pwError, setPwError] = useState(false);
-  const [tab, setTab] = useState<"overview" | "launches" | "chains" | "add" | "referrals" | "settings">("overview");
+  const [tab, setTab] = useState<"overview" | "launches" | "chains" | "add" | "referrals" | "live" | "settings">("overview");
   const { data: launches = [], refetch } = useLaunches();
   const addLaunchMutation = useAddLaunch();
   const setVerifiedMutation = useSetVerified();
+  const { data: liveStream } = useLiveStream();
+  const updateLiveMutation = useUpdateLiveStream();
+  const [liveForm, setLiveForm] = useState({
+    isLive: false,
+    title: "Barbie Fun Live",
+    embedUrl: "",
+    goLiveUrl: "https://t.me/barbiefunv2/65",
+    videoObjectPath: "",
+    videoTitle: "",
+  });
+  const [liveMessage, setLiveMessage] = useState<string | null>(null);
+  const [liveError, setLiveError] = useState<string | null>(null);
+  const { uploadFile, isUploading: isUploadingVideo, progress: uploadProgress } = useUpload();
+
+  useEffect(() => {
+    if (!liveStream) return;
+    setLiveForm({
+      isLive: liveStream.isLive,
+      title: liveStream.title,
+      embedUrl: liveStream.embedUrl ?? "",
+      goLiveUrl: liveStream.goLiveUrl ?? "",
+      videoObjectPath: liveStream.videoObjectPath ?? "",
+      videoTitle: liveStream.videoTitle ?? "",
+    });
+  }, [liveStream]);
 
   const BLANK_ADD_FORM = {
     name: "", ticker: "", description: "",
@@ -83,6 +110,37 @@ export default function Admin() {
   };
 
   const refresh = () => refetch();
+
+  const handleSaveLiveStream = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLiveError(null);
+    setLiveMessage(null);
+    try {
+      await updateLiveMutation.mutateAsync({
+        ...liveForm,
+        embedUrl: liveForm.embedUrl.trim() || null,
+        goLiveUrl: liveForm.goLiveUrl.trim() || null,
+        videoObjectPath: liveForm.videoObjectPath.trim() || null,
+        videoTitle: liveForm.videoTitle.trim() || null,
+      });
+      setLiveMessage("Live stream settings saved. The home page is updated.");
+    } catch (error) {
+      setLiveError(error instanceof Error ? error.message : "Could not save live stream settings.");
+    }
+  };
+
+  const handleVideoUpload = async (file: File) => {
+    setLiveError(null);
+    const result = await uploadFile(file);
+    if (result) {
+      setLiveForm((current) => ({
+        ...current,
+        videoObjectPath: result.objectPath,
+        videoTitle: current.videoTitle || file.name.replace(/\.[^/.]+$/, ""),
+      }));
+      setLiveMessage("Video uploaded. Save the live stream settings to publish it.");
+    }
+  };
 
   const toggleVerify = async (id: string, current: boolean) => {
     try {
@@ -169,6 +227,7 @@ export default function Admin() {
     { id: "chains", label: "Chains", icon: Link2 },
     { id: "add", label: "Add Token", icon: Plus },
     { id: "referrals", label: "Referrals", icon: TrendingUp },
+    { id: "live", label: "Live Stream", icon: Radio },
     { id: "settings", label: "Settings", icon: Settings },
   ] as const;
 
@@ -737,6 +796,87 @@ export default function Admin() {
                   </table>
                 </div>
               )}
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* LIVE STREAM TAB */}
+      {tab === "live" && (
+        <div className="max-w-3xl space-y-4">
+          {liveMessage && (
+            <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-2xl px-4 py-3 text-sm font-semibold text-emerald-700">
+              <CheckCircle2 className="w-4 h-4" /> {liveMessage}
+            </div>
+          )}
+          {liveError && (
+            <div className="flex items-center gap-2 bg-rose-50 border border-rose-200 rounded-2xl px-4 py-3 text-sm font-semibold text-rose-700">
+              <AlertCircle className="w-4 h-4" /> {liveError}
+            </div>
+          )}
+          <Card className="border-pink-100 shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-sm font-bold text-pink-600 flex items-center gap-2">
+                <Radio className="w-4 h-4" /> Live Stream Controls
+              </CardTitle>
+              <p className="text-xs text-pink-400">Configure what visitors see in the Barbie Fun Live section on the home page.</p>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSaveLiveStream} className="space-y-5">
+                <label className="flex items-center gap-3 rounded-xl border border-pink-100 bg-pink-50/60 px-4 py-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={liveForm.isLive}
+                    onChange={(e) => setLiveForm((current) => ({ ...current, isLive: e.target.checked }))}
+                    className="w-4 h-4 accent-pink-500"
+                  />
+                  <span>
+                    <span className="block text-sm font-bold text-pink-900">Show as live now</span>
+                    <span className="block text-xs text-pink-500">Displays the red Live badge on the public page.</span>
+                  </span>
+                </label>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-pink-700 uppercase tracking-wide">Stream title</label>
+                  <input type="text" value={liveForm.title} onChange={(e) => setLiveForm((current) => ({ ...current, title: e.target.value }))} maxLength={120} className="w-full border border-pink-200/60 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300" />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-pink-700 uppercase tracking-wide">Embed URL</label>
+                    <input type="url" placeholder="https://www.youtube.com/embed/…" value={liveForm.embedUrl} onChange={(e) => setLiveForm((current) => ({ ...current, embedUrl: e.target.value }))} className="w-full border border-pink-200/60 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300" />
+                    <p className="text-[11px] text-pink-400">Use the platform’s embed URL, not the normal watch page URL.</p>
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-pink-700 uppercase tracking-wide">Go Live link</label>
+                    <input type="url" placeholder="https://t.me/your-channel" value={liveForm.goLiveUrl} onChange={(e) => setLiveForm((current) => ({ ...current, goLiveUrl: e.target.value }))} className="w-full border border-pink-200/60 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300" />
+                    <p className="text-[11px] text-pink-400">The public Go Live button opens this link in a new tab.</p>
+                  </div>
+                </div>
+                <div className="rounded-2xl border border-dashed border-pink-200 bg-pink-50/40 p-4 space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Video className="w-4 h-4 text-pink-500" />
+                    <div>
+                      <p className="text-sm font-bold text-pink-900">Upload a video</p>
+                      <p className="text-xs text-pink-400">MP4, WebM, OGG, or MOV up to 100 MB.</p>
+                    </div>
+                  </div>
+                  <label className="inline-flex items-center gap-2 rounded-full bg-white border border-pink-200 px-4 py-2 text-sm font-bold text-pink-600 hover:border-pink-400 cursor-pointer transition-colors">
+                    <Upload className="w-4 h-4" />
+                    {isUploadingVideo ? `Uploading ${uploadProgress}%` : "Choose video"}
+                    <input type="file" accept="video/mp4,video/webm,video/ogg,video/quicktime" className="sr-only" disabled={isUploadingVideo} onChange={(e) => { const file = e.target.files?.[0]; if (file) void handleVideoUpload(file); e.currentTarget.value = ""; }} />
+                  </label>
+                  {liveForm.videoObjectPath && (
+                    <div className="flex items-center justify-between gap-3 bg-white border border-pink-100 rounded-xl px-3 py-2 text-xs">
+                      <span className="font-semibold text-pink-700 truncate">{liveForm.videoTitle || "Uploaded video ready"}</span>
+                      <button type="button" onClick={() => setLiveForm((current) => ({ ...current, videoObjectPath: "", videoTitle: "" }))} className="text-rose-500 font-bold shrink-0">Remove</button>
+                    </div>
+                  )}
+                  <input type="text" placeholder="Video title (optional)" value={liveForm.videoTitle} onChange={(e) => setLiveForm((current) => ({ ...current, videoTitle: e.target.value }))} maxLength={160} className="w-full border border-pink-200/60 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300 bg-white" />
+                </div>
+                <button type="submit" disabled={updateLiveMutation.isPending} className="w-full bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 hover:from-pink-500 hover:via-pink-600 hover:to-pink-700 disabled:opacity-60 text-white font-extrabold text-sm h-12 rounded-xl shadow-md transition-all flex items-center justify-center gap-2">
+                  <Radio className="w-4 h-4" />
+                  {updateLiveMutation.isPending ? "Saving…" : "Save Live Stream Settings"}
+                </button>
+              </form>
             </CardContent>
           </Card>
         </div>
