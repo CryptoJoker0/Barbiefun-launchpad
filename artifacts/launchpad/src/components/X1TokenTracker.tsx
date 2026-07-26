@@ -1,14 +1,9 @@
 /**
  * X1TokenTracker — live token price widget for the X1 Blockchain ecosystem.
  *
- * Data-source waterfall (all fetched client-side):
- *   1. x1scr.xyz  — preferred: xDEX AMM pools + Degen Launchpad bonding-curve tokens
- *   2. DexScreener search — fallback for any pairs indexed under "xone" chain
- *   3. Curated featured projects — a hand-picked snapshot of top X1 ecosystem
- *      tokens (X1 Brains, Degen, Xenium, Theo AI) with links to their
- *      live pair pages on x1.ninja, shown when no live API is reachable.
- *
- * The component NEVER breaks the page — every error path renders a fallback UI.
+ * Data source: /api/x1/tokens — a server-side proxy that fetches from
+ * x1scr.xyz (CORS-free) and caches responses for 30 s.
+ * Falls back to a curated featured-projects snapshot when the proxy is down.
  */
 
 import { useQuery } from "@tanstack/react-query";
@@ -32,14 +27,12 @@ export type X1Token = {
   marketCap: number | null;
   logo?: string;
   pairUrl?: string;
-  source: "x1scr" | "dexscreener" | "static";
+  source: "x1scr" | "static";
 };
 
 // ---------------------------------------------------------------------------
-// Curated featured projects — hand-picked snapshot of top X1 ecosystem tokens.
-// Used as the final fallback tier when no live API (x1scr.xyz / DexScreener)
-// is reachable. Each entry links out to its live pair page on x1.ninja so the
-// user can always check current data themselves.
+// Curated featured projects — hand-picked snapshot, shown only when the
+// live proxy is unreachable.
 // ---------------------------------------------------------------------------
 const FEATURED_X1_TOKENS: X1Token[] = [
   {
@@ -118,108 +111,48 @@ function fmtPct(n: number | null): string {
 // API helpers
 // ---------------------------------------------------------------------------
 
-/** Try x1scr.xyz — their typical screener API paths */
-async function fetchX1Scr(): Promise<X1Token[]> {
-  // Try multiple endpoint patterns common for DeFi screeners
-  const attempts = [
-    "https://x1scr.xyz/api/pairs",
-    "https://x1scr.xyz/api/tokens",
-    "https://x1scr.xyz/api/v1/pairs",
-    "https://x1scr.xyz/api/v1/tokens",
-    "https://x1scr.xyz/api/top",
-  ];
+type X1ScrRaw = {
+  xntUsd: number | null;
+  tokens: Array<{
+    mint: string;
+    symbol: string;
+    name: string;
+    priceUsd: number | null;
+    change24h: number | null;
+    change1h: number | null;
+    volume24hUsd: number | null;
+    liquidityUsd: number | null;
+    marketCapUsd: number | null;
+    poolId: string | null;
+  }>;
+};
 
-  for (const url of attempts) {
-    try {
-      const res = await fetch(url, {
-        headers: { Accept: "application/json" },
-        signal: AbortSignal.timeout(4000),
-      });
-      if (!res.ok) continue;
-      const ct = res.headers.get("content-type") ?? "";
-      if (!ct.includes("json")) continue;
-      const data = await res.json();
-
-      // Handle array of pairs/tokens
-      const items: any[] = Array.isArray(data)
-        ? data
-        : data.pairs ?? data.tokens ?? data.data ?? data.results ?? [];
-
-      if (!items.length) continue;
-
-      return items.slice(0, 12).map((t: any): X1Token => ({
-        address: t.address ?? t.tokenAddress ?? t.pairAddress ?? "",
-        name: t.name ?? t.baseToken?.name ?? "Unknown",
-        symbol: t.symbol ?? t.baseToken?.symbol ?? "?",
-        priceUsd: parseFloat(t.priceUsd ?? t.price ?? t.priceNative ?? 0) || null,
-        priceChange24h: parseFloat(t.priceChange?.h24 ?? t.change24h ?? t.priceChange24h ?? 0) || null,
-        volume24h: parseFloat(t.volume?.h24 ?? t.volume24h ?? t.vol24h ?? 0) || null,
-        liquidity: parseFloat(t.liquidity?.usd ?? t.liquidityUsd ?? t.liquidity ?? 0) || null,
-        marketCap: parseFloat(t.fdv ?? t.marketCap ?? t.mcap ?? 0) || null,
-        logo: t.info?.imageUrl ?? t.logo ?? t.icon ?? undefined,
-        pairUrl: t.url ?? undefined,
-        source: "x1scr",
-      }));
-    } catch {
-      // Try next endpoint
-    }
-  }
-  throw new Error("x1scr unavailable");
-}
-
-/** Try DexScreener with X1 chain IDs */
-async function fetchDexScreener(): Promise<X1Token[]> {
-  const chainIds = ["xone", "x1", "x1blockchain"];
-
-  for (const chainId of chainIds) {
-    try {
-      const res = await fetch(
-        `https://api.dexscreener.com/latest/dex/search?q=${chainId}`,
-        { signal: AbortSignal.timeout(5000) }
-      );
-      if (!res.ok) continue;
-      const data = await res.json();
-      const pairs: any[] = data.pairs ?? [];
-      const filtered = pairs.filter(
-        (p: any) =>
-          (p.chainId ?? "").toLowerCase().includes("x1") ||
-          (p.chainId ?? "").toLowerCase() === "xone"
-      );
-      if (!filtered.length) continue;
-
-      return filtered.slice(0, 12).map((p: any): X1Token => ({
-        address: p.baseToken?.address ?? "",
-        name: p.baseToken?.name ?? "Unknown",
-        symbol: p.baseToken?.symbol ?? "?",
-        priceUsd: parseFloat(p.priceUsd ?? 0) || null,
-        priceChange24h: parseFloat(p.priceChange?.h24 ?? 0) || null,
-        volume24h: parseFloat(p.volume?.h24 ?? 0) || null,
-        liquidity: parseFloat(p.liquidity?.usd ?? 0) || null,
-        marketCap: parseFloat(p.fdv ?? p.marketCap ?? 0) || null,
-        logo: p.info?.imageUrl ?? undefined,
-        pairUrl: p.url ?? undefined,
-        source: "dexscreener",
-      }));
-    } catch {
-      // Try next chain ID
-    }
-  }
-  throw new Error("DexScreener X1 data unavailable");
-}
-
-/** Combined fetch with waterfall */
-async function fetchX1Tokens(): Promise<{ tokens: X1Token[]; source: string; isSnapshot: boolean }> {
+async function fetchX1Tokens(): Promise<{ tokens: X1Token[]; xntUsd: number | null; source: string; isSnapshot: boolean }> {
   try {
-    const tokens = await fetchX1Scr();
-    return { tokens, source: "x1scr.xyz", isSnapshot: false };
-  } catch {}
-  try {
-    const tokens = await fetchDexScreener();
-    return { tokens, source: "DexScreener", isSnapshot: false };
-  } catch {}
-  // No live API reachable — show the curated featured projects instead of an
-  // empty state so the user always sees the top X1 ecosystem tokens.
-  return { tokens: FEATURED_X1_TOKENS, source: "Featured (snapshot)", isSnapshot: true };
+    const res = await fetch("/api/x1/tokens", {
+      signal: AbortSignal.timeout(10_000),
+    });
+    if (!res.ok) throw new Error(`proxy returned ${res.status}`);
+    const data = (await res.json()) as X1ScrRaw;
+
+    const tokens: X1Token[] = (data.tokens ?? []).map((t) => ({
+      address: t.mint ?? "",
+      name: t.name ?? "Unknown",
+      symbol: t.symbol ?? "?",
+      priceUsd: t.priceUsd ?? null,
+      priceChange24h: t.change24h ?? null,
+      volume24h: t.volume24hUsd ?? null,
+      liquidity: t.liquidityUsd ?? null,
+      marketCap: t.marketCapUsd ?? null,
+      pairUrl: t.poolId ? `https://x1scr.xyz/tokens/${t.mint}` : undefined,
+      source: "x1scr" as const,
+    }));
+
+    return { tokens, xntUsd: data.xntUsd ?? null, source: "x1scr.xyz", isSnapshot: false };
+  } catch {
+    // Proxy down — show curated snapshot
+    return { tokens: FEATURED_X1_TOKENS, xntUsd: null, source: "Featured (snapshot)", isSnapshot: true };
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -272,8 +205,8 @@ export default function X1TokenTracker() {
       {isSnapshot && (
         <div className="px-4 py-1.5 bg-pink-50/60 border-b border-orange-100 text-[10px] text-pink-500 font-semibold flex items-center justify-between">
           <span>Showing featured X1 projects — live API unavailable</span>
-          <a href="https://x1.ninja" target="_blank" rel="noopener noreferrer" className="text-pink-600 hover:text-orange-700 underline">
-            View live on x1.ninja
+          <a href="https://x1scr.xyz" target="_blank" rel="noopener noreferrer" className="text-pink-600 hover:text-orange-700 underline">
+            View live on x1scr.xyz
           </a>
         </div>
       )}
@@ -354,19 +287,18 @@ export default function X1TokenTracker() {
           })}
         </div>
       ) : (
-        /* Safety-net fallback — only reachable if FEATURED_X1_TOKENS is ever emptied */
         <div className="py-8 px-4 text-center">
           <div className="w-12 h-12 rounded-full bg-pink-50 border border-pink-200/60 flex items-center justify-center mx-auto mb-3">
             <BarChart2 className="w-5 h-5 text-pink-400" />
           </div>
           <p className="text-sm font-bold text-pink-800 mb-1">X1 token data unavailable</p>
           <p className="text-xs text-pink-400 mb-4">
-            Live X1 token prices require a public API. Visit x1.ninja directly for real-time data.
+            Visit x1scr.xyz directly for real-time data.
           </p>
-          <a href="https://x1.ninja" target="_blank" rel="noopener noreferrer"
+          <a href="https://x1scr.xyz" target="_blank" rel="noopener noreferrer"
             className="inline-flex items-center gap-1.5 text-xs font-bold bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 rounded-full transition-colors">
             <ChainIcon chain="x1" size={14} />
-            Open x1.ninja
+            Open x1scr.xyz
             <ExternalLink className="w-3 h-3" />
           </a>
         </div>
@@ -382,9 +314,9 @@ export default function X1TokenTracker() {
                 ? `Updated ${lastUpdated.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
                 : "X1 Blockchain"}
           </span>
-          <a href="https://x1.ninja" target="_blank" rel="noopener noreferrer"
+          <a href="https://x1scr.xyz" target="_blank" rel="noopener noreferrer"
             className="text-[9px] text-pink-400 hover:text-pink-600 font-semibold flex items-center gap-0.5">
-            x1.ninja <ExternalLink className="w-2.5 h-2.5 inline" />
+            x1scr.xyz <ExternalLink className="w-2.5 h-2.5 inline" />
           </a>
         </div>
       )}

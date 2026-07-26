@@ -21,6 +21,13 @@ async function fetchPrices(): Promise<PriceMap> {
   return res.json();
 }
 
+async function fetchXntPrice(): Promise<number | null> {
+  const res = await fetch("/api/x1/tokens", { signal: AbortSignal.timeout(8_000) });
+  if (!res.ok) return null;
+  const data = await res.json() as { xntUsd?: number | null };
+  return data.xntUsd ?? null;
+}
+
 function formatPrice(n: number): string {
   if (n >= 10000) return `$${n.toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
   if (n >= 100) return `$${n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -43,6 +50,14 @@ export default function NativeTokenPrices() {
     refetchInterval: 60_000,
     staleTime: 45_000,
     retry: 2,
+  });
+
+  const { data: xntUsd } = useQuery<number | null>({
+    queryKey: ["xnt-price"],
+    queryFn: fetchXntPrice,
+    refetchInterval: 60_000,
+    staleTime: 45_000,
+    retry: 1,
   });
 
   const lastUpdated = dataUpdatedAt ? new Date(dataUpdatedAt) : null;
@@ -95,8 +110,10 @@ export default function NativeTokenPrices() {
           const cid = cgId(chain.symbol, chain.coingeckoId);
           const priceData = cid ? prices?.[cid] : null;
 
-          const price = isStable ? 1 : priceData?.usd ?? null;
-          const change = isStable ? 0 : priceData?.usd_24h_change ?? null;
+          // X1 Blockchain (id -1) uses XNT price from x1scr.xyz proxy
+          const isX1 = chain.id === -1;
+          const price = isStable ? 1 : isX1 ? (xntUsd ?? null) : priceData?.usd ?? null;
+          const change = isStable ? 0 : isX1 ? null : priceData?.usd_24h_change ?? null;
           const up = change === null ? true : change >= 0;
 
           return (
