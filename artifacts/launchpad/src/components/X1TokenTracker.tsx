@@ -144,6 +144,7 @@ async function fetchX1Tokens(): Promise<{ tokens: X1Token[]; xntUsd: number | nu
       volume24h: t.volume24hUsd ?? null,
       liquidity: t.liquidityUsd ?? null,
       marketCap: t.marketCapUsd ?? null,
+      logo: t.mint ? `/api/x1/logo?mint=${encodeURIComponent(t.mint)}` : undefined,
       pairUrl: t.poolId ? `https://x1scr.xyz/tokens/${t.mint}` : undefined,
       source: "x1scr" as const,
     }));

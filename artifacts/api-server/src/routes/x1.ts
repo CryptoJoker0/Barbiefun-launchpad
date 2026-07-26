@@ -66,4 +66,41 @@ router.get("/x1/tokens", async (req, res) => {
   }
 });
 
+/** Proxy token logo images from x1scr.xyz (blocked by CORS client-side) */
+router.get("/x1/logo", async (req, res) => {
+  const mint = req.query["mint"];
+  if (!mint || typeof mint !== "string") {
+    res.status(400).json({ error: "mint required" });
+    return;
+  }
+
+  try {
+    const upstream = await fetch(
+      `https://x1scr.xyz/api/logo?mint=${encodeURIComponent(mint)}&v=2`,
+      {
+        headers: {
+          Accept: "image/webp,image/*,*/*",
+          Referer: "https://x1scr.xyz/",
+          "User-Agent": "Mozilla/5.0 (compatible; BarbieFun/1.0)",
+        },
+        signal: AbortSignal.timeout(6_000),
+      }
+    );
+
+    if (!upstream.ok) {
+      res.status(404).json({ error: "logo not found" });
+      return;
+    }
+
+    const contentType = upstream.headers.get("content-type") ?? "image/webp";
+    const buffer = await upstream.arrayBuffer();
+
+    res.set("Content-Type", contentType);
+    res.set("Cache-Control", "public, max-age=86400"); // cache 24h
+    res.send(Buffer.from(buffer));
+  } catch {
+    res.status(502).json({ error: "logo fetch failed" });
+  }
+});
+
 export default router;
