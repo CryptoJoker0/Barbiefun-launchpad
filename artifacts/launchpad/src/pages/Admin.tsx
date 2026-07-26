@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
-import { Rocket, DollarSign, CheckCircle2, Link2, TrendingUp, BadgeCheck, Activity, Settings, ShieldCheck, Zap, AlertCircle, Plus, X, Radio, Upload, Video } from "lucide-react";
+import { Rocket, DollarSign, CheckCircle2, Link2, TrendingUp, BadgeCheck, Activity, Settings, ShieldCheck, Zap, AlertCircle, Plus, X, Radio, Upload, Video, LogOut } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ChainIcon from "@/components/ChainIcon";
 import { SUPPORTED_CHAINS, DISPLAY_CHAINS } from "@/lib/wagmi";
@@ -9,16 +9,14 @@ import { useLaunches, useAddLaunch, useSetVerified } from "@/hooks/useLaunches";
 import { LAUNCH_FEE_USD } from "@/lib/pricing";
 import { useLiveStream, useUpdateLiveStream } from "@/hooks/useLiveStream";
 import { useUpload } from "@/hooks/useUpload";
-
-// NOTE: VITE_* env vars are included in the client bundle and visible in browser
-// devtools — this gate is a UX deterrent only, not a security boundary.
-// For real authorization, move sensitive actions to a protected backend route.
-const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || "";
+import { getAdminSession, loginAdmin, logoutAdmin } from "@/lib/adminAuth";
 
 const PIE_COLORS = ["#ec4899", "#db2777", "#f472b6", "#8b5cf6", "#3b82f6", "#14b8a6"];
 
 export default function Admin() {
-  const [authenticated, setAuthenticated] = useState(!ADMIN_PASSWORD);
+  const [authenticated, setAuthenticated] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
+  const [authPending, setAuthPending] = useState(false);
   const [pw, setPw] = useState("");
   const [pwError, setPwError] = useState(false);
   const [tab, setTab] = useState<"overview" | "launches" | "chains" | "add" | "referrals" | "live" | "settings">("overview");
@@ -38,6 +36,13 @@ export default function Admin() {
   const [liveMessage, setLiveMessage] = useState<string | null>(null);
   const [liveError, setLiveError] = useState<string | null>(null);
   const { uploadFile, isUploading: isUploadingVideo, progress: uploadProgress } = useUpload();
+
+  useEffect(() => {
+    getAdminSession()
+      .then((session) => setAuthenticated(session.authenticated))
+      .catch(() => setAuthenticated(false))
+      .finally(() => setAuthChecked(true));
+  }, []);
 
   useEffect(() => {
     if (!liveStream) return;
@@ -99,14 +104,26 @@ export default function Admin() {
     }
   };
 
-  const handleAuth = (e: React.FormEvent) => {
+  const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!ADMIN_PASSWORD || pw === ADMIN_PASSWORD) {
-      setAuthenticated(true);
-    } else {
+    setAuthPending(true);
+    setPwError(false);
+    try {
+      const session = await loginAdmin(pw);
+      setAuthenticated(session.authenticated);
+      setPw("");
+    } catch {
       setPwError(true);
       setTimeout(() => setPwError(false), 2000);
+    } finally {
+      setAuthPending(false);
     }
+  };
+
+  const handleLogout = async () => {
+    await logoutAdmin().catch(() => undefined);
+    setAuthenticated(false);
+    setTab("overview");
   };
 
   const refresh = () => refetch();
@@ -148,6 +165,10 @@ export default function Admin() {
     } catch { /* React Query invalidates on success; silent on error */ }
   };
 
+  if (!authChecked) {
+    return <div className="max-w-sm mx-auto py-24 text-center text-sm font-semibold text-pink-500">Checking admin access…</div>;
+  }
+
   if (!authenticated) {
     return (
       <div className="max-w-sm mx-auto py-24 animate-in fade-in duration-500">
@@ -177,16 +198,13 @@ export default function Admin() {
           )}
           <button
             type="submit"
-            className="w-full bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 text-white font-bold py-3 rounded-xl hover:from-pink-500 hover:via-pink-600 hover:to-pink-700 transition-all"
+            disabled={authPending}
+            className="w-full bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 text-white font-bold py-3 rounded-xl hover:from-pink-500 hover:via-pink-600 hover:to-pink-700 disabled:opacity-60 transition-all"
           >
-            Enter Dashboard
+            {authPending ? "Checking…" : "Enter Dashboard"}
           </button>
         </form>
-        {!ADMIN_PASSWORD && (
-          <p className="text-center text-xs text-pink-400 mt-4">
-            Set <code className="bg-pink-100/50 px-1 py-0.5 rounded">VITE_ADMIN_PASSWORD</code> to protect this page.
-          </p>
-        )}
+        <p className="text-center text-xs text-pink-400 mt-4">Your password is checked securely by the server.</p>
       </div>
     );
   }
@@ -227,7 +245,7 @@ export default function Admin() {
     { id: "chains", label: "Chains", icon: Link2 },
     { id: "add", label: "Add Token", icon: Plus },
     { id: "referrals", label: "Referrals", icon: TrendingUp },
-    { id: "live", label: "Live Stream", icon: Radio },
+    { id: "live", label: "Live Stream & Upload", icon: Radio },
     { id: "settings", label: "Settings", icon: Settings },
   ] as const;
 
@@ -254,6 +272,12 @@ export default function Admin() {
             className="text-xs text-pink-500 hover:text-pink-600 font-semibold border border-pink-200/60 rounded-full px-3 py-1 hover:bg-pink-50 transition-all"
           >
             Refresh
+          </button>
+          <button
+            onClick={() => void handleLogout()}
+            className="flex items-center gap-1 text-xs text-pink-500 hover:text-pink-600 font-semibold border border-pink-200/60 rounded-full px-3 py-1 hover:bg-pink-50 transition-all"
+          >
+            <LogOut className="w-3 h-3" /> Log out
           </button>
         </div>
       </div>
@@ -819,7 +843,7 @@ export default function Admin() {
               <CardTitle className="text-sm font-bold text-pink-600 flex items-center gap-2">
                 <Radio className="w-4 h-4" /> Live Stream Controls
               </CardTitle>
-              <p className="text-xs text-pink-400">Configure what visitors see in the Barbie Fun Live section on the home page.</p>
+              <p className="text-xs text-pink-400">Connect an embed or manually upload a video for visitors to play in the Barbie Fun Live section.</p>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSaveLiveStream} className="space-y-5">
@@ -846,9 +870,9 @@ export default function Admin() {
                     <p className="text-[11px] text-pink-400">Use the platform’s embed URL, not the normal watch page URL.</p>
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-pink-700 uppercase tracking-wide">Go Live link</label>
+                    <label className="text-xs font-bold text-pink-700 uppercase tracking-wide">Community link (optional)</label>
                     <input type="url" placeholder="https://t.me/your-channel" value={liveForm.goLiveUrl} onChange={(e) => setLiveForm((current) => ({ ...current, goLiveUrl: e.target.value }))} className="w-full border border-pink-200/60 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300" />
-                    <p className="text-[11px] text-pink-400">The public Go Live button opens this link in a new tab.</p>
+                    <p className="text-[11px] text-pink-400">Playback stays on this page; this link is only saved for community use.</p>
                   </div>
                 </div>
                 <div className="rounded-2xl border border-dashed border-pink-200 bg-pink-50/40 p-4 space-y-3">
@@ -856,7 +880,7 @@ export default function Admin() {
                     <Video className="w-4 h-4 text-pink-500" />
                     <div>
                       <p className="text-sm font-bold text-pink-900">Upload a video</p>
-                      <p className="text-xs text-pink-400">MP4, WebM, OGG, or MOV up to 100 MB.</p>
+                      <p className="text-xs text-pink-400">Manual upload: MP4, WebM, OGG, or MOV up to 100 MB.</p>
                     </div>
                   </div>
                   <label className="inline-flex items-center gap-2 rounded-full bg-white border border-pink-200 px-4 py-2 text-sm font-bold text-pink-600 hover:border-pink-400 cursor-pointer transition-colors">
@@ -897,7 +921,7 @@ export default function Admin() {
                 { key: "VITE_LAUNCH_FEE_TREASURY_ADDRESS", label: "EVM Treasury Address", description: `Wallet that receives ${LAUNCH_FEE_USD} launch fees on EVM chains` },
                 { key: "VITE_SOLANA_TREASURY_ADDRESS", label: "Solana / X1 Treasury Address", description: `Wallet that receives ${LAUNCH_FEE_USD} launch fees on SVM chains` },
                 { key: "VITE_WALLETCONNECT_PROJECT_ID", label: "WalletConnect Project ID", description: "Enables WalletConnect QR modal" },
-                { key: "VITE_ADMIN_PASSWORD", label: "Admin Password", description: "Protects this dashboard" },
+                { key: "ADMIN_PASSWORD", label: "Server Admin Password", description: "Stored securely on the API server; never exposed to the browser" },
               ].map((setting) => {
                 const value = import.meta.env[setting.key];
                 const configured = !!value;

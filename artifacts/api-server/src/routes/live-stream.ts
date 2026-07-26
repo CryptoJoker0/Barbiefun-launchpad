@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { db, liveStreamSettingsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
+import { requireAdmin } from "../lib/adminAuth";
 
 const router = Router();
 const SETTINGS_ID = "default";
@@ -39,7 +40,7 @@ router.get("/live-stream", async (_req, res) => {
   }
 });
 
-router.put("/live-stream", async (req, res) => {
+router.put("/live-stream", requireAdmin, async (req, res) => {
   try {
     const body = req.body ?? {};
     const title = typeof body.title === "string" ? body.title.trim() : "";

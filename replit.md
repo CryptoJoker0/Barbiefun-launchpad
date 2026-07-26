@@ -39,7 +39,7 @@ A multi-chain fair-launch token launchpad ("Barbie Fun") — lets users launch, 
 - Live-stream configuration is stored as one database row (`default`) so all visitors see the same current settings.
 - Uploaded videos use the existing two-step presigned Object Storage flow; the API receives metadata and the browser sends file bytes directly to storage.
 - The public page prioritizes an uploaded video over an embed, then shows a useful no-stream state instead of rendering a broken hard-coded iframe.
-- Stream settings are public to read, while the current admin password remains a client-side UX gate and is not a security boundary.
+- Stream settings are public to read, while updates and video-upload URL generation require a server-validated, HTTP-only admin session.
 
 ## Product
 
@@ -55,6 +55,7 @@ _Populate as you build — explicit user instructions worth remembering across s
 - `pnpm run typecheck` is the canonical workspace verification command.
 - Run `pnpm --filter @workspace/db run push` after changing Drizzle schemas, then regenerate API types with `pnpm --filter @workspace/api-spec run codegen` after changing `lib/api-spec/openapi.yaml`.
 - Public video uploads are limited to supported video MIME types and 100 MB; token logos remain limited to images and 2 MB.
+- Set the `ADMIN_PASSWORD` secret to access the admin dashboard; the browser never receives this value.
 
 ## Pointers
 

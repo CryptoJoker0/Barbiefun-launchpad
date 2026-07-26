@@ -1,6 +1,7 @@
 import { Readable } from "stream";
 import { Router, type IRouter, type Request, type Response } from "express";
 import { ObjectNotFoundError, ObjectStorageService } from "../lib/objectStorage";
+import { requireAdmin } from "../lib/adminAuth";
 
 const router: IRouter = Router();
 const objectStorageService = new ObjectStorageService();
@@ -9,11 +10,18 @@ const objectStorageService = new ObjectStorageService();
  * POST /storage/uploads/request-url
  *
  * Request a presigned URL for logo and live video uploads.
- * No auth required — this is a public launchpad; anyone launching a token
- * may upload a logo or a live video. Images are capped at 2 MB and videos at 100 MB.
+ * Image uploads are public for token launches. Video uploads require an admin
+ * session because they become part of the public livestream configuration.
  */
 router.post(
   "/storage/uploads/request-url",
+  (req: Request, res: Response, next) => {
+    if (req.body?.contentType?.startsWith("video/")) {
+      requireAdmin(req, res, next);
+      return;
+    }
+    next();
+  },
   async (req: Request, res: Response) => {
     const { name, size, contentType } = req.body ?? {};
     if (typeof name !== "string" || typeof size !== "number" || typeof contentType !== "string") {
