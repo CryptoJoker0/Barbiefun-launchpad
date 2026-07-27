@@ -208,6 +208,69 @@ export default function Home() {
         <X1TokenTracker />
       </section>
 
+      {/* African X1 NFT — Guardian Banner */}
+      <motion.a
+        href="https://african-x-1-nft--africamarket.replit.app"
+        target="_blank"
+        rel="noopener noreferrer"
+        initial={{ opacity: 0, y: 24 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.3 }}
+        transition={{ duration: 0.6 }}
+        whileHover={{ scale: 1.01 }}
+        whileTap={{ scale: 0.98 }}
+        className="block relative overflow-hidden rounded-3xl shadow-2xl cursor-pointer group"
+      >
+        {/* Full-bleed NFT image */}
+        <img
+          src="/african-nft.jpg"
+          alt="African X1 NFT — Genesis Collection"
+          className="w-full h-64 sm:h-80 object-cover object-top transition-transform duration-700 group-hover:scale-105"
+        />
+
+        {/* Dark gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+
+        {/* Animated glow ring */}
+        <motion.div
+          className="absolute inset-0 rounded-3xl pointer-events-none"
+          animate={{ boxShadow: ["0 0 0px 0px rgba(251,191,36,0)", "0 0 32px 6px rgba(251,191,36,0.45)", "0 0 0px 0px rgba(251,191,36,0)"] }}
+          transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
+        />
+
+        {/* Content */}
+        <div className="absolute inset-0 flex flex-col items-center justify-end pb-8 px-6 text-center">
+          {/* Badge */}
+          <div className="mb-3 inline-flex items-center gap-1.5 bg-yellow-400/20 border border-yellow-400/60 backdrop-blur-sm rounded-full px-3 py-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-pulse" />
+            <span className="text-yellow-300 text-[10px] font-bold uppercase tracking-widest">African X1 · Genesis Collection · X1 Chain</span>
+          </div>
+
+          {/* CTA text */}
+          <motion.h3
+            className="text-white font-black text-2xl sm:text-3xl uppercase tracking-wide drop-shadow-lg mb-5"
+            style={{ textShadow: "0 0 24px rgba(251,191,36,0.7)" }}
+            animate={{ scale: [1, 1.03, 1] }}
+            transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+          >
+            🌍 Click to Become a Guardian
+          </motion.h3>
+
+          {/* Buy button */}
+          <motion.div
+            className="relative inline-flex items-center gap-2 bg-gradient-to-r from-yellow-400 via-amber-500 to-yellow-400 text-black font-extrabold text-sm sm:text-base px-8 py-3 rounded-full shadow-lg shadow-amber-500/40"
+            animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
+            transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+            style={{ backgroundSize: "200% 200%" }}
+            whileHover={{ y: -2 }}
+          >
+            <span className="text-lg">🔘</span>
+            Buy African X1 NFT
+            <ExternalLink className="w-4 h-4" />
+          </motion.div>
+        </div>
+      </motion.a>
+
       {/* Recently Launched */}
       <RecentLaunches launches={launches} />
 
