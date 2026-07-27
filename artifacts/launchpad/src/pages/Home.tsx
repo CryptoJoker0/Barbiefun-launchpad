@@ -380,83 +380,141 @@ export default function Home() {
         </Tabs>
       </section>
 
-      {/* Live Stream Section */}
+      {/* Live Stream Section — X1 Exclusive */}
       <motion.section
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.2 }}
-        transition={{ duration: 0.6 }}
-        className="bg-white border border-pink-100 rounded-3xl overflow-hidden shadow-sm"
+        viewport={{ once: true, amount: 0.15 }}
+        transition={{ duration: 0.7 }}
+        className="relative overflow-hidden rounded-3xl shadow-2xl"
+        style={{ background: "linear-gradient(135deg, #0a0a0f 0%, #0d0820 40%, #12091a 100%)" }}
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-pink-50">
-          <div className="flex items-center gap-2.5">
-            <div className="relative">
-              <Radio className="w-5 h-5 text-pink-500" />
-              <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-red-500 rounded-full animate-ping" />
-              <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-red-500 rounded-full" />
+        {/* Ambient glow blobs */}
+        <div className="absolute -top-24 -left-24 w-72 h-72 bg-pink-600/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-24 -right-24 w-72 h-72 bg-purple-600/20 rounded-full blur-3xl pointer-events-none" />
+        <motion.div
+          className="absolute top-10 right-10 w-40 h-40 bg-pink-500/10 rounded-full blur-2xl pointer-events-none"
+          animate={{ scale: [1, 1.3, 1], opacity: [0.4, 0.8, 0.4] }}
+          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+        />
+
+        {/* Header */}
+        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-6 pt-6 pb-4 border-b border-white/10">
+          <div className="flex items-center gap-3">
+            {/* Live pulse icon */}
+            <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-pink-500 to-fuchsia-600 shadow-lg shadow-pink-500/40">
+              <Radio className="w-5 h-5 text-white" />
+              {liveStream?.isLive && (
+                <>
+                  <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-ping" />
+                  <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full" />
+                </>
+              )}
             </div>
-            <h2 className="text-lg font-extrabold text-pink-900">Barbie Fun Live</h2>
-            <span className={`text-[10px] font-bold text-white rounded-full px-2 py-0.5 uppercase tracking-widest ${liveStream?.isLive ? "bg-red-500" : "bg-pink-400"}`}>
-              {liveStream?.isLive ? "Live" : "Community"}
-            </span>
+
+            <div>
+              <div className="flex items-center gap-2 mb-0.5">
+                <h2 className="text-lg font-extrabold text-white tracking-tight">Barbie Fun Live</h2>
+                <span className={`text-[9px] font-black text-white rounded-full px-2 py-0.5 uppercase tracking-widest ${liveStream?.isLive ? "bg-red-500 shadow-sm shadow-red-500/60" : "bg-white/10"}`}>
+                  {liveStream?.isLive ? "🔴 Live" : "Offline"}
+                </span>
+              </div>
+              <p className="text-[11px] text-white/40 font-medium">Token launches · Alpha calls · Community events</p>
+            </div>
           </div>
-          <a
-             href={hasLivePlayer ? "#live-player" : undefined}
-             aria-disabled={!hasLivePlayer}
-            className="text-xs font-semibold text-pink-500 hover:text-pink-700 transition-colors flex items-center gap-1"
-          >
-             {hasLivePlayer ? "Watch Live" : "Stream Offline"} <Radio className="w-3 h-3" />
-          </a>
+
+          {/* X1 Exclusive badge */}
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 border border-purple-500/40 bg-purple-500/10 backdrop-blur-sm rounded-full px-3 py-1.5">
+              <ChainIcon chain="x1" size={14} />
+              <span className="text-[10px] font-black text-purple-300 uppercase tracking-widest">X1 Projects Only</span>
+              <ShieldCheck className="w-3 h-3 text-purple-400" />
+            </div>
+            {hasLivePlayer && (
+              <a href="#live-player"
+                className="flex items-center gap-1.5 bg-gradient-to-r from-pink-500 to-fuchsia-500 hover:from-pink-400 hover:to-fuchsia-400 text-white text-[11px] font-bold px-3 py-1.5 rounded-full transition-all shadow-md shadow-pink-500/30">
+                <Radio className="w-3 h-3" /> Watch Live
+              </a>
+            )}
+          </div>
         </div>
-         {hasLivePlayer ? (
-           <div id="live-player" className="relative w-full bg-slate-950" style={{ paddingBottom: "56.25%" }}>
-             {videoUrl ? (
-               <video
-                 controls
-                 playsInline
-                 className="absolute inset-0 w-full h-full object-contain"
-                 aria-label={liveStream?.videoTitle || liveStream?.title || "Barbie Fun video"}
-               >
-                 <source src={videoUrl} />
-                 Your browser does not support embedded video.
-               </video>
-             ) : (
-               <iframe
-                 src={liveStream?.embedUrl || undefined}
-                 title={liveStream?.title || "Barbie Fun Live Stream"}
-                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                 allowFullScreen
-                 className="absolute inset-0 w-full h-full"
-               />
-             )}
-           </div>
-         ) : (
-           <div className="bg-gradient-to-br from-pink-50 via-white to-fuchsia-50 px-6 py-14 text-center">
-             <Video className="w-10 h-10 text-pink-300 mx-auto mb-3" />
-             <h3 className="text-lg font-extrabold text-pink-900 mb-1">No stream is scheduled right now</h3>
-             <p className="text-sm text-pink-500 max-w-md mx-auto mb-5">
-               Follow Barbie Fun for the next launch, community event, and live token announcement.
-             </p>
-              <span className="inline-flex items-center gap-2 rounded-full bg-pink-100 text-pink-600 text-sm font-bold px-5 py-2.5">
-                Live player offline <Radio className="w-4 h-4" />
-              </span>
-           </div>
-         )}
-        <div className="px-6 py-4 bg-gradient-to-r from-pink-50 to-fuchsia-50 flex flex-wrap items-center gap-4">
-          <div className="flex items-center gap-2 text-sm font-semibold text-pink-700">
-            <Users className="w-4 h-4 text-pink-400" />
-            Live token launches, alpha calls & community events
+
+        {/* Player or offline state */}
+        {hasLivePlayer ? (
+          <div id="live-player" className="relative w-full bg-black" style={{ paddingBottom: "56.25%" }}>
+            {videoUrl ? (
+              <video controls playsInline
+                className="absolute inset-0 w-full h-full object-contain"
+                aria-label={liveStream?.videoTitle || liveStream?.title || "Barbie Fun video"}>
+                <source src={videoUrl} />
+              </video>
+            ) : (
+              <iframe
+                src={liveStream?.embedUrl || undefined}
+                title={liveStream?.title || "Barbie Fun Live Stream"}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="absolute inset-0 w-full h-full"
+              />
+            )}
           </div>
-          <div className="flex gap-2 ml-auto">
+        ) : (
+          <div className="relative z-10 px-6 py-16 text-center">
+            {/* Animated screen icon */}
+            <motion.div
+              className="relative inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-white/5 border border-white/10 mb-6 mx-auto"
+              animate={{ boxShadow: ["0 0 0px 0px rgba(236,72,153,0)", "0 0 24px 4px rgba(236,72,153,0.3)", "0 0 0px 0px rgba(236,72,153,0)"] }}
+              transition={{ duration: 2.5, repeat: Infinity }}
+            >
+              <Video className="w-9 h-9 text-pink-400" />
+              <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-slate-700 border border-white/10 flex items-center justify-center">
+                <span className="w-1.5 h-1.5 rounded-full bg-slate-500" />
+              </span>
+            </motion.div>
+
+            <h3 className="text-xl font-extrabold text-white mb-2">No stream scheduled right now</h3>
+            <p className="text-sm text-white/40 max-w-sm mx-auto mb-2">
+              This stage is reserved exclusively for <span className="text-purple-400 font-bold">X1 Blockchain projects</span> — token launches, alpha calls & live AMAs.
+            </p>
+
+            {/* X1-only rule */}
+            <div className="inline-flex items-center gap-2 mt-3 mb-6 border border-purple-500/30 bg-purple-500/10 rounded-2xl px-5 py-3">
+              <ChainIcon chain="x1" size={16} />
+              <span className="text-xs text-purple-300 font-semibold">Only X1 projects are permitted to go live on this stage</span>
+              <ShieldCheck className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+            </div>
+
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              <a href={TWITTER_URL} target="_blank" rel="noopener noreferrer"
+                className="flex items-center gap-2 bg-white/10 hover:bg-white/15 border border-white/10 text-white text-xs font-bold px-4 py-2 rounded-full transition-all">
+                <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 fill-current"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.261 5.636 5.903-5.636zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                Follow for updates
+              </a>
+              <a href={TELEGRAM_URL} target="_blank" rel="noopener noreferrer"
+                className="flex items-center gap-2 bg-white/10 hover:bg-white/15 border border-white/10 text-white text-xs font-bold px-4 py-2 rounded-full transition-all">
+                <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 fill-[#229ED9]"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+                Join Telegram
+              </a>
+            </div>
+          </div>
+        )}
+
+        {/* Footer bar */}
+        <div className="relative z-10 border-t border-white/10 px-6 py-3 flex flex-wrap items-center justify-between gap-3 bg-white/5 backdrop-blur-sm">
+          <div className="flex items-center gap-2">
+            <ChainIcon chain="x1" size={14} />
+            <span className="text-[11px] text-white/50 font-semibold">Powered by X1 Blockchain · SVM</span>
+          </div>
+          <div className="flex items-center gap-3">
             <a href={TWITTER_URL} target="_blank" rel="noopener noreferrer"
-              className="flex items-center gap-1.5 bg-white border border-pink-100 hover:border-pink-300 text-pink-600 text-xs font-bold px-3 py-1.5 rounded-full transition-colors shadow-sm">
-              <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 fill-current"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.261 5.636 5.903-5.636zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+              className="flex items-center gap-1.5 text-white/40 hover:text-white text-[11px] font-semibold transition-colors">
+              <svg viewBox="0 0 24 24" className="w-3 h-3 fill-current"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.261 5.636 5.903-5.636zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
               Follow on X
             </a>
-             <a href={hasLivePlayer ? "#live-player" : undefined} aria-disabled={!hasLivePlayer}
-              className="flex items-center gap-1.5 bg-pink-500 hover:bg-pink-600 text-white text-xs font-bold px-3 py-1.5 rounded-full transition-colors shadow-sm">
-              <Radio className="w-3.5 h-3.5" />
-                {hasLivePlayer ? "Watch Live" : "Offline"}
+            <a href={hasLivePlayer ? "#live-player" : undefined}
+              className={`flex items-center gap-1.5 text-[11px] font-bold px-3 py-1 rounded-full transition-all ${hasLivePlayer ? "bg-gradient-to-r from-pink-500 to-fuchsia-500 text-white shadow-sm" : "text-white/20 cursor-default"}`}>
+              <Radio className="w-3 h-3" />
+              {hasLivePlayer ? "Watch Live" : "Offline"}
             </a>
           </div>
         </div>
