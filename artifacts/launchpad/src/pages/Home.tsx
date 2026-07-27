@@ -22,10 +22,15 @@ export default function Home() {
   const [search, setSearch] = useState("");
   const { data: launches = [], isLoading } = useLaunches();
   const { data: liveStream } = useLiveStream();
+  // Use API-configured video/embed if available, otherwise fall back to the
+  // locally-served video uploaded directly to the public folder.
+  const LOCAL_VIDEO = `${import.meta.env.BASE_URL}live-video.mp4`;
   const videoUrl = liveStream?.videoObjectPath
     ? `/api/storage${liveStream.videoObjectPath}`
-    : null;
+    : LOCAL_VIDEO;
   const hasLivePlayer = Boolean(liveStream?.embedUrl || videoUrl);
+  // True when we have something to play (API stream or local video)
+  const isOnAir = liveStream?.isLive || hasLivePlayer;
 
   const getFiltered = () => {
     switch (tab) {
@@ -404,7 +409,7 @@ export default function Home() {
             {/* Live pulse icon */}
             <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-pink-500 to-fuchsia-600 shadow-lg shadow-pink-500/40">
               <Radio className="w-5 h-5 text-white" />
-              {liveStream?.isLive && (
+              {isOnAir && (
                 <>
                   <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-ping" />
                   <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full" />
@@ -415,8 +420,8 @@ export default function Home() {
             <div>
               <div className="flex items-center gap-2 mb-0.5">
                 <h2 className="text-lg font-extrabold text-white tracking-tight">Barbie Fun Live</h2>
-                <span className={`text-[9px] font-black text-white rounded-full px-2 py-0.5 uppercase tracking-widest ${liveStream?.isLive ? "bg-red-500 shadow-sm shadow-red-500/60" : "bg-white/10"}`}>
-                  {liveStream?.isLive ? "🔴 Live" : "Offline"}
+                <span className={`text-[9px] font-black text-white rounded-full px-2 py-0.5 uppercase tracking-widest ${liveStream?.isLive ? "bg-red-500 shadow-sm shadow-red-500/60" : isOnAir ? "bg-fuchsia-600 shadow-sm shadow-fuchsia-500/50" : "bg-white/10"}`}>
+                  {liveStream?.isLive ? "🔴 Live" : isOnAir ? "▶ On Air" : "Offline"}
                 </span>
               </div>
               <p className="text-[11px] text-white/40 font-medium">Token launches · Alpha calls · Community events</p>
