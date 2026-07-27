@@ -129,8 +129,8 @@ export const SUPPORTED_CHAINS: ChainMeta[] = [
  * Do NOT use this list for wagmi switchChain calls.
  */
 export const DISPLAY_CHAINS: ChainMeta[] = [
-  ...SUPPORTED_CHAINS,
   { id: -1, name: "X1 Blockchain", symbol: "XN",  tokenName: "XN Token", icon: "x1",     dex: "https://app.bridge.x1.xyz/", isSvm: true },
+  ...SUPPORTED_CHAINS,
   { id: -2, name: "Solana",        symbol: "SOL", tokenName: "Solana",   icon: "solana", dex: "https://jup.ag",              isSvm: true, coingeckoId: "solana" },
 ];
 

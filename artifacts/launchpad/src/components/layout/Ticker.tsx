@@ -11,7 +11,7 @@ const svmCount = DISPLAY_CHAINS.filter((c) => c.isSvm).length;
 const ANNOUNCEMENTS: TickerItem[] = [
   { icon: Rocket, text: `Launch your token for a flat $5 across ${evmCount} EVM chains + ${svmCount} SVM chains` },
   { icon: ArrowLeftRight, text: "Bridge assets · Base Bridge · Solana · X1 Bridge · Robinhood Bridge" },
-  { icon: Link2, text: `Live on ${SUPPORTED_CHAINS.map((c) => c.name).join(" · ")} · X1 Blockchain · Solana` },
+  { icon: Link2, text: `Live on X1 Blockchain · ${SUPPORTED_CHAINS.map((c) => c.name).join(" · ")} · Solana` },
   { icon: Heart, text: "Join the community on Telegram & X" },
 ];
 

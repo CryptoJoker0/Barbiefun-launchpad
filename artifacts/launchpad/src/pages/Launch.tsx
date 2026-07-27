@@ -67,7 +67,7 @@ export default function Launch() {
 
   const [walletOpen,     setWalletOpen]     = useState(false);
   const [selectedEvmId,  setSelectedEvmId]  = useState<number | null>(null);
-  const [selectedSvmId,  setSelectedSvmId]  = useState<number | null>(null); // -1 or -2
+  const [selectedSvmId,  setSelectedSvmId]  = useState<number | null>(-1); // -1 = X1 (primary), -2 = Solana
   const [svmTxSig,       setSvmTxSig]       = useState("");
   const [svmSubmitting,  setSvmSubmitting]  = useState(false);
   const [svmVerifyError, setSvmVerifyError] = useState<string | null>(null);

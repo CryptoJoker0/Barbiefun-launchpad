@@ -110,13 +110,22 @@ export default function Navbar() {
                 <div className="relative hidden sm:block">
                   <button onClick={() => setChainOpen(!chainOpen)}
                     className="flex items-center space-x-1.5 px-3 py-1.5 rounded-full border border-pink-200/60 bg-pink-50 hover:bg-pink-100 text-sm font-semibold text-pink-700 transition-colors">
-                    <ChainIcon chain="bnb" size={16} />
+                    <ChainIcon chain="x1" size={16} />
                     <span className="hidden lg:inline">Chains</span>
                     <ChevronDown className="w-3.5 h-3.5" />
                   </button>
                   {chainOpen && (
                     <div className="absolute right-0 mt-2 w-64 bg-white border border-pink-200/60 rounded-xl shadow-lg z-50 overflow-hidden">
-                      <div className="px-3 py-2 text-[10px] font-bold text-pink-400 uppercase tracking-widest bg-pink-50 border-b border-pink-100">EVM Chains</div>
+                      <div className="px-3 py-2 text-[10px] font-bold text-purple-400 uppercase tracking-widest bg-purple-50 border-b border-purple-100">SVM Chains</div>
+                      {DISPLAY_CHAINS.filter((c) => c.isSvm).map((c) => (
+                        <div key={c.id} className="flex items-center justify-between px-4 py-2.5 text-sm text-purple-600">
+                          <div className="flex items-center space-x-2">
+                            <ChainIcon chain={c.icon} size={18} /><span>{c.name}</span>
+                          </div>
+                          <span className="text-[9px] bg-purple-100 text-purple-600 rounded px-1.5 font-bold">SVM</span>
+                        </div>
+                      ))}
+                      <div className="px-3 py-2 text-[10px] font-bold text-pink-400 uppercase tracking-widest bg-pink-50 border-y border-pink-100">EVM Chains</div>
                       {SUPPORTED_CHAINS.map((c) => (
                         <button key={c.id} onClick={() => setChainOpen(false)}
                           className="w-full flex items-center justify-between px-4 py-2.5 text-sm hover:bg-pink-50 transition-colors text-left text-pink-800">
@@ -125,15 +134,6 @@ export default function Navbar() {
                           </div>
                           <span className="text-[10px] text-pink-400 font-bold">{c.symbol}</span>
                         </button>
-                      ))}
-                      <div className="px-3 py-2 text-[10px] font-bold text-purple-400 uppercase tracking-widest bg-purple-50 border-y border-purple-100">SVM Chains</div>
-                      {DISPLAY_CHAINS.filter((c) => c.isSvm).map((c) => (
-                        <div key={c.id} className="flex items-center justify-between px-4 py-2.5 text-sm text-purple-600">
-                          <div className="flex items-center space-x-2">
-                            <ChainIcon chain={c.icon} size={18} /><span>{c.name}</span>
-                          </div>
-                          <span className="text-[9px] bg-purple-100 text-purple-600 rounded px-1.5 font-bold">SVM</span>
-                        </div>
                       ))}
                     </div>
                   )}
