@@ -24,7 +24,7 @@ export default function Footer() {
           <div className="space-y-3 col-span-1 sm:col-span-2 md:col-span-1">
             <div className="flex items-center gap-2">
               <img src="/logo.png" alt="Barbie Fun" className="w-8 h-8 rounded-full object-cover border border-pink-300/60" />
-              <span className="font-extrabold text-lg bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 bg-clip-text text-transparent">
+              <span className="font-extrabold text-lg bg-gradient-to-r from-pink-500 via-pink-600 to-pink-700 bg-clip-text text-transparent">
                 Barbie Fun
               </span>
             </div>

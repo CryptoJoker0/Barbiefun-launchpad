@@ -5,6 +5,22 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  /* ── Premium Rose-Velvet Pink Scale ─────────────────────────────────────
+     Replaces Tailwind's default flat pink with a richer, jewel-toned rose.
+     Mid-tones are 6-8 pts darker and warmer (hue 333) for depth & sweetness.
+  ── */
+  --color-pink-50:  #fff1f6;
+  --color-pink-100: #ffe3ee;
+  --color-pink-200: #ffc4dc;
+  --color-pink-300: #ff95c3;
+  --color-pink-400: #f55fa5;
+  --color-pink-500: #e0337e;  /* primary rose — was #ec4899 */
+  --color-pink-600: #c41d65;
+  --color-pink-700: #a2134f;
+  --color-pink-800: #860d3e;
+  --color-pink-900: #5f0929;
+  --color-pink-950: #3c0318;
+
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));
   --color-border: hsl(var(--border));
@@ -94,70 +110,72 @@
 }
 
 :root {
-  --button-outline: rgba(236,72,153,0.20);
-  --badge-outline: rgba(236,72,153,0.10);
+  --button-outline: rgba(224,51,126,0.22);
+  --badge-outline: rgba(224,51,126,0.10);
   --opaque-button-border-intensity: 5;
-  --elevate-1: rgba(236,72,153,0.04);
-  --elevate-2: rgba(236,72,153,0.08);
+  --elevate-1: rgba(224,51,126,0.04);
+  --elevate-2: rgba(224,51,126,0.09);
 
-  --background: 330 100% 98%;
-  --foreground: 330 40% 15%;
+  /* Warmer, richer blush background — less candy, more velvet */
+  --background: 338 55% 98.5%;
+  --foreground: 335 45% 13%;
 
-  --border: 330 70% 92%;
+  --border: 334 45% 91%;
 
   --card: 0 0% 100%;
-  --card-foreground: 330 40% 15%;
-  --card-border: 330 70% 92%;
+  --card-foreground: 335 45% 13%;
+  --card-border: 334 45% 91%;
 
   --sidebar: 0 0% 100%;
-  --sidebar-foreground: 330 40% 15%;
-  --sidebar-border: 330 70% 92%;
-  --sidebar-primary: 330 85% 60%;
+  --sidebar-foreground: 335 45% 13%;
+  --sidebar-border: 334 45% 91%;
+  --sidebar-primary: 333 82% 53%;
   --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 330 100% 95%;
-  --sidebar-accent-foreground: 330 40% 15%;
-  --sidebar-ring: 330 85% 60%;
+  --sidebar-accent: 335 70% 96%;
+  --sidebar-accent-foreground: 335 45% 13%;
+  --sidebar-ring: 333 82% 53%;
 
   --popover: 0 0% 100%;
-  --popover-foreground: 330 40% 15%;
-  --popover-border: 330 70% 92%;
+  --popover-foreground: 335 45% 13%;
+  --popover-border: 334 45% 91%;
 
-  --primary: 330 85% 60%;
+  --primary: 333 82% 53%;
   --primary-foreground: 0 0% 100%;
 
-  --secondary: 330 100% 95%;
-  --secondary-foreground: 330 40% 15%;
+  --secondary: 335 70% 96%;
+  --secondary-foreground: 335 45% 13%;
 
-  --muted: 330 80% 96%;
-  --muted-foreground: 330 30% 45%;
+  --muted: 335 55% 96.5%;
+  --muted-foreground: 333 28% 46%;
 
-  --accent: 330 100% 94%;
-  --accent-foreground: 330 40% 15%;
+  --accent: 335 65% 95%;
+  --accent-foreground: 335 45% 13%;
 
-  --destructive: 340 85% 60%;
+  --destructive: 343 82% 57%;
   --destructive-foreground: 0 0% 100%;
 
-  --input: 330 70% 92%;
-  --ring: 330 85% 60%;
+  --input: 334 45% 91%;
+  --ring: 333 82% 53%;
 
-  --chart-1: 330 86% 60%;
+  --chart-1: 333 82% 53%;
   --chart-2: 0 84% 55%;
   --chart-3: 43 74% 55%;
   --chart-4: 283 39% 53%;
-  --chart-5: 330 60% 85%;
+  --chart-5: 333 55% 82%;
 
   --app-font-sans: 'Inter', sans-serif;
   --app-font-serif: Georgia, serif;
   --app-font-mono: 'Space Mono', 'Menlo', monospace;
   --radius: .75rem;
-  --shadow-2xs: 0px 1px 3px 0px rgba(244,114,182,0.15);
-  --shadow-xs: 0px 2px 4px 0px rgba(244,114,182,0.20);
-  --shadow-sm: 0px 2px 8px 0px rgba(244,114,182,0.25), 0px 1px 2px -1px rgba(244,114,182,0.15);
-  --shadow: 0px 4px 12px 0px rgba(244,114,182,0.30), 0px 1px 2px -1px rgba(244,114,182,0.20);
-  --shadow-md: 0px 6px 18px 0px rgba(244,114,182,0.35), 0px 2px 4px -1px rgba(244,114,182,0.25);
-  --shadow-lg: 0px 10px 28px 0px rgba(244,114,182,0.40), 0px 4px 6px -1px rgba(244,114,182,0.30);
-  --shadow-xl: 0px 16px 40px 0px rgba(244,114,182,0.45), 0px 8px 10px -1px rgba(244,114,182,0.35);
-  --shadow-2xl: 0px 24px 60px 0px rgba(244,114,182,0.50);
+  /* Rose-velvet shadows — warmer, deeper */
+  --shadow-2xs: 0px 1px 3px 0px rgba(196,29,101,0.12);
+  --shadow-xs: 0px 2px 4px 0px rgba(196,29,101,0.18);
+  --shadow-sm: 0px 2px 8px 0px rgba(196,29,101,0.22), 0px 1px 2px -1px rgba(196,29,101,0.14);
+  --shadow: 0px 4px 12px 0px rgba(196,29,101,0.26), 0px 1px 2px -1px rgba(196,29,101,0.18);
+  --shadow-md: 0px 6px 18px 0px rgba(196,29,101,0.30), 0px 2px 4px -1px rgba(196,29,101,0.22);
+  --shadow-lg: 0px 10px 28px 0px rgba(196,29,101,0.35), 0px 4px 6px -1px rgba(196,29,101,0.26);
+  --shadow-xl: 0px 16px 40px 0px rgba(196,29,101,0.40), 0px 8px 10px -1px rgba(196,29,101,0.30);
+  --shadow-2xl: 0px 24px 60px 0px rgba(196,29,101,0.45);
   --tracking-normal: 0em;
   --spacing: 0.25rem;
 
@@ -197,12 +215,12 @@
   }
 
   .wallet-btn {
-    background: linear-gradient(135deg, #ec4899, #f43f5e, #ffffff, #ec4899);
+    background: linear-gradient(135deg, #c41d65, #e0337e, #f9d4e6, #c41d65);
     background-size: 300% 300%;
     animation: wallet-shimmer 3s ease infinite;
-    color: #be185d;
+    color: #8a0d3e;
     font-weight: 700;
-    border: 2px solid #f9a8d4;
+    border: 2px solid #f5afd0;
   }
 
   .wallet-btn:hover {

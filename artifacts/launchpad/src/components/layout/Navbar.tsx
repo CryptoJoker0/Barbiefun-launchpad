@@ -43,7 +43,7 @@ export default function Navbar() {
               <Link href="/" className="flex items-center space-x-2 shrink-0">
                 <img src="/logo.png" alt="Barbie Fun logo"
                   className="w-10 h-10 rounded-full object-cover border-2 border-pink-400 shadow-md" />
-                <span className="font-extrabold text-xl tracking-tight bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 bg-clip-text text-transparent">
+                <span className="font-extrabold text-xl tracking-tight bg-gradient-to-r from-pink-600 via-pink-500 to-pink-700 bg-clip-text text-transparent">
                   Barbie Fun
                 </span>
               </Link>

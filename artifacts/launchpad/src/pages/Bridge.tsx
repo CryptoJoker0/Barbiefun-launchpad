@@ -48,11 +48,11 @@ export default function Bridge() {
   return (
     <div className="max-w-4xl mx-auto py-8 pb-20 animate-in fade-in duration-500">
       <div className="mb-10 text-center">
-        <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-pink-400 via-pink-500 to-pink-600 shadow-lg shadow-pink-200 mb-4">
+        <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-pink-500 via-pink-600 to-pink-700 shadow-lg shadow-pink-200 mb-4">
           <ArrowLeftRight className="w-7 h-7 text-white" />
         </div>
         <h1 className="text-4xl font-extrabold tracking-tight mb-2">
-          <span className="bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 bg-clip-text text-transparent">Bridge Assets</span>
+          <span className="bg-gradient-to-r from-pink-500 via-pink-600 to-pink-700 bg-clip-text text-transparent">Bridge Assets</span>
         </h1>
         <p className="text-pink-600 font-medium max-w-xl mx-auto">
           Move your tokens across chains using official bridge partners. Barbie Fun links out to

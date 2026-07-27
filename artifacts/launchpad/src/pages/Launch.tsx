@@ -235,7 +235,7 @@ export default function Launch() {
         <Card className="border-pink-200/60 shadow-xl text-center py-12">
           <CardContent className="space-y-6 flex flex-col items-center">
             <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", bounce: 0.5 }}
-              className="w-24 h-24 rounded-full bg-gradient-to-br from-pink-300 via-pink-400 to-pink-500 flex items-center justify-center shadow-lg">
+              className="w-24 h-24 rounded-full bg-gradient-to-br from-pink-400 via-pink-500 to-pink-600 flex items-center justify-center shadow-lg">
               <CheckCircle2 className="w-12 h-12 text-white" />
             </motion.div>
             <div className="space-y-2">
@@ -266,7 +266,7 @@ export default function Launch() {
             </div>
             <div className="flex flex-wrap gap-3 justify-center mt-2">
               <Link href="/" className="flex-1 min-w-[140px]">
-                <Button className="w-full bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 text-white font-bold rounded-full">
+                <Button className="w-full bg-gradient-to-r from-pink-500 via-pink-600 to-pink-700 text-white font-bold rounded-full">
                   Back to Home
                 </Button>
               </Link>
@@ -282,7 +282,7 @@ export default function Launch() {
     <div className="max-w-3xl mx-auto py-8 pb-20 animate-in fade-in duration-500">
       <div className="mb-8 text-center">
         <h1 className="text-4xl font-extrabold tracking-tight mb-2">
-          <span className="bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 bg-clip-text text-transparent">Launch Your Token</span>
+          <span className="bg-gradient-to-r from-pink-500 via-pink-600 to-pink-700 bg-clip-text text-transparent">Launch Your Token</span>
         </h1>
         <p className="text-pink-600 font-medium">Fair launch, locked liquidity, zero team tokens.</p>
       </div>
@@ -303,7 +303,7 @@ export default function Launch() {
             <Wallet className="w-5 h-5 text-pink-500 shrink-0" />
             <p className="text-sm font-semibold text-pink-700">Connect your EVM wallet to pay the launch fee on-chain</p>
           </div>
-          <Button onClick={() => setWalletOpen(true)} size="sm" className="bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 text-white font-bold rounded-full shrink-0">
+          <Button onClick={() => setWalletOpen(true)} size="sm" className="bg-gradient-to-r from-pink-500 via-pink-600 to-pink-700 text-white font-bold rounded-full shrink-0">
             Connect
           </Button>
         </div>
@@ -542,7 +542,7 @@ export default function Launch() {
                 </p>
               </div>
               <Button type="submit" size="lg" disabled={isSending || !treasuryEvm}
-                className="w-full bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 hover:from-pink-500 hover:via-pink-600 hover:to-pink-700 text-white font-extrabold text-lg h-14 rounded-full shadow-lg hover:shadow-pink-300/60 disabled:opacity-50">
+                className="w-full bg-gradient-to-r from-pink-500 via-pink-600 to-pink-700 hover:from-pink-600 hover:via-pink-700 hover:to-pink-800 text-white font-extrabold text-lg h-14 rounded-full shadow-lg hover:shadow-pink-300/60 disabled:opacity-50">
                 {isSending ? (
                   <span className="flex items-center space-x-2">
                     <span className="w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin" />

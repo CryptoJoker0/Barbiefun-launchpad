@@ -266,7 +266,7 @@ export default function Verify() {
             <Wallet className="w-5 h-5 text-pink-500 shrink-0" />
             <p className="text-sm font-semibold text-pink-700">Connect your EVM wallet to pay the verification fee on-chain</p>
           </div>
-          <Button onClick={() => setWalletOpen(true)} size="sm" className="bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 text-white font-bold rounded-full shrink-0">
+          <Button onClick={() => setWalletOpen(true)} size="sm" className="bg-gradient-to-r from-pink-500 via-pink-600 to-pink-700 text-white font-bold rounded-full shrink-0">
             Connect
           </Button>
         </div>
@@ -413,7 +413,7 @@ export default function Verify() {
                 <CardFooter className="bg-muted/10 border-t border-border mt-6 pt-6">
                   <Button type="submit" size="lg"
                     disabled={isSending || !selectedEvmChain || !treasuryConfigured}
-                    className="w-full bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 hover:from-pink-500 hover:via-pink-600 hover:to-pink-700 text-white font-extrabold text-base h-12 rounded-full shadow-md disabled:opacity-50">
+                    className="w-full bg-gradient-to-r from-pink-500 via-pink-600 to-pink-700 hover:from-pink-600 hover:via-pink-700 hover:to-pink-800 text-white font-extrabold text-base h-12 rounded-full shadow-md disabled:opacity-50">
                     {isSending ? (
                       <span className="flex items-center justify-center space-x-2">
                         <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />

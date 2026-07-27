@@ -58,7 +58,7 @@ export default function TokenDetail() {
         <h2 className="text-xl font-bold text-pink-800 mb-2">Launch not found</h2>
         <p className="text-sm text-pink-400 mb-6">This token launch record doesn&apos;t exist or hasn&apos;t been confirmed yet.</p>
         <Link href="/">
-          <Button className="bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 text-white font-bold rounded-full">Back to Terminal</Button>
+          <Button className="bg-gradient-to-r from-pink-500 via-pink-600 to-pink-700 text-white font-bold rounded-full">Back to Terminal</Button>
         </Link>
       </div>
     );
@@ -257,7 +257,7 @@ export default function TokenDetail() {
           </div>
           {/* Mock social card */}
           <div className="rounded-xl border border-slate-200 overflow-hidden shadow-sm max-w-sm">
-            <div className="bg-gradient-to-br from-pink-400 via-pink-500 to-pink-600 h-28 flex items-center justify-center relative">
+            <div className="bg-gradient-to-br from-pink-500 via-pink-600 to-pink-700 h-28 flex items-center justify-center relative">
               {logoSrc ? (
                 <img src={logoSrc} alt={launch.ticker}
                   className="w-16 h-16 rounded-full border-4 border-white shadow-lg object-cover" />
@@ -317,7 +317,7 @@ export default function TokenDetail() {
       {/* Right sidebar: fee & chain info + safety */}
       <div className="space-y-4">
         <div className="bg-white border border-pink-100 rounded-2xl shadow-sm overflow-hidden sticky top-20">
-          <div className="bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 px-5 py-3">
+          <div className="bg-gradient-to-r from-pink-500 via-pink-600 to-pink-700 px-5 py-3">
             <h3 className="font-extrabold text-white text-lg">Launch Record</h3>
             {chainMeta && <p className="text-pink-100 text-xs flex items-center space-x-1"><ChainIcon chain={chainMeta.icon} size={12} /><span>{chainMeta.name}</span></p>}
           </div>
@@ -337,7 +337,7 @@ export default function TokenDetail() {
 
             {chainMeta && (
               <a href={dexSearchUrl ?? chainMeta.dex} target="_blank" rel="noopener noreferrer">
-                <Button className="w-full bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 text-white font-extrabold text-base h-12 rounded-xl">
+                <Button className="w-full bg-gradient-to-r from-pink-500 via-pink-600 to-pink-700 text-white font-extrabold text-base h-12 rounded-xl">
                   <TrendingUp className="w-4 h-4 mr-2" />
                   {dexSearchUrl ? `Find $${launch.ticker}` : `Open ${chainMeta.name} DEX`}
                 </Button>

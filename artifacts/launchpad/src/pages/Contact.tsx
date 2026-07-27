@@ -22,11 +22,11 @@ export default function Contact() {
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-gradient-to-br from-pink-400 via-pink-500 to-pink-600 shadow-xl shadow-pink-200 mb-2"
+          className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-gradient-to-br from-pink-500 via-pink-600 to-pink-700 shadow-xl shadow-pink-200 mb-2"
         >
           <Mail className="w-10 h-10 text-white" />
         </motion.div>
-        <h1 className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 bg-clip-text text-transparent">
+        <h1 className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-pink-500 via-pink-600 to-pink-700 bg-clip-text text-transparent">
           Contact Us
         </h1>
         <p className="text-pink-600/80 max-w-md mx-auto text-lg">

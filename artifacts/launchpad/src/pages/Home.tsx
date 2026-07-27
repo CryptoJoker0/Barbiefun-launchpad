@@ -128,7 +128,7 @@ export default function Home() {
             </p>
 
             <div className="relative inline-block mb-7">
-              <div className="absolute inset-0 bg-gradient-to-r from-pink-300 via-pink-400 to-pink-500 rounded-2xl blur-md opacity-40 scale-105" />
+              <div className="absolute inset-0 bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 rounded-2xl blur-md opacity-40 scale-105" />
               <div className="relative bg-gradient-to-r from-pink-400 via-pink-500 to-pink-400 rounded-2xl px-5 py-2.5 shadow-lg flex items-center justify-center gap-2">
                 <Rocket className="w-5 h-5 text-white" />
                 <span className="text-white font-black text-lg sm:text-xl tracking-widest uppercase drop-shadow">
@@ -139,7 +139,7 @@ export default function Home() {
 
             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3">
               <Link href="/launch">
-                <Button size="lg" className="bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 hover:from-pink-500 hover:via-pink-600 hover:to-pink-700 text-white font-bold px-8 rounded-full shadow-lg hover:shadow-pink-300/60 transition-all">
+                <Button size="lg" className="bg-gradient-to-r from-pink-500 via-pink-600 to-pink-700 hover:from-pink-600 hover:via-pink-700 hover:to-pink-800 text-white font-bold px-8 rounded-full shadow-lg hover:shadow-pink-300/60 transition-all">
                   <Rocket className="w-5 h-5 mr-2" />
                   Launch a Token
                 </Button>
@@ -284,7 +284,7 @@ export default function Home() {
         <Tabs defaultValue="new" value={tab} onValueChange={setTab} className="w-full">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
             <h2 className="text-2xl font-bold tracking-tight">
-              <span className="bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 bg-clip-text text-transparent">Discovery</span>
+              <span className="bg-gradient-to-r from-pink-500 via-pink-600 to-pink-700 bg-clip-text text-transparent">Discovery</span>
             </h2>
             <div className="relative w-full sm:w-72">
               <Search className="w-4 h-4 text-pink-300 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -344,7 +344,7 @@ export default function Home() {
                     Verified tokens have passed a team review for legitimacy and trust.
                   </p>
                   <Link href="/verify">
-                    <Button className="bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 text-white font-bold rounded-full">
+                    <Button className="bg-gradient-to-r from-pink-500 via-pink-600 to-pink-700 text-white font-bold rounded-full">
                       <BadgeCheck className="w-4 h-4 mr-2" />Apply for Verification
                     </Button>
                   </Link>
@@ -357,7 +357,7 @@ export default function Home() {
                     Be the first to launch a token on Barbie Fun — pick a chain, pay the $5 fee, and your launch will show up here.
                   </p>
                   <Link href="/launch">
-                    <Button className="bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 text-white font-bold rounded-full">
+                    <Button className="bg-gradient-to-r from-pink-500 via-pink-600 to-pink-700 text-white font-bold rounded-full">
                       <Rocket className="w-4 h-4 mr-2" />Launch the First Token
                     </Button>
                   </Link>

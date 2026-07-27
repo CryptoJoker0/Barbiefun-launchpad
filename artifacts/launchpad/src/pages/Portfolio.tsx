@@ -79,10 +79,10 @@ export default function Portfolio() {
   if (!anyConnected) {
     return (
       <div className="max-w-2xl mx-auto py-20 text-center animate-in fade-in duration-500">
-        <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-gradient-to-br from-pink-400 via-pink-500 to-pink-600 shadow-lg shadow-pink-200 mb-6">
+        <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-gradient-to-br from-pink-500 via-pink-600 to-pink-700 shadow-lg shadow-pink-200 mb-6">
           <Wallet className="w-10 h-10 text-white" />
         </div>
-        <h1 className="text-3xl font-extrabold tracking-tight mb-3 bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 bg-clip-text text-transparent">
+        <h1 className="text-3xl font-extrabold tracking-tight mb-3 bg-gradient-to-r from-pink-500 via-pink-600 to-pink-700 bg-clip-text text-transparent">
           Your Portfolio
         </h1>
         <p className="text-pink-600/80 mb-8 max-w-sm mx-auto">
@@ -90,7 +90,7 @@ export default function Portfolio() {
         </p>
         <Button
           onClick={() => setWalletOpen(true)}
-          className="bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 text-white font-bold px-8 rounded-full"
+          className="bg-gradient-to-r from-pink-500 via-pink-600 to-pink-700 text-white font-bold px-8 rounded-full"
         >
           <Wallet className="w-4 h-4 mr-2" />
           Connect Wallet
@@ -105,7 +105,7 @@ export default function Portfolio() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-pink-500 via-pink-600 to-pink-700 bg-clip-text text-transparent">
             Portfolio
           </h1>
           <p className="text-sm text-pink-400 mt-1">Your holdings across all supported chains</p>
@@ -126,7 +126,7 @@ export default function Portfolio() {
           <Card className="border-pink-200/60 shadow-md">
             <CardContent className="p-5">
               <div className="flex items-center space-x-3 mb-4">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-300 via-pink-400 to-pink-500 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-400 via-pink-500 to-pink-600 flex items-center justify-center">
                   <Wallet className="w-5 h-5 text-white" />
                 </div>
                 <div>

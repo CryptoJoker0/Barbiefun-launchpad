@@ -63,7 +63,7 @@ export default function WalletModal({ onClose }: WalletModalProps) {
         <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
         <div className="relative bg-white rounded-3xl shadow-2xl border border-pink-200/60 w-full max-w-sm overflow-hidden">
           {/* Header */}
-          <div className="bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 px-6 py-4 flex items-center justify-between">
+          <div className="bg-gradient-to-r from-pink-500 via-pink-600 to-pink-700 px-6 py-4 flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <Wallet className="w-5 h-5 text-white" />
               <span className="text-white font-bold text-lg">My Wallet</span>
@@ -76,7 +76,7 @@ export default function WalletModal({ onClose }: WalletModalProps) {
           <div className="p-6 space-y-4">
             {/* Address display */}
             <div className="bg-pink-50 border border-pink-200/60 rounded-2xl p-4 text-center">
-              <div className="w-14 h-14 rounded-full bg-gradient-to-br from-pink-300 via-pink-400 to-pink-500 mx-auto mb-3 flex items-center justify-center shadow-lg shadow-pink-200">
+              <div className="w-14 h-14 rounded-full bg-gradient-to-br from-pink-400 via-pink-500 to-pink-600 mx-auto mb-3 flex items-center justify-center shadow-lg shadow-pink-200">
                 <Wallet className="w-6 h-6 text-white" />
               </div>
               <p className="font-mono font-bold text-pink-900 text-sm mb-1">
@@ -183,7 +183,7 @@ export default function WalletModal({ onClose }: WalletModalProps) {
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
       <div className="relative bg-white rounded-3xl shadow-2xl border border-pink-200/60 w-full max-w-sm overflow-hidden">
         {/* Header */}
-        <div className="bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 px-6 py-4 flex items-center justify-between">
+        <div className="bg-gradient-to-r from-pink-500 via-pink-600 to-pink-700 px-6 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <Wallet className="w-5 h-5 text-white" />
             <span className="text-white font-bold text-lg">Connect Wallet</span>

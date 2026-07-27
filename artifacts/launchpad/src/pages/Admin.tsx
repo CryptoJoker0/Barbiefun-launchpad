@@ -173,7 +173,7 @@ export default function Admin() {
     return (
       <div className="max-w-sm mx-auto py-24 animate-in fade-in duration-500">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-pink-400 via-pink-500 to-pink-600 shadow-lg mb-4">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-pink-500 via-pink-600 to-pink-700 shadow-lg mb-4">
             <ShieldCheck className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-2xl font-extrabold text-pink-900">Admin Access</h1>
@@ -199,7 +199,7 @@ export default function Admin() {
           <button
             type="submit"
             disabled={authPending}
-            className="w-full bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 text-white font-bold py-3 rounded-xl hover:from-pink-500 hover:via-pink-600 hover:to-pink-700 disabled:opacity-60 transition-all"
+            className="w-full bg-gradient-to-r from-pink-500 via-pink-600 to-pink-700 text-white font-bold py-3 rounded-xl hover:from-pink-600 hover:via-pink-700 hover:to-pink-800 disabled:opacity-60 transition-all"
           >
             {authPending ? "Checking…" : "Enter Dashboard"}
           </button>
@@ -254,7 +254,7 @@ export default function Admin() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-400 via-pink-500 to-pink-600 flex items-center justify-center shadow-md">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-500 via-pink-600 to-pink-700 flex items-center justify-center shadow-md">
             <ShieldCheck className="w-5 h-5 text-white" />
           </div>
           <div>
@@ -757,7 +757,7 @@ export default function Admin() {
 
                 <button
                   type="submit"
-                  className="w-full bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 hover:from-pink-500 hover:via-pink-600 hover:to-pink-700 text-white font-extrabold text-sm h-12 rounded-xl shadow-md transition-all flex items-center justify-center gap-2"
+                  className="w-full bg-gradient-to-r from-pink-500 via-pink-600 to-pink-700 hover:from-pink-600 hover:via-pink-700 hover:to-pink-800 text-white font-extrabold text-sm h-12 rounded-xl shadow-md transition-all flex items-center justify-center gap-2"
                 >
                   <Plus className="w-4 h-4" />
                   Add Token to Launchpad
@@ -896,7 +896,7 @@ export default function Admin() {
                   )}
                   <input type="text" placeholder="Video title (optional)" value={liveForm.videoTitle} onChange={(e) => setLiveForm((current) => ({ ...current, videoTitle: e.target.value }))} maxLength={160} className="w-full border border-pink-200/60 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300 bg-white" />
                 </div>
-                <button type="submit" disabled={updateLiveMutation.isPending} className="w-full bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 hover:from-pink-500 hover:via-pink-600 hover:to-pink-700 disabled:opacity-60 text-white font-extrabold text-sm h-12 rounded-xl shadow-md transition-all flex items-center justify-center gap-2">
+                <button type="submit" disabled={updateLiveMutation.isPending} className="w-full bg-gradient-to-r from-pink-500 via-pink-600 to-pink-700 hover:from-pink-600 hover:via-pink-700 hover:to-pink-800 disabled:opacity-60 text-white font-extrabold text-sm h-12 rounded-xl shadow-md transition-all flex items-center justify-center gap-2">
                   <Radio className="w-4 h-4" />
                   {updateLiveMutation.isPending ? "Saving…" : "Save Live Stream Settings"}
                 </button>
