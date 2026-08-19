@@ -228,7 +228,7 @@ export default function Home() {
 
       {/* African X1 NFT — Guardian Banner */}
       <motion.a
-        href="https://african-x-1-nft--africamarket.replit.app"
+        href="https://african-x-1-nft--X1AFRICANFT.replit.app"
         target="_blank"
         rel="noopener noreferrer"
         initial={{ opacity: 0, y: 24 }}
