@@ -6,9 +6,25 @@ id = "fqs82U_Nn8xOdYE12MTrR"
 uri = "file://barbie-fun-demo.tar.gz"
 type = "unspecified"
 title = "Barbie Fun — Demo Source (tar.gz)"
+logical_id = "c672c84e-35d7-4141-b029-ad67cf93ade8"
 
 [[outputs]]
 id = "jt-GRWcobb7hd9ulIzrjY"
 uri = "file://artifacts/marketing-video/public/audio/bg_music.mp3"
 type = "audio"
 title = "background music"
+logical_id = "10ce1e7c-3720-475a-90c4-f03d5361a1a8"
+
+[[outputs]]
+id = "jO0onbjJsRdvIQXh6azV2"
+uri = "file://barbie-fun-netlify.zip"
+type = "unspecified"
+title = "Barbie Fun Netlify ZIP"
+description = "Static production frontend packaged for Netlify drag-and-drop deployment, including SPA routing fallback and the latest Validator/NFT updates."
+logical_id = "9efe2c37-f3da-43a1-a843-7021e2ae253d"
+content_hash = "sha256:f47add58f920077e5d4743bd35e17f0d8525ec60caaa31904c4d059dd587589b"
+size = 9619091
+mtime_ms = 1787145846570
+storage_uri = "gcs://replit-rams-assets-picard/rams/assets/repl:f5767814-3145-4158-8922-8039df3ec914/9efe2c37-f3da-43a1-a843-7021e2ae253d/29d6f38d-258e-4a3f-9231-3ba827ef9b37"
+storage_version_token = "1787145851240518"
+content_type = "application/octet-stream"
