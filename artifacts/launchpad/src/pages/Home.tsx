@@ -556,8 +556,12 @@ export default function Home() {
         <div className="relative z-10 p-6 sm:p-8 lg:p-10">
           <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6 mb-8">
             <div className="flex items-center gap-3">
-              <div className="relative w-14 h-14 rounded-2xl bg-gradient-to-br from-pink-400 via-fuchsia-500 to-pink-600 flex items-center justify-center shadow-xl shadow-pink-300/60 ring-4 ring-pink-100">
-                <ShieldCheck className="w-6 h-6 text-white" />
+              <div className="relative w-16 h-16 rounded-2xl overflow-hidden bg-black flex items-center justify-center shadow-xl shadow-pink-300/60 ring-4 ring-pink-100">
+                <img
+                  src="/validator-logo.png"
+                  alt="BarbieFun Validator (X1)"
+                  className="h-full w-full object-cover"
+                />
                 <span className="absolute -right-1.5 -top-1.5 w-4 h-4 rounded-full bg-emerald-500 border-2 border-white shadow-sm" />
               </div>
               <div>
