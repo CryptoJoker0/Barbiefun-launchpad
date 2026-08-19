@@ -545,35 +545,43 @@ export default function Home() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.2 }}
         transition={{ duration: 0.6, delay: 0.1 }}
-        className="relative overflow-hidden rounded-3xl border border-pink-100 bg-white shadow-sm"
+        className="relative overflow-hidden rounded-3xl border border-pink-200/80 bg-white shadow-[0_20px_60px_rgba(236,72,153,0.16)] ring-1 ring-white"
       >
-        {/* Subtle animated BG */}
-        <div className="absolute inset-0 bg-gradient-to-br from-pink-50 via-white to-fuchsia-50 pointer-events-none" />
-        <div className="absolute -top-16 -right-16 w-64 h-64 bg-pink-100/40 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-16 -left-16 w-64 h-64 bg-fuchsia-100/40 rounded-full blur-3xl pointer-events-none" />
+        {/* Layered pink glass background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-white via-pink-50/70 to-fuchsia-50 pointer-events-none" />
+        <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-pink-500 via-fuchsia-500 to-pink-300 pointer-events-none" />
+        <div className="absolute -top-24 -right-20 w-80 h-80 bg-pink-200/35 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-24 -left-20 w-80 h-80 bg-fuchsia-200/35 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="relative z-10 p-6 sm:p-8">
+        <div className="relative z-10 p-6 sm:p-8 lg:p-10">
           <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6 mb-8">
             <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-pink-400 to-fuchsia-500 flex items-center justify-center shadow-lg shadow-pink-200">
+              <div className="relative w-14 h-14 rounded-2xl bg-gradient-to-br from-pink-400 via-fuchsia-500 to-pink-600 flex items-center justify-center shadow-xl shadow-pink-300/60 ring-4 ring-pink-100">
                 <ShieldCheck className="w-6 h-6 text-white" />
+                <span className="absolute -right-1.5 -top-1.5 w-4 h-4 rounded-full bg-emerald-500 border-2 border-white shadow-sm" />
               </div>
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-pink-500 mb-1">Official validator guide</p>
                 <h2 className="text-2xl sm:text-3xl font-extrabold text-pink-900 leading-tight">Stake with BarbieFun <span className="text-pink-500">(X1)</span></h2>
-                <p className="text-xs text-pink-400 font-semibold">Powered by X1 Blockchain · SVM</p>
+                <p className="text-xs text-pink-400 font-semibold mt-1">Powered by X1 Blockchain · SVM Mainnet</p>
               </div>
             </div>
-            <a
-              href={VALIDATOR_STAKING_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 bg-gradient-to-r from-pink-500 to-fuchsia-500 hover:from-pink-600 hover:to-fuchsia-600 text-white text-sm font-bold px-5 py-3 rounded-full shadow-md shadow-pink-200 transition-all hover:-translate-y-0.5 w-fit"
-            >
-              <Zap className="w-4 h-4" />
-              Open staking portal
-              <ExternalLink className="w-3.5 h-3.5" />
-            </a>
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3.5 py-2 text-xs font-extrabold text-emerald-700">
+                <span className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_0_4px_rgba(16,185,129,0.14)]" />
+                LIVE
+              </span>
+              <a
+                href={VALIDATOR_STAKING_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 bg-gradient-to-r from-pink-500 via-fuchsia-500 to-pink-600 hover:from-pink-600 hover:to-fuchsia-600 text-white text-sm font-bold px-5 py-3 rounded-full shadow-lg shadow-pink-300/50 transition-all hover:-translate-y-0.5 w-fit"
+              >
+                <Zap className="w-4 h-4" />
+                Open staking portal
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+            </div>
           </div>
 
           <p className="max-w-2xl text-sm text-pink-600/80 leading-relaxed mb-6">
@@ -608,7 +616,7 @@ export default function Home() {
             {[
               { icon: ShieldCheck, label: "Network",      value: "X1 Blockchain", sub: "SVM Mainnet" },
               { icon: Cpu,         label: "Role",         value: "Validator",      sub: "Block producer" },
-              { icon: Globe,       label: "Status",       value: "Pending",        sub: "Awaiting activation", amber: true },
+              { icon: Globe,       label: "Status",       value: "Live",            sub: "Active on X1 network", green: true },
               { icon: Zap,         label: "Commission",   value: "0%",             sub: "No fees to stakers" },
             ].map(({ icon: Icon, label, value, sub, green, amber }: { icon: React.ElementType; label: string; value: string; sub: string; green?: boolean; amber?: boolean }) => (
               <div key={label} className="bg-pink-50/70 border border-pink-100 rounded-2xl p-4 flex flex-col gap-1">
