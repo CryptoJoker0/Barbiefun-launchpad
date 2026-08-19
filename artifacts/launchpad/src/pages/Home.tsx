@@ -3,7 +3,7 @@ import { Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Rocket, Clock, Trophy, ArrowLeftRight, Sparkles, DollarSign, Link2, Heart, BadgeCheck, Search, Radio, ShieldCheck, Cpu, Zap, Globe, Users, ExternalLink, Video } from "lucide-react";
+import { Rocket, Clock, Trophy, ArrowLeftRight, Sparkles, DollarSign, Link2, Heart, BadgeCheck, Search, Radio, ShieldCheck, Cpu, Zap, Globe, Users, ExternalLink, Video, Clipboard, Check, Send } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import RecentLaunches from "@/components/RecentLaunches";
 import TokenCard from "@/components/TokenCard";
@@ -16,10 +16,13 @@ import { useLiveStream } from "@/hooks/useLiveStream";
 
 const TELEGRAM_URL = "https://t.me/barbiefunv2/65";
 const TWITTER_URL = "https://x.com/BARBIEFUNV2";
+const VALIDATOR_VOTE_ACCOUNT = "BhoHtTEp56AvhGM4qAe6rujVjYwVB8NGXE3z8CJFTBLE";
+const VALIDATOR_STAKING_URL = "https://app.xdex.xyz/valistake";
 
 export default function Home() {
   const [tab, setTab] = useState("new");
   const [search, setSearch] = useState("");
+  const [validatorCopied, setValidatorCopied] = useState(false);
   const { data: launches = [], isLoading } = useLaunches();
   const { data: liveStream } = useLiveStream();
   // Use API-configured video/embed if available, otherwise fall back to the
@@ -31,6 +34,16 @@ export default function Home() {
   const hasLivePlayer = Boolean(liveStream?.embedUrl || videoUrl);
   // True when we have something to play (API stream or local video)
   const isOnAir = liveStream?.isLive || hasLivePlayer;
+
+  const copyValidatorVoteAccount = async () => {
+    try {
+      await navigator.clipboard.writeText(VALIDATOR_VOTE_ACCOUNT);
+      setValidatorCopied(true);
+      window.setTimeout(() => setValidatorCopied(false), 2200);
+    } catch {
+      window.alert("Unable to copy the vote account. Please copy it manually.");
+    }
+  };
 
   const getFiltered = () => {
     switch (tab) {
@@ -527,6 +540,7 @@ export default function Home() {
 
       {/* BarbieFun Validator Section */}
       <motion.section
+        id="validator"
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.2 }}
@@ -539,29 +553,57 @@ export default function Home() {
         <div className="absolute -bottom-16 -left-16 w-64 h-64 bg-fuchsia-100/40 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 p-6 sm:p-8">
-          {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6 mb-8">
             <div className="flex items-center gap-3">
               <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-pink-400 to-fuchsia-500 flex items-center justify-center shadow-lg shadow-pink-200">
                 <ShieldCheck className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h2 className="text-xl font-extrabold text-pink-900 leading-tight">BarbieFun Validator</h2>
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-pink-500 mb-1">Official validator guide</p>
+                <h2 className="text-2xl sm:text-3xl font-extrabold text-pink-900 leading-tight">Stake with BarbieFun <span className="text-pink-500">(X1)</span></h2>
                 <p className="text-xs text-pink-400 font-semibold">Powered by X1 Blockchain · SVM</p>
               </div>
             </div>
             <a
-              href="https://x1.wiki/validator"
+              href={VALIDATOR_STAKING_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 bg-gradient-to-r from-pink-500 to-fuchsia-500 hover:from-pink-600 hover:to-fuchsia-600 text-white text-sm font-bold px-5 py-2.5 rounded-full shadow-md shadow-pink-200 transition-all hover:-translate-y-0.5 w-fit"
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-pink-500 to-fuchsia-500 hover:from-pink-600 hover:to-fuchsia-600 text-white text-sm font-bold px-5 py-3 rounded-full shadow-md shadow-pink-200 transition-all hover:-translate-y-0.5 w-fit"
             >
               <Zap className="w-4 h-4" />
-              Stake &amp; Delegate
+              Open staking portal
+              <ExternalLink className="w-3.5 h-3.5" />
             </a>
           </div>
 
-          {/* Stats grid */}
+          <p className="max-w-2xl text-sm text-pink-600/80 leading-relaxed mb-6">
+            Join the BarbieFun Validator community through the official staking portal. Delegate your X1 stake directly to BarbieFun and help support a community-run block producer.
+          </p>
+
+          {/* Vote account */}
+          <div className="rounded-2xl border border-pink-200 bg-white/80 p-4 sm:p-5 mb-6 shadow-sm">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-pink-400">Validator vote account</p>
+                <p className="text-xs text-pink-500 mt-1">Copy this address into the official staking interface.</p>
+              </div>
+              <button
+                type="button"
+                onClick={copyValidatorVoteAccount}
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-pink-100 hover:bg-pink-200 text-pink-700 text-xs font-bold px-4 py-2 transition-colors shrink-0"
+                aria-label="Copy validator vote account"
+              >
+                {validatorCopied ? <Check className="w-3.5 h-3.5" /> : <Clipboard className="w-3.5 h-3.5" />}
+                {validatorCopied ? "Copied" : "Copy address"}
+              </button>
+            </div>
+            <code className="block overflow-x-auto rounded-xl bg-pink-950 px-3 py-3 text-[11px] sm:text-xs text-pink-100 font-mono whitespace-nowrap">
+              {VALIDATOR_VOTE_ACCOUNT}
+            </code>
+            {validatorCopied && <p className="text-[11px] text-emerald-600 font-semibold mt-2 flex items-center gap-1"><Check className="w-3 h-3" /> Vote account copied to clipboard</p>}
+          </div>
+
+          {/* Validator stats */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
             {[
               { icon: ShieldCheck, label: "Network",      value: "X1 Blockchain", sub: "SVM Mainnet" },
@@ -580,6 +622,31 @@ export default function Home() {
             ))}
           </div>
 
+          <div className="border-t border-pink-100 pt-7">
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 mb-4">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-pink-400">The process</p>
+                <h3 className="text-lg font-extrabold text-pink-900 mt-1">How to join BarbieFun (X1)</h3>
+              </div>
+              <p className="text-xs text-pink-500">Five simple steps through the official portal.</p>
+            </div>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-3 mb-7">
+              {[
+                ["01", "Copy vote account", "Copy the validator vote account shown above."],
+                ["02", "Open staking portal", "Open the official staking portal in a new tab."],
+                ["03", "Paste address", "Paste the copied vote account into the staking interface."],
+                ["04", "Select BarbieFun", "Choose BarbieFun Validator (X1) as your validator."],
+                ["05", "Stake", "Complete the staking process directly through the portal."],
+              ].map(([number, title, body]) => (
+                <div key={number} className="rounded-2xl bg-pink-50/80 border border-pink-100 p-4">
+                  <span className="text-xs font-extrabold text-pink-400">{number}</span>
+                  <h4 className="text-sm font-bold text-pink-900 mt-2 mb-1">{title}</h4>
+                  <p className="text-[11px] text-pink-500 leading-relaxed">{body}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
           {/* Why stake */}
           <div className="grid sm:grid-cols-3 gap-3">
             {[
@@ -595,6 +662,15 @@ export default function Home() {
                 <p className="text-xs text-pink-500 leading-relaxed">{body}</p>
               </div>
             ))}
+          </div>
+          <div className="mt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-2xl bg-pink-950 px-4 py-3.5 text-pink-100">
+            <p className="text-[11px] leading-relaxed max-w-2xl">
+              <strong className="text-white">Safety first.</strong> This page will never request or collect seed phrases, private keys, recovery phrases, or wallet passwords.
+            </p>
+            <div className="flex items-center gap-3 shrink-0">
+              <a href={TWITTER_URL} target="_blank" rel="noopener noreferrer" className="text-xs font-bold hover:text-white transition-colors">Follow on X</a>
+              <a href={TELEGRAM_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-bold hover:text-white transition-colors"><Send className="w-3.5 h-3.5" /> Telegram</a>
+            </div>
           </div>
         </div>
       </motion.section>
