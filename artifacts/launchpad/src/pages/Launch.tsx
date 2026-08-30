@@ -669,7 +669,12 @@ export default function Launch() {
         </div>
       )}
 
-      {walletOpen && <WalletModal onClose={() => setWalletOpen(false)} />}
+      {walletOpen && (
+        <WalletModal
+          initialSection={isSvmMode ? "x1" : "evm"}
+          onClose={() => setWalletOpen(false)}
+        />
+      )}
     </div>
   );
 }

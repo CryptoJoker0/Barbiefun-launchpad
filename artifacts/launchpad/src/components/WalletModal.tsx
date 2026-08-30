@@ -21,6 +21,7 @@ const WALLET_META: Record<string, { name: string; icon: LucideIcon }> = {
 
 interface WalletModalProps {
   onClose: () => void;
+  initialSection?: "evm" | "x1";
 }
 
 /** Shorten a Solana public key for display */
@@ -28,21 +29,21 @@ function shortPk(pk: string) {
   return `${pk.slice(0, 4)}...${pk.slice(-4)}`;
 }
 
-export default function WalletModal({ onClose }: WalletModalProps) {
+export default function WalletModal({ onClose, initialSection = "evm" }: WalletModalProps) {
   const { connectors, connect, isPending, error } = useConnect();
   const { disconnect } = useDisconnect();
   const { address, isConnected, chain } = useAccount();
   const { switchChain } = useSwitchChain();
   const [copied, setCopied] = useState(false);
   const [tab, setTab] = useState<"wallet" | "chain">("wallet");
-  const [section, setSection] = useState<"evm" | "x1">("evm");
+  const [section, setSection] = useState<"evm" | "x1">(initialSection);
 
   const solana = useSolanaWallet();
   const phantomAvailable = isPhantomAvailable();
   const backpackAvailable = isBackpackAvailable();
 
   const copyAddress = () => {
-    const addr = address ?? solana.publicKey ?? "";
+    const addr = activeAddress ?? "";
     if (addr) {
       navigator.clipboard.writeText(addr);
       setCopied(true);
@@ -54,10 +55,11 @@ export default function WalletModal({ onClose }: WalletModalProps) {
     ? `${address.slice(0, 6)}...${address.slice(-4)}`
     : "";
 
-  const anyConnected = isConnected || solana.connected;
+  const sectionConnected = section === "x1" ? solana.connected : isConnected;
+  const activeAddress = section === "x1" ? solana.publicKey : address;
 
   // ---------- Connected view ----------
-  if (anyConnected) {
+  if (sectionConnected) {
     return (
       <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
         <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
@@ -80,12 +82,14 @@ export default function WalletModal({ onClose }: WalletModalProps) {
                 <Wallet className="w-6 h-6 text-white" />
               </div>
               <p className="font-mono font-bold text-pink-900 text-sm mb-1">
-                {isConnected ? shortAddress : solana.publicKey ? shortPk(solana.publicKey) : ""}
+                {section === "x1" && solana.publicKey
+                  ? shortPk(solana.publicKey)
+                  : shortAddress}
               </p>
               <p className="text-xs text-pink-500 font-semibold">
-                {isConnected
-                  ? (chain ? chain.name : "Unsupported network")
-                  : `SVM · ${solana.walletId === "phantom" ? "Phantom" : "Backpack"}`}
+                {section === "x1"
+                  ? `SVM · ${solana.walletId === "phantom" ? "Phantom" : "Backpack"}`
+                  : (chain ? chain.name : "Unsupported network")}
               </p>
               <button
                 onClick={copyAddress}
@@ -96,7 +100,7 @@ export default function WalletModal({ onClose }: WalletModalProps) {
               </button>
             </div>
 
-            {isConnected && (
+            {section === "evm" && isConnected && (
               <>
                 <div className="flex space-x-2 bg-pink-50 rounded-xl p-1">
                   <button
@@ -162,7 +166,7 @@ export default function WalletModal({ onClose }: WalletModalProps) {
               </>
             )}
 
-            {solana.connected && (
+            {section === "x1" && solana.connected && (
               <button
                 onClick={() => { solana.disconnect(); onClose(); }}
                 className="w-full flex items-center justify-center space-x-2 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-600 font-bold py-3 rounded-xl transition-all"

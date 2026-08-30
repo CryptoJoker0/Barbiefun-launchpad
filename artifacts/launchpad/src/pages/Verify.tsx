@@ -705,7 +705,12 @@ export default function Verify() {
         </div>
       </div>
 
-      {walletOpen && <WalletModal onClose={() => setWalletOpen(false)} />}
+      {walletOpen && (
+        <WalletModal
+          initialSection={isSvmSelected ? "x1" : "evm"}
+          onClose={() => setWalletOpen(false)}
+        />
+      )}
     </div>
   );
 }
