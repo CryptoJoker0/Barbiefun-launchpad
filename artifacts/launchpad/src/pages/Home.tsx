@@ -16,6 +16,7 @@ import { useLiveStream } from "@/hooks/useLiveStream";
 
 const TELEGRAM_URL = "https://t.me/barbiefunv2/65";
 const TWITTER_URL = "https://x.com/BARBIEFUNV2";
+const BARBIE_EXPLORER_URL = "https://barbie-vault-gamma.vercel.app/";
 const VALIDATOR_VOTE_ACCOUNT = "BhoHtTEp56AvhGM4qAe6rujVjYwVB8NGXE3z8CJFTBLE";
 const VALIDATOR_STAKING_URL = "https://app.xdex.xyz/valistake";
 
@@ -140,15 +141,21 @@ export default function Home() {
               Own by nobody &mdash; zero team, only Barbie&apos;s.
             </p>
 
-            <div className="relative inline-block mb-7">
+            <a
+              href={BARBIE_EXPLORER_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Open Barbie Explorer"
+              className="relative inline-block mb-7"
+            >
               <div className="absolute inset-0 bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 rounded-2xl blur-md opacity-40 scale-105" />
               <div className="relative bg-gradient-to-r from-pink-400 via-pink-500 to-pink-400 rounded-2xl px-5 py-2.5 shadow-lg flex items-center justify-center gap-2">
-                <Rocket className="w-5 h-5 text-white" />
+                <ExternalLink className="w-5 h-5 text-white" />
                 <span className="text-white font-black text-lg sm:text-xl tracking-widest uppercase drop-shadow">
-                  Start Launching
+                  Barbie Explorer
                 </span>
               </div>
-            </div>
+            </a>
 
             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3">
               <Link href="/launch">
