@@ -628,7 +628,7 @@ export default function Home() {
               { icon: ShieldCheck, label: "Network",      value: "X1 Blockchain", sub: "SVM Mainnet" },
               { icon: Cpu,         label: "Role",         value: "Validator",      sub: "Block producer" },
               { icon: Globe,       label: "Status",       value: "Live",            sub: "Active on X1 network", green: true },
-              { icon: Zap,         label: "Commission",   value: "0%",             sub: "No fees to stakers" },
+              { icon: Zap,         label: "Commission",   value: "10%",            sub: "Validator commission" },
             ].map(({ icon: Icon, label, value, sub, green, amber }: { icon: React.ElementType; label: string; value: string; sub: string; green?: boolean; amber?: boolean }) => (
               <div key={label} className="bg-pink-50/70 border border-pink-100 rounded-2xl p-4 flex flex-col gap-1">
                 <div className="flex items-center gap-1.5 text-pink-400 mb-1">
@@ -671,7 +671,7 @@ export default function Home() {
             {[
               { icon: Heart,       title: "Community-run",  body: "BarbieFun runs its own validator to keep the X1 network decentralised and support the Barbie Fun ecosystem." },
               { icon: ShieldCheck, title: "Trusted & secure", body: "Operated with 24/7 monitoring, redundant infra, and slashing protection to keep your stake safe." },
-              { icon: Zap,         title: "0% commission",  body: "100% of staking rewards flow straight to delegators — zero fees taken by the validator operator." },
+              { icon: Zap,         title: "10% commission", body: "90% of staking rewards flow to delegators, while 10% supports validator operations." },
             ].map(({ icon: Icon, title, body }) => (
               <div key={title} className="bg-gradient-to-br from-white to-pink-50 border border-pink-100 rounded-2xl p-4">
                 <div className="w-8 h-8 rounded-xl bg-pink-100 flex items-center justify-center mb-3">
