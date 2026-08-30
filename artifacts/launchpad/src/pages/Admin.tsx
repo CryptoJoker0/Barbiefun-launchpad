@@ -137,7 +137,6 @@ export default function Admin() {
   const refresh = () => refetch();
 
   const selectedWalletChain = DISPLAY_CHAINS.find((c) => c.id === selectedWalletChainId) ?? DISPLAY_CHAINS[0];
-  const selectedWalletAddress = selectedWalletChain.isSvm ? solana.publicKey : address;
   const walletConfirmed = selectedWalletChain.isSvm
     ? solana.connected
     : isConnected && chain?.id === selectedWalletChain.id;
@@ -387,11 +386,6 @@ export default function Admin() {
                               ? `Connected on ${chain?.name ?? "another network"}`
                               : "EVM wallet not connected"}
                       </p>
-                      {selectedWalletAddress && (
-                        <p className="font-mono text-[11px] text-pink-400 mt-1">
-                          {selectedWalletAddress.slice(0, 10)}…{selectedWalletAddress.slice(-6)}
-                        </p>
-                      )}
                     </div>
                   </div>
                   <button
@@ -419,18 +413,12 @@ export default function Admin() {
                 <div className="rounded-2xl border border-pink-100 bg-white p-4">
                   <p className="text-xs font-bold uppercase tracking-wide text-pink-400">EVM verification fee</p>
                   <p className="text-2xl font-extrabold text-pink-900 mt-1">$5.00</p>
-                  <p className="text-xs text-pink-500 mt-1">Paid on the selected EVM chain to the configured treasury.</p>
-                  <p className="font-mono text-[11px] text-pink-700 break-all mt-3">
-                    {import.meta.env.VITE_LAUNCH_FEE_TREASURY_ADDRESS || "Treasury not configured"}
-                  </p>
+                  <p className="text-xs text-pink-500 mt-1">Payment destination remains private and is not displayed here.</p>
                 </div>
                 <div className="rounded-2xl border border-purple-100 bg-purple-50/50 p-4">
                   <p className="text-xs font-bold uppercase tracking-wide text-purple-400">SVM verification fee</p>
                   <p className="text-2xl font-extrabold text-purple-900 mt-1">$5.00</p>
-                  <p className="text-xs text-purple-500 mt-1">Paid on X1 or Solana to the SVM treasury.</p>
-                  <p className="font-mono text-[11px] text-purple-700 break-all mt-3">
-                    {import.meta.env.VITE_SOLANA_TREASURY_ADDRESS || "Treasury not configured"}
-                  </p>
+                  <p className="text-xs text-purple-500 mt-1">Payment destination remains private and is not displayed here.</p>
                 </div>
               </div>
             </CardContent>
