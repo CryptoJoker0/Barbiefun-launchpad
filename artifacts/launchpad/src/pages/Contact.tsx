@@ -151,7 +151,7 @@ export default function Contact() {
             },
             {
               q: "How do I get verified?",
-              a: "Go to Verify, choose Standard ($80) or Fast-Track ($100), fill in your project details, and pay the fee.",
+              a: "Go to Verify, choose your chain, fill in your project details, and pay the flat $5 verification fee.",
             },
             {
               q: "Which wallets are supported?",

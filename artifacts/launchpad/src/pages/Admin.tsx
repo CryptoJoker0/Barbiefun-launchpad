@@ -1058,10 +1058,10 @@ export default function Admin() {
             </CardHeader>
             <CardContent className="space-y-4 text-sm">
               {[
-                { key: "VITE_LAUNCH_FEE_TREASURY_ADDRESS", label: "EVM Treasury Address", description: `Wallet that receives ${LAUNCH_FEE_USD} launch fees on EVM chains` },
-                { key: "VITE_SOLANA_TREASURY_ADDRESS", label: "Solana / X1 Treasury Address", description: `Wallet that receives ${LAUNCH_FEE_USD} launch fees on SVM chains` },
+                { key: "VITE_LAUNCH_FEE_TREASURY_ADDRESS", label: "EVM Treasury Address", description: `Wallet that receives ${LAUNCH_FEE_USD} launch and verification fees on EVM chains` },
+                { key: "VITE_SOLANA_TREASURY_ADDRESS", label: "Solana / X1 Treasury Address", description: `Wallet that receives ${LAUNCH_FEE_USD} launch and verification fees on SVM chains` },
                 { key: "VITE_WALLETCONNECT_PROJECT_ID", label: "WalletConnect Project ID", description: "Enables WalletConnect QR modal" },
-                { key: "ADMIN_PASSWORD", label: "Server Admin Password", description: "Stored securely on the API server; never exposed to the browser" },
+                { key: "ADMIN_PASSWORD", label: "Server Admin Password", description: "Stored securely on the API server; never exposed to the browser", serverManaged: true },
               ].map((setting) => {
                 const value = import.meta.env[setting.key];
                 const configured = !!value;
@@ -1073,7 +1073,11 @@ export default function Admin() {
                       <code className="text-[10px] text-pink-600/80 bg-pink-100/50 px-1.5 py-0.5 rounded mt-1 inline-block">{setting.key}</code>
                     </div>
                     <div className="flex items-center gap-2">
-                      {configured ? (
+                      {setting.serverManaged ? (
+                        <span className="flex items-center gap-1 text-xs font-bold text-blue-600 bg-blue-50 border border-blue-200 rounded-full px-2.5 py-1">
+                          <ShieldCheck className="w-3 h-3" /> Server-managed
+                        </span>
+                      ) : configured ? (
                         <span className="flex items-center gap-1 text-xs font-bold text-emerald-500 bg-emerald-50 border border-emerald-200 rounded-full px-2.5 py-1">
                           <CheckCircle2 className="w-3 h-3" /> Set
                         </span>
