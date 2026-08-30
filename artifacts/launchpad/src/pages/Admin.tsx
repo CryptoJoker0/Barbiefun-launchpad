@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
-import { Rocket, DollarSign, CheckCircle2, Link2, TrendingUp, BadgeCheck, Activity, Settings, ShieldCheck, Zap, AlertCircle, Plus, X, Radio, Upload, Video, LogOut } from "lucide-react";
+import { Rocket, DollarSign, CheckCircle2, Link2, TrendingUp, BadgeCheck, Activity, Settings, ShieldCheck, Zap, AlertCircle, Plus, X, Radio, Upload, Video, LogOut, Wallet } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ChainIcon from "@/components/ChainIcon";
 import { SUPPORTED_CHAINS, DISPLAY_CHAINS } from "@/lib/wagmi";
+import { useAccount, useSwitchChain } from "wagmi";
+import { useSolanaWallet } from "@/hooks/useSolanaWallet";
+import WalletModal from "@/components/WalletModal";
 import { type Launch } from "@/lib/launches";
 import { useLaunches, useAddLaunch, useSetVerified } from "@/hooks/useLaunches";
 import { LAUNCH_FEE_USD } from "@/lib/pricing";
@@ -19,7 +22,12 @@ export default function Admin() {
   const [authPending, setAuthPending] = useState(false);
   const [pw, setPw] = useState("");
   const [pwError, setPwError] = useState(false);
-  const [tab, setTab] = useState<"overview" | "launches" | "chains" | "add" | "referrals" | "live" | "settings">("overview");
+  const [tab, setTab] = useState<"overview" | "launches" | "chains" | "add" | "referrals" | "live" | "settings" | "wallet">("overview");
+  const [walletModalOpen, setWalletModalOpen] = useState(false);
+  const [selectedWalletChainId, setSelectedWalletChainId] = useState(-1);
+  const { address, isConnected, chain } = useAccount();
+  const { switchChain, isPending: isSwitchingChain } = useSwitchChain();
+  const solana = useSolanaWallet();
   const { data: launches = [], refetch } = useLaunches();
   const addLaunchMutation = useAddLaunch();
   const setVerifiedMutation = useSetVerified();
@@ -127,6 +135,28 @@ export default function Admin() {
   };
 
   const refresh = () => refetch();
+
+  const selectedWalletChain = DISPLAY_CHAINS.find((c) => c.id === selectedWalletChainId) ?? DISPLAY_CHAINS[0];
+  const selectedWalletAddress = selectedWalletChain.isSvm ? solana.publicKey : address;
+  const walletConfirmed = selectedWalletChain.isSvm
+    ? solana.connected
+    : isConnected && chain?.id === selectedWalletChain.id;
+
+  const confirmWalletForChain = () => {
+    if (selectedWalletChain.isSvm) {
+      if (!solana.connected) setWalletModalOpen(true);
+      return;
+    }
+
+    if (!isConnected) {
+      setWalletModalOpen(true);
+      return;
+    }
+
+    if (chain?.id !== selectedWalletChain.id) {
+      switchChain({ chainId: selectedWalletChain.id });
+    }
+  };
 
   const handleSaveLiveStream = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -246,6 +276,7 @@ export default function Admin() {
     { id: "add", label: "Add Token", icon: Plus },
     { id: "referrals", label: "Referrals", icon: TrendingUp },
     { id: "live", label: "Live Stream & Upload", icon: Radio },
+    { id: "wallet", label: "Wallet Confirm", icon: Wallet },
     { id: "settings", label: "Settings", icon: Settings },
   ] as const;
 
@@ -297,6 +328,115 @@ export default function Admin() {
           </button>
         ))}
       </div>
+
+      {/* WALLET CONFIRMATION TAB */}
+      {tab === "wallet" && (
+        <div className="space-y-4">
+          <Card className="border-purple-200 shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-sm font-bold text-purple-700 flex items-center gap-2">
+                <Wallet className="w-4 h-4" />
+                Confirm Wallet by Chain
+              </CardTitle>
+              <p className="text-xs text-purple-400">
+                Select a network, then connect or switch the wallet used to confirm verification-fee payments.
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-5">
+              <div>
+                <p className="text-xs font-bold text-purple-400 uppercase tracking-widest mb-2">Select chain</p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                  {DISPLAY_CHAINS.map((chainOption) => (
+                    <button
+                      key={chainOption.id}
+                      type="button"
+                      onClick={() => setSelectedWalletChainId(chainOption.id)}
+                      className={`flex items-center gap-2 rounded-xl border-2 px-3 py-3 text-left transition-all ${
+                        selectedWalletChainId === chainOption.id
+                          ? chainOption.isSvm
+                            ? "border-purple-500 bg-purple-50 shadow-sm"
+                            : "border-pink-500 bg-pink-50 shadow-sm"
+                          : "border-pink-100 hover:border-purple-200"
+                      }`}
+                    >
+                      <ChainIcon chain={chainOption.icon} size={24} />
+                      <span className="min-w-0">
+                        <span className="block text-xs font-bold text-pink-900 truncate">{chainOption.name}</span>
+                        <span className={`block text-[10px] font-semibold ${chainOption.isSvm ? "text-purple-500" : "text-pink-400"}`}>
+                          {chainOption.isSvm ? `SVM · ${chainOption.symbol}` : `EVM · ${chainOption.symbol}`}
+                        </span>
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className={`rounded-2xl border p-4 ${selectedWalletChain.isSvm ? "border-purple-200 bg-purple-50/60" : "border-pink-200 bg-pink-50/60"}`}>
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <ChainIcon chain={selectedWalletChain.icon} size={34} />
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-wide text-pink-400">Selected network</p>
+                      <p className="font-extrabold text-pink-900">{selectedWalletChain.name}</p>
+                      <p className={`text-xs font-semibold ${selectedWalletChain.isSvm ? "text-purple-500" : "text-pink-500"}`}>
+                        {walletConfirmed
+                          ? `${selectedWalletChain.isSvm ? (solana.walletId === "phantom" ? "Phantom" : "Backpack") : "EVM wallet"} confirmed`
+                          : selectedWalletChain.isSvm
+                            ? "SVM wallet not connected"
+                            : isConnected
+                              ? `Connected on ${chain?.name ?? "another network"}`
+                              : "EVM wallet not connected"}
+                      </p>
+                      {selectedWalletAddress && (
+                        <p className="font-mono text-[11px] text-pink-400 mt-1">
+                          {selectedWalletAddress.slice(0, 10)}…{selectedWalletAddress.slice(-6)}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={confirmWalletForChain}
+                    disabled={walletConfirmed || isSwitchingChain || solana.isPending}
+                    className={`rounded-full px-5 py-2.5 text-sm font-extrabold text-white transition-all disabled:opacity-60 ${
+                      selectedWalletChain.isSvm
+                        ? "bg-purple-600 hover:bg-purple-700"
+                        : "bg-gradient-to-r from-pink-500 via-pink-600 to-pink-700 hover:from-pink-600 hover:via-pink-700 hover:to-pink-800"
+                    }`}
+                  >
+                    {walletConfirmed
+                      ? "Wallet confirmed"
+                      : isSwitchingChain
+                        ? "Switching…"
+                        : isConnected && !selectedWalletChain.isSvm
+                          ? `Switch to ${selectedWalletChain.name}`
+                          : "Connect wallet"}
+                  </button>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="rounded-2xl border border-pink-100 bg-white p-4">
+                  <p className="text-xs font-bold uppercase tracking-wide text-pink-400">EVM verification fee</p>
+                  <p className="text-2xl font-extrabold text-pink-900 mt-1">$5.00</p>
+                  <p className="text-xs text-pink-500 mt-1">Paid on the selected EVM chain to the configured treasury.</p>
+                  <p className="font-mono text-[11px] text-pink-700 break-all mt-3">
+                    {import.meta.env.VITE_LAUNCH_FEE_TREASURY_ADDRESS || "Treasury not configured"}
+                  </p>
+                </div>
+                <div className="rounded-2xl border border-purple-100 bg-purple-50/50 p-4">
+                  <p className="text-xs font-bold uppercase tracking-wide text-purple-400">SVM verification fee</p>
+                  <p className="text-2xl font-extrabold text-purple-900 mt-1">$5.00</p>
+                  <p className="text-xs text-purple-500 mt-1">Paid on X1 or Solana to the SVM treasury.</p>
+                  <p className="font-mono text-[11px] text-purple-700 break-all mt-3">
+                    {import.meta.env.VITE_SOLANA_TREASURY_ADDRESS || "Treasury not configured"}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* OVERVIEW TAB */}
       {tab === "overview" && (
@@ -972,6 +1112,13 @@ export default function Admin() {
             </CardContent>
           </Card>
         </div>
+      )}
+
+      {walletModalOpen && (
+        <WalletModal
+          initialSection={selectedWalletChain.isSvm ? "x1" : "evm"}
+          onClose={() => setWalletModalOpen(false)}
+        />
       )}
     </div>
   );

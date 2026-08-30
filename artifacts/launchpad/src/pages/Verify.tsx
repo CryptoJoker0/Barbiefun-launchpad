@@ -5,7 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
-  BadgeCheck, ShieldAlert, CheckCircle2, Zap,
+  BadgeCheck, ShieldAlert, CheckCircle2,
   Wallet, ExternalLink, AlertCircle, Copy,
 } from "lucide-react";
 import ChainIcon from "@/components/ChainIcon";
@@ -17,11 +17,8 @@ import { useSolanaWallet } from "@/hooks/useSolanaWallet";
 import {
   useFeeNative,
   formatNativeAmount,
-  verificationFeeUsd,
   useNativeTokenPriceUsd,
   VERIFICATION_FEE_STANDARD_USD,
-  VERIFICATION_FEE_FAST_USD,
-  type VerificationTier,
 } from "@/lib/pricing";
 import { verifySvmPayment } from "@/lib/svmVerify";
 
@@ -66,14 +63,12 @@ export default function Verify() {
   const solana = useSolanaWallet();
 
   const [walletOpen,     setWalletOpen]     = useState(false);
-  const [tier,           setTier]           = useState<VerificationTier>("standard");
   const [selectedEvmId,  setSelectedEvmId]  = useState<number | null>(null);
   const [selectedSvm,    setSelectedSvm]    = useState<SvmChainKey | null>(null);
   const [svmTxSig,       setSvmTxSig]       = useState("");
   const [svmSubmitting,  setSvmSubmitting]  = useState(false);
   const [svmVerifyError, setSvmVerifyError] = useState<string | null>(null);
   const [successData,    setSuccessData]    = useState<{
-    tier: VerificationTier;
     txHash: string;
     chainName: string;
     explorer: string;
@@ -83,7 +78,7 @@ export default function Verify() {
   // derived
   const selectedEvmChain = SUPPORTED_CHAINS.find((c) => c.id === selectedEvmId);
   const selectedSvmMeta  = SVM_CHAINS.find((c) => c.key === selectedSvm);
-  const feeUsd = verificationFeeUsd(tier);
+  const feeUsd = VERIFICATION_FEE_STANDARD_USD;
   const evmFee = useFeeNative(feeUsd, selectedEvmChain?.symbol ?? "", selectedEvmChain?.isStableGas);
   const solPriceQuery = useNativeTokenPriceUsd("SOL");
   const solFee = useFeeNative(feeUsd, "SOL");
@@ -121,7 +116,7 @@ export default function Verify() {
 
       const txHash = await sendTransactionAsync({ to: EVM_TREASURY as `0x${string}`, value });
       const explorerBase = EVM_EXPLORERS[selectedEvmChain.id] ?? "";
-      setSuccessData({ tier, txHash, chainName: selectedEvmChain.name, explorer: explorerBase });
+      setSuccessData({ txHash, chainName: selectedEvmChain.name, explorer: explorerBase });
     } catch (err) {
       console.error("Verification fee payment failed", err);
     }
@@ -168,7 +163,6 @@ export default function Verify() {
     }
 
     setSuccessData({
-      tier,
       txHash: svmTxSig.trim(),
       chainName: selectedSvmMeta.name,
       explorer: selectedSvmMeta.explorer,
@@ -180,7 +174,6 @@ export default function Verify() {
   // Success screen
   // ---------------------------------------------------------------------------
   if (successData) {
-    const paidUsd = verificationFeeUsd(successData.tier);
     return (
       <div className="max-w-xl mx-auto py-12 animate-in slide-in-from-bottom-8 duration-500">
         <Card className="border-primary/50 text-center py-12 rounded-3xl shadow-lg">
@@ -191,9 +184,7 @@ export default function Verify() {
             <div className="space-y-2">
               <h2 className="text-2xl font-bold tracking-tight">Application Submitted</h2>
               <p className="text-muted-foreground">
-                Your ${paidUsd} {successData.tier === "fast" ? "fast-track" : "standard"} verification fee has been paid on{" "}
-                {successData.chainName}. Our team will review your application{" "}
-                {successData.tier === "fast" ? "within a few hours" : "within 24-48 hours"}.
+                Your ${feeUsd} verification fee has been paid on {successData.chainName}. Our team will review your application within 24-48 hours.
               </p>
             </div>
             <div className="w-full bg-pink-50 border border-pink-200/60 p-4 rounded-2xl text-left">
@@ -283,26 +274,13 @@ export default function Verify() {
                   <CardDescription>Provide details about your project to prove legitimacy.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  {/* Tier */}
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-bold border-b border-border/50 pb-2">Review Speed</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {[
-                        { id: "standard" as const, label: "Standard", price: VERIFICATION_FEE_STANDARD_USD, desc: "Reviewed within 24-48 hours" },
-                        { id: "fast" as const, label: "Fast-Track", price: VERIFICATION_FEE_FAST_USD, desc: "Jumps the queue, reviewed within hours" },
-                      ].map((t) => (
-                        <button key={t.id} type="button" onClick={() => setTier(t.id)}
-                          className={`text-left rounded-2xl border-2 p-4 transition-all ${tier === t.id ? "border-pink-500 bg-pink-50 shadow-md" : "border-border hover:border-pink-300/60"}`}>
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="font-bold text-sm flex items-center gap-1">
-                              {t.id === "fast" && <Zap className="w-3.5 h-3.5 text-amber-500" />}{t.label}
-                            </span>
-                            <span className="font-extrabold text-lg text-pink-600">${t.price}</span>
-                          </div>
-                          <p className="text-xs text-muted-foreground">{t.desc}</p>
-                        </button>
-                      ))}
+                  {/* Flat verification fee */}
+                  <div className="flex items-center justify-between rounded-2xl border-2 border-pink-200/60 bg-pink-50 p-4">
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-wide text-pink-500">Verification Fee</p>
+                      <p className="text-sm text-pink-700">One flat fee on every supported chain</p>
                     </div>
+                    <span className="text-2xl font-extrabold text-pink-600">${feeUsd.toFixed(2)}</span>
                   </div>
 
                   {/* Chain select */}
@@ -454,26 +432,13 @@ export default function Verify() {
                   </button>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  {/* Tier */}
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-bold border-b border-purple-100 pb-2">Review Speed</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {[
-                        { id: "standard" as const, label: "Standard", price: VERIFICATION_FEE_STANDARD_USD, desc: "24-48 hours" },
-                        { id: "fast" as const, label: "Fast-Track", price: VERIFICATION_FEE_FAST_USD, desc: "Within hours" },
-                      ].map((t) => (
-                        <button key={t.id} type="button" onClick={() => setTier(t.id)}
-                          className={`text-left rounded-2xl border-2 p-4 transition-all ${tier === t.id ? "border-purple-500 bg-purple-50 shadow-md" : "border-purple-200 hover:border-purple-400"}`}>
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="font-bold text-sm flex items-center gap-1">
-                              {t.id === "fast" && <Zap className="w-3.5 h-3.5 text-amber-500" />}{t.label}
-                            </span>
-                            <span className="font-extrabold text-lg text-purple-600">${t.price}</span>
-                          </div>
-                          <p className="text-xs text-muted-foreground">{t.desc}</p>
-                        </button>
-                      ))}
+                  {/* Flat verification fee */}
+                  <div className="flex items-center justify-between rounded-2xl border-2 border-purple-200 bg-purple-50 p-4">
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-wide text-purple-500">Verification Fee</p>
+                      <p className="text-sm text-purple-700">One flat fee on every supported chain</p>
                     </div>
+                    <span className="text-2xl font-extrabold text-purple-600">${feeUsd.toFixed(2)}</span>
                   </div>
 
                   {/* SVM wallet status */}
