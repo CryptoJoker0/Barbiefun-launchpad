@@ -48,15 +48,15 @@ export function useNativeTokenPriceUsd(symbol: string) {
 
 export const LAUNCH_FEE_USD = 5;
 
-/** Flat verification fee for every supported chain. */
-export const VERIFICATION_FEE_STANDARD_USD = 5;
-/** Kept for backwards compatibility with existing verification records. */
-export const VERIFICATION_FEE_FAST_USD = 5;
+/** Standard-track verification review, processed in 24-48 hours. */
+export const VERIFICATION_FEE_STANDARD_USD = 80;
+/** Fast-track verification review, jumps the review queue. */
+export const VERIFICATION_FEE_FAST_USD = 100;
 
 export type VerificationTier = "standard" | "fast";
 
-export function verificationFeeUsd(_tier: VerificationTier): number {
-  return VERIFICATION_FEE_STANDARD_USD;
+export function verificationFeeUsd(tier: VerificationTier): number {
+  return tier === "fast" ? VERIFICATION_FEE_FAST_USD : VERIFICATION_FEE_STANDARD_USD;
 }
 
 export type LaunchFee = {

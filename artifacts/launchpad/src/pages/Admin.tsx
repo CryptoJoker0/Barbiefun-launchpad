@@ -411,14 +411,14 @@ export default function Admin() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="rounded-2xl border border-pink-100 bg-white p-4">
-                  <p className="text-xs font-bold uppercase tracking-wide text-pink-400">EVM verification fee</p>
+                  <p className="text-xs font-bold uppercase tracking-wide text-pink-400">EVM wallet confirmation</p>
                   <p className="text-2xl font-extrabold text-pink-900 mt-1">$5.00</p>
-                  <p className="text-xs text-pink-500 mt-1">Payment destination remains private and is not displayed here.</p>
+                  <p className="text-xs text-pink-500 mt-1">Admin-only confirmation reference; wallet connection handles the selected network.</p>
                 </div>
                 <div className="rounded-2xl border border-purple-100 bg-purple-50/50 p-4">
-                  <p className="text-xs font-bold uppercase tracking-wide text-purple-400">SVM verification fee</p>
+                  <p className="text-xs font-bold uppercase tracking-wide text-purple-400">SVM wallet confirmation</p>
                   <p className="text-2xl font-extrabold text-purple-900 mt-1">$5.00</p>
-                  <p className="text-xs text-purple-500 mt-1">Payment destination remains private and is not displayed here.</p>
+                  <p className="text-xs text-purple-500 mt-1">Admin-only confirmation reference; wallet connection handles the selected network.</p>
                 </div>
               </div>
             </CardContent>
@@ -1046,8 +1046,8 @@ export default function Admin() {
             </CardHeader>
             <CardContent className="space-y-4 text-sm">
               {[
-                { key: "VITE_LAUNCH_FEE_TREASURY_ADDRESS", label: "EVM Treasury Address", description: `Wallet that receives ${LAUNCH_FEE_USD} launch and verification fees on EVM chains` },
-                { key: "VITE_SOLANA_TREASURY_ADDRESS", label: "Solana / X1 Treasury Address", description: `Wallet that receives ${LAUNCH_FEE_USD} launch and verification fees on SVM chains` },
+                { key: "VITE_LAUNCH_FEE_TREASURY_ADDRESS", label: "EVM Treasury Address", description: `Wallet that receives ${LAUNCH_FEE_USD} launch fees on EVM chains` },
+                { key: "VITE_SOLANA_TREASURY_ADDRESS", label: "Solana / X1 Treasury Address", description: `Wallet that receives ${LAUNCH_FEE_USD} launch fees on SVM chains` },
                 { key: "VITE_WALLETCONNECT_PROJECT_ID", label: "WalletConnect Project ID", description: "Enables WalletConnect QR modal" },
                 { key: "ADMIN_PASSWORD", label: "Server Admin Password", description: "Stored securely on the API server; never exposed to the browser", serverManaged: true },
               ].map((setting) => {
