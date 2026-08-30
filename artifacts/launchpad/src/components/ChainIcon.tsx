@@ -1,5 +1,6 @@
 import robinhoodLogo from "@assets/20260703_080059_1783141834672.jpg";
 import x1Logo from "@assets/20260703_080024_1783141834739.jpg";
+import pulsechainLogo from "@assets/file_0000000062ac81f48ea11588303a614c_1788099479287.png";
 
 type ChainIconProps = {
   chain: string;
@@ -85,16 +86,14 @@ export default function ChainIcon({ chain, className = "", size = 28 }: ChainIco
 
     case "pluschain":
       return (
-        <svg {...props}>
-          <defs>
-            <linearGradient id="plusChainGrad" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="#F43F5E" />
-              <stop offset="100%" stopColor="#BE185D" />
-            </linearGradient>
-          </defs>
-          <circle cx="16" cy="16" r="16" fill="url(#plusChainGrad)" />
-          <path d="M10 11h12M10 16h12M10 21h12" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" />
-        </svg>
+        <img
+          src={pulsechainLogo}
+          alt="PlusChain"
+          width={size}
+          height={size}
+          className={`${className} rounded-full object-cover`}
+          style={{ width: size, height: size }}
+        />
       );
 
     case "x1":
