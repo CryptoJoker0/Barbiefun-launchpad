@@ -21,31 +21,17 @@ export const xlayer: Chain = {
   },
 };
 
-// Tempo Mainnet — payments-focused EVM chain incubated by Paradigm & Stripe.
-// Fees are paid in a stablecoin via Tempo's Fee AMM (TIP-20) rather than a
-// volatile native gas token, so we model its "native currency" as USD.
-export const tempo: Chain = {
-  id: 4217,
-  name: "Tempo",
-  nativeCurrency: { name: "US Dollar", symbol: "USD", decimals: 18 },
+// PlusChain uses the PulseChain-compatible EVM network details supplied by the
+// product: chain ID 369, PLS gas, PulseScan, and PulseX.
+export const plusChain: Chain = {
+  id: 369,
+  name: "PlusChain",
+  nativeCurrency: { name: "Pulse", symbol: "PLS", decimals: 18 },
   rpcUrls: {
-    default: { http: ["https://rpc.tempo.xyz"] },
+    default: { http: ["https://rpc.pulsechain.com"] },
   },
   blockExplorers: {
-    default: { name: "Tempo Explorer", url: "https://explore.tempo.xyz" },
-  },
-};
-
-// Circle Arc — mainnet chain ID has not been publicly announced yet.
-export const arcMainnet: Chain = {
-  id: 5042002,
-  name: "Arc Mainnet",
-  nativeCurrency: { name: "USD Coin", symbol: "USDC", decimals: 6 },
-  rpcUrls: {
-    default: { http: ["https://rpc.testnet.arc.network"] },
-  },
-  blockExplorers: {
-    default: { name: "Arc Scan", url: "https://testnet.arcscan.app" },
+    default: { name: "PulseScan", url: "https://scan.pulsechain.com" },
   },
 };
 
@@ -69,14 +55,13 @@ const connectorList = [
 ];
 
 export const wagmiConfig = createConfig({
-  chains: [bsc, base, xlayer, tempo, arcMainnet, robinhoodChain],
+  chains: [bsc, base, xlayer, plusChain, robinhoodChain],
   connectors: connectorList,
   transports: {
     [bsc.id]: http("https://bsc-dataseed.binance.org"),
     [base.id]: http("https://mainnet.base.org"),
     [xlayer.id]: http("https://rpc.xlayer.tech"),
-    [tempo.id]: http("https://rpc.tempo.xyz"),
-    [arcMainnet.id]: http("https://rpc.testnet.arc.network"),
+    [plusChain.id]: http("https://rpc.pulsechain.com"),
     [robinhoodChain.id]: http("https://rpc.mainnet.chain.robinhood.com"),
   },
 });
@@ -118,8 +103,7 @@ export const SUPPORTED_CHAINS: ChainMeta[] = [
   { id: bsc.id,          name: "BNB Smart Chain", symbol: "BNB",  tokenName: "BNB",      icon: "bnb",      dex: "https://pancakeswap.finance/swap",                coingeckoId: "binancecoin" },
   { id: base.id,         name: "Base",             symbol: "ETH",  tokenName: "Ether",    icon: "base",     dex: "https://app.uniswap.org/swap?chain=base",          coingeckoId: "ethereum"    },
   { id: xlayer.id,       name: "X Layer",          symbol: "OKB",  tokenName: "OKB",      icon: "xlayer",   dex: "https://www.okx.com/dex",                          coingeckoId: "okb"         },
-  { id: tempo.id,        name: "Tempo",            symbol: "USD",  tokenName: "US Dollar",icon: "tempo",    dex: "https://explore.tempo.xyz",  isStableGas: true                               },
-  { id: arcMainnet.id,   name: "Arc Mainnet",      symbol: "USDC", tokenName: "USD Coin", icon: "arc",      dex: "https://testnet.arcscan.app", isStableGas: true                               },
+  { id: plusChain.id,    name: "PlusChain",        symbol: "PLS",  tokenName: "Pulse",     icon: "pluschain", dex: "https://pulsex.com/?utm_source=perplexity", coingeckoId: "pulsechain" },
   { id: robinhoodChain.id, name: "Robinhood Chain",symbol: "ETH",  tokenName: "Ether",    icon: "robinhood",dex: "https://robinhoodchain.blockscout.com",             coingeckoId: "ethereum"    },
 ];
 

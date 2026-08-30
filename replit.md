@@ -1,6 +1,6 @@
 # Barbie Fun (Degen Launchpad)
 
-A multi-chain fair-launch token launchpad ("Barbie Fun") — lets users launch, trade, bridge, and track tokens across 6 EVM chains plus X1 and Solana.
+A multi-chain fair-launch token launchpad ("Barbie Fun") — lets users launch, trade, bridge, and track tokens across 5 EVM chains plus X1 and Solana.
 
 ## Run & Operate
 

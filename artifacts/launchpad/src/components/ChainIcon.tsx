@@ -83,33 +83,17 @@ export default function ChainIcon({ chain, className = "", size = 28 }: ChainIco
         </svg>
       );
 
-    case "tempo":
+    case "pluschain":
       return (
         <svg {...props}>
           <defs>
-            <linearGradient id="tempoGrad" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="#8B5CF6" />
-              <stop offset="100%" stopColor="#6D28D9" />
+            <linearGradient id="plusChainGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="#F43F5E" />
+              <stop offset="100%" stopColor="#BE185D" />
             </linearGradient>
           </defs>
-          <circle cx="16" cy="16" r="16" fill="url(#tempoGrad)" />
-          <circle cx="16" cy="16" r="8.5" stroke="#fff" strokeWidth="1.6" fill="none" />
-          <path d="M16 10.5v6l4 2.2" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" fill="none" />
-        </svg>
-      );
-
-    case "arc":
-      return (
-        <svg {...props}>
-          <defs>
-            <linearGradient id="arcGrad" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="#3B82F6" />
-              <stop offset="100%" stopColor="#1D4ED8" />
-            </linearGradient>
-          </defs>
-          <circle cx="16" cy="16" r="16" fill="url(#arcGrad)" />
-          <path d="M8 21c2.5-7 6.5-11 8-11s5.5 4 8 11" stroke="#fff" strokeWidth="2" fill="none" strokeLinecap="round" />
-          <circle cx="16" cy="21" r="1.6" fill="#fff" />
+          <circle cx="16" cy="16" r="16" fill="url(#plusChainGrad)" />
+          <path d="M10 11h12M10 16h12M10 21h12" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" />
         </svg>
       );
 

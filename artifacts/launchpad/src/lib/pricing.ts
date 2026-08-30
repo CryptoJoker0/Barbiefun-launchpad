@@ -12,6 +12,7 @@ const COINGECKO_IDS: Record<string, string> = {
   BNB: "binancecoin",
   ETH: "ethereum",   // covers both Base and Robinhood Chain (both use ETH)
   OKB: "okb",
+  PLS: "pulsechain",
   SOL: "solana",
 };
 
@@ -69,8 +70,9 @@ export type LaunchFee = {
 
 /**
  * Resolves a USD fee into a native-token amount for the given chain
- * symbol. Stable-gas chains (Tempo/Arc, both USD-pegged) are always
- * exactly 1:1. Everything else uses the CoinGecko feed with a static fallback.
+ * symbol. Every supported EVM chain uses its native token price feed, while
+ * SVM chains use their own native token feeds. A static fallback is used when
+ * one is configured and the live feed is temporarily unavailable.
  */
 export function useFeeNative(usd: number, symbol: string, isStableGas?: boolean): LaunchFee {
   const { data, isLoading, isError } = useNativeTokenPriceUsd(symbol);

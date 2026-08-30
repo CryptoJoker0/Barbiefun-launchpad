@@ -43,6 +43,10 @@ VITE_LAUNCH_FEE_TREASURY_ADDRESS is a plain env var (not a Replit Secret) since 
 
 ---
 
-## Unannounced mainnet chains (Tempo/Arc)
+## PlusChain network identity
 
-These chains don't have confirmed public mainnet RPC/chain IDs. We use placeholder values and mark them clearly. Do not treat their chain IDs as authoritative.
+**Rule:** The product labels the chain PlusChain, while its confirmed network endpoints use the PulseChain branding: chain ID **369**, native token **PLS**, RPC `rpc.pulsechain.com`, PulseScan, and PulseX.
+
+**Why:** The user supplied these exact network values after the previous Tempo/Arc configuration proved incorrect.
+
+**How to apply:** Keep PlusChain on the EVM/wagmi path and use the PulseChain-branded RPC, explorer, and DEX URLs for wallet switching and transaction links.

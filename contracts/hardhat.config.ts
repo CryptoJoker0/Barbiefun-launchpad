@@ -32,14 +32,9 @@ const config: HardhatUserConfig = {
       chainId: 196,
       accounts,
     },
-    tempo: {
-      url: process.env.TEMPO_RPC_URL || "https://rpc.tempo.xyz",
-      chainId: 4217,
-      accounts,
-    },
-    arcTestnet: {
-      url: process.env.ARC_RPC_URL || "https://rpc.testnet.arc.network",
-      chainId: 5042002,
+    pluschain: {
+      url: process.env.PLUSCHAIN_RPC_URL || "https://rpc.pulsechain.com",
+      chainId: 369,
       accounts,
     },
     robinhoodChain: {
@@ -71,19 +66,11 @@ const config: HardhatUserConfig = {
         },
       },
       {
-        network: "arcTestnet",
-        chainId: 5042002,
+        network: "pluschain",
+        chainId: 369,
         urls: {
-          apiURL: "https://testnet.arcscan.app/api",
-          browserURL: "https://testnet.arcscan.app",
-        },
-      },
-      {
-        network: "tempo",
-        chainId: 4217,
-        urls: {
-          apiURL: "https://explore.tempo.xyz/api",
-          browserURL: "https://explore.tempo.xyz",
+          apiURL: "https://scan.pulsechain.com/api",
+          browserURL: "https://scan.pulsechain.com",
         },
       },
     ],
