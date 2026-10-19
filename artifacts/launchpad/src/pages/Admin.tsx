@@ -21,6 +21,7 @@ export default function Admin() {
   const [pwError, setPwError] = useState(false);
   const [tab, setTab] = useState<"overview" | "launches" | "chains" | "add" | "referrals" | "live" | "settings">("overview");
   const [launchQuery, setLaunchQuery] = useState("");
+  const [launchPage, setLaunchPage] = useState(1);
   const { data: launches = [], isLoading: launchesLoading, isError: launchesError, refetch } = useLaunches();
   const addLaunchMutation = useAddLaunch();
   const setVerifiedMutation = useSetVerified();
@@ -260,6 +261,13 @@ export default function Admin() {
       return acc;
     }, {});
   const referralRows = Object.entries(referralCounts).sort((a, b) => b[1] - a[1]);
+  const filteredLaunches = launches.filter((launch) => {
+    const query = launchQuery.trim().toLowerCase();
+    return !query || [launch.name, launch.ticker, launch.deployer, launch.chainName].some((value) => value.toLowerCase().includes(query));
+  });
+  const launchesPerPage = 10;
+  const launchPageCount = Math.max(1, Math.ceil(filteredLaunches.length / launchesPerPage));
+  const visibleLaunches = filteredLaunches.slice((launchPage - 1) * launchesPerPage, launchPage * launchesPerPage);
 
   const tabs = [
     { id: "overview", label: "Overview", icon: Activity },
@@ -507,8 +515,11 @@ export default function Admin() {
               <input
                 type="search"
                 value={launchQuery}
-                onChange={(event) => setLaunchQuery(event.target.value)}
-                placeholder="Search token, name, or deployer"
+                onChange={(event) => {
+                  setLaunchQuery(event.target.value);
+                  setLaunchPage(1);
+                }}
+                placeholder="Search token, name, chain, or deployer"
                 aria-label="Search launches"
                 className="min-w-0 flex-1 bg-transparent text-sm text-pink-900 outline-none placeholder:text-pink-300"
               />
@@ -537,12 +548,7 @@ export default function Admin() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-pink-50">
-                    {launches
-                      .filter((launch) => {
-                        const query = launchQuery.trim().toLowerCase();
-                        return !query || [launch.name, launch.ticker, launch.deployer, launch.chainName].some((value) => value.toLowerCase().includes(query));
-                      })
-                      .map((l) => {
+                    {visibleLaunches.map((l) => {
                       const chainMeta = SUPPORTED_CHAINS.find((c) => c.id === l.chainId);
                       return (
                         <tr key={l.id} className="hover:bg-pink-50/40 transition-colors">
@@ -579,6 +585,19 @@ export default function Admin() {
                     })}
                   </tbody>
                 </table>
+                {filteredLaunches.length === 0 && (
+                  <p className="py-8 text-center text-sm text-pink-400">No launches match this search.</p>
+                )}
+                {filteredLaunches.length > 0 && (
+                  <div className="mt-4 flex flex-col gap-3 border-t border-pink-100 pt-4 text-xs text-pink-400 sm:flex-row sm:items-center sm:justify-between">
+                    <span>Showing {(launchPage - 1) * launchesPerPage + 1}–{Math.min(launchPage * launchesPerPage, filteredLaunches.length)} of {filteredLaunches.length}</span>
+                    <div className="flex items-center gap-2">
+                      <button type="button" onClick={() => setLaunchPage((page) => Math.max(1, page - 1))} disabled={launchPage === 1} className="rounded-lg border border-pink-200 px-3 py-1.5 font-semibold text-pink-600 disabled:cursor-not-allowed disabled:opacity-40">Previous</button>
+                      <span className="font-semibold text-pink-600">Page {launchPage} of {launchPageCount}</span>
+                      <button type="button" onClick={() => setLaunchPage((page) => Math.min(launchPageCount, page + 1))} disabled={launchPage === launchPageCount} className="rounded-lg border border-pink-200 px-3 py-1.5 font-semibold text-pink-600 disabled:cursor-not-allowed disabled:opacity-40">Next</button>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </CardContent>
