@@ -2,12 +2,12 @@
  * Navbar — public navigation only. Admin dashboard is intentionally
  * excluded and accessible only via direct URL: /admin
  */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import {
   Rocket, Wallet, ChevronDown, Menu, X, CheckCircle2,
-  ArrowLeftRight, FileText, Repeat, BarChart3,
+  ArrowLeftRight, FileText, Repeat, BarChart3, Sun, Moon,
 } from "lucide-react";
 import { useAccount, useDisconnect } from "wagmi";
 import WalletModal from "@/components/WalletModal";
@@ -26,6 +26,21 @@ export default function Navbar() {
   const [chainOpen,   setChainOpen]   = useState(false);
   const [mobileOpen,  setMobileOpen]  = useState(false);
   const [walletOpen,  setWalletOpen]  = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
+
+  useEffect(() => {
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    setDarkMode(prefersDark);
+    document.documentElement.classList.toggle("dark", prefersDark);
+  }, []);
+
+  const toggleTheme = () => {
+    setDarkMode((current) => {
+      const next = !current;
+      document.documentElement.classList.toggle("dark", next);
+      return next;
+    });
+  };
 
   const shortAddress    = address ? `${address.slice(0, 6)}…${address.slice(-4)}` : "";
   const shortSolAddress = solana.publicKey ? `${solana.publicKey.slice(0, 4)}…${solana.publicKey.slice(-4)}` : "";
@@ -72,6 +87,17 @@ export default function Navbar() {
 
             {/* Right Side */}
             <div className="flex items-center space-x-2 sm:space-x-3">
+              {/* Theme control */}
+              <button
+                type="button"
+                onClick={toggleTheme}
+                aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+                title={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+                className="flex size-9 items-center justify-center rounded-full border border-pink-200/60 bg-pink-50 text-pink-600 transition-colors hover:bg-pink-100 dark:border-pink-900/60 dark:bg-pink-950/40 dark:text-pink-200 dark:hover:bg-pink-900/60"
+              >
+                {darkMode ? <Sun aria-hidden="true" /> : <Moon aria-hidden="true" />}
+              </button>
+
               {/* Social icons */}
               <a href={TELEGRAM_URL} target="_blank" rel="noopener noreferrer"
                 className="hidden sm:flex items-center justify-center w-9 h-9 rounded-full bg-pink-50 hover:bg-pink-100 border border-pink-200/60 transition-colors" title="Telegram">
@@ -213,7 +239,20 @@ export default function Navbar() {
                   <FileText className="w-4 h-4" /><span>Whitepaper</span>
                 </div>
               </a>
-              <div className="px-4 py-2 flex items-center space-x-4">
+              <div className="px-4 py-2 flex items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <a href={TELEGRAM_URL} target="_blank" rel="noopener noreferrer" className="flex items-center space-x-1.5 text-sm text-pink-600 font-semibold">
+                    Telegram
+                  </a>
+                  <a href={TWITTER_URL} target="_blank" rel="noopener noreferrer" className="flex items-center space-x-1.5 text-sm text-pink-600 font-semibold">
+                    X (Twitter)
+                  </a>
+                </div>
+                <button type="button" onClick={toggleTheme} aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"} className="flex size-9 items-center justify-center rounded-full border border-pink-200/60 bg-pink-50 text-pink-600 dark:border-pink-900/60 dark:bg-pink-950/40 dark:text-pink-200">
+                  {darkMode ? <Sun aria-hidden="true" /> : <Moon aria-hidden="true" />}
+                </button>
+              </div>
+              <div className="hidden">
                 <a href={TELEGRAM_URL} target="_blank" rel="noopener noreferrer" className="flex items-center space-x-1.5 text-sm text-pink-600 font-semibold">
                   <svg viewBox="0 0 24 24" className="w-4 h-4 fill-[#229ED9]"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
                   Telegram
