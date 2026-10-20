@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
-import { Rocket, DollarSign, CheckCircle2, Link2, TrendingUp, BadgeCheck, Activity, Settings, ShieldCheck, Zap, AlertCircle, Plus, X, Radio, Upload, Video, LogOut, Wallet } from "lucide-react";
+import { Rocket, DollarSign, CheckCircle2, Link2, TrendingUp, BadgeCheck, Activity, Settings, ShieldCheck, Zap, AlertCircle, Plus, X, Radio, Upload, Video, LogOut, Search, Wallet } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ChainIcon from "@/components/ChainIcon";
 import { SUPPORTED_CHAINS, DISPLAY_CHAINS } from "@/lib/wagmi";
@@ -23,12 +23,14 @@ export default function Admin() {
   const [pw, setPw] = useState("");
   const [pwError, setPwError] = useState(false);
   const [tab, setTab] = useState<"overview" | "launches" | "chains" | "add" | "referrals" | "live" | "settings" | "wallet">("overview");
+  const [launchQuery, setLaunchQuery] = useState("");
+  const [launchPage, setLaunchPage] = useState(1);
   const [walletModalOpen, setWalletModalOpen] = useState(false);
   const [selectedWalletChainId, setSelectedWalletChainId] = useState(-1);
   const { address, isConnected, chain } = useAccount();
   const { switchChain, isPending: isSwitchingChain } = useSwitchChain();
   const solana = useSolanaWallet();
-  const { data: launches = [], refetch } = useLaunches();
+  const { data: launches = [], isLoading: launchesLoading, isError: launchesError, refetch } = useLaunches();
   const addLaunchMutation = useAddLaunch();
   const setVerifiedMutation = useSetVerified();
   const { data: liveStream } = useLiveStream();
@@ -135,6 +137,27 @@ export default function Admin() {
   };
 
   const refresh = () => refetch();
+
+  const exportLaunches = () => {
+    const headers = ["Token", "Name", "Chain", "Deployer", "Created", "Verified"];
+    const rows = launches.map((launch) => [
+      `$${launch.ticker}`,
+      launch.name,
+      launch.chainName,
+      launch.deployer,
+      new Date(launch.createdAt).toISOString(),
+      launch.verified ? "Yes" : "No",
+    ]);
+    const csv = [headers, ...rows]
+      .map((row) => row.map((value) => `"${String(value).replaceAll('"', '""')}"`).join(","))
+      .join("\\n");
+    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `barbiefun-launches-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
 
   const selectedWalletChain = DISPLAY_CHAINS.find((c) => c.id === selectedWalletChainId) ?? DISPLAY_CHAINS[0];
   const walletConfirmed = selectedWalletChain.isSvm
@@ -267,6 +290,13 @@ export default function Admin() {
       return acc;
     }, {});
   const referralRows = Object.entries(referralCounts).sort((a, b) => b[1] - a[1]);
+  const filteredLaunches = launches.filter((launch) => {
+    const query = launchQuery.trim().toLowerCase();
+    return !query || [launch.name, launch.ticker, launch.deployer, launch.chainName].some((value) => value.toLowerCase().includes(query));
+  });
+  const launchesPerPage = 10;
+  const launchPageCount = Math.max(1, Math.ceil(filteredLaunches.length / launchesPerPage));
+  const visibleLaunches = filteredLaunches.slice((launchPage - 1) * launchesPerPage, launchPage * launchesPerPage);
 
   const tabs = [
     { id: "overview", label: "Overview", icon: Activity },
@@ -282,7 +312,7 @@ export default function Admin() {
   return (
     <div className="max-w-6xl mx-auto py-8 pb-20 animate-in fade-in duration-500 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-500 via-pink-600 to-pink-700 flex items-center justify-center shadow-md">
             <ShieldCheck className="w-5 h-5 text-white" />
@@ -313,19 +343,23 @@ export default function Admin() {
       </div>
 
       {/* Tabs */}
-      <div className="flex space-x-1 bg-pink-50 border border-pink-100 rounded-xl p-1 w-fit">
-        {tabs.map(({ id, label, icon: Icon }) => (
-          <button
-            key={id}
-            onClick={() => setTab(id)}
-            className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold transition-all ${
-              tab === id ? "bg-white text-pink-600 shadow-sm" : "text-pink-400 hover:text-pink-600"
-            }`}
-          >
-            <Icon className="w-3.5 h-3.5" />
-            {label}
-          </button>
-        ))}
+      <div className="max-w-full overflow-x-auto rounded-xl border border-pink-100 bg-pink-50 p-1">
+        <div className="flex min-w-max gap-1">
+          {tabs.map(({ id, label, icon: Icon }) => (
+            <button
+              key={id}
+              type="button"
+              onClick={() => setTab(id)}
+              aria-current={tab === id ? "page" : undefined}
+              className={`flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-bold transition-all ${
+                tab === id ? "bg-white text-pink-600 shadow-sm" : "text-pink-400 hover:text-pink-600"
+              }`}
+            >
+              <Icon className="h-3.5 w-3.5" aria-hidden="true" />
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* WALLET CONFIRMATION TAB */}
@@ -597,11 +631,34 @@ export default function Admin() {
                 <Rocket className="w-4 h-4" />
                 All Launches ({launches.length})
               </div>
-              <span className="text-xs text-pink-400 font-normal">Revenue: ${launches.length * LAUNCH_FEE_USD}</span>
+              <div className="flex items-center gap-3 text-xs font-normal">
+                <span className="text-pink-400">Revenue: ${launches.length * LAUNCH_FEE_USD}</span>
+                <button type="button" onClick={exportLaunches} disabled={!launches.length} className="font-bold text-pink-600 hover:text-pink-800 disabled:cursor-not-allowed disabled:opacity-40">Export CSV</button>
+              </div>
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {launches.length === 0 ? (
+            <div className="mb-4 flex items-center gap-2 rounded-xl border border-pink-100 bg-pink-50/50 px-3 py-2">
+              <Search className="h-4 w-4 text-pink-400" aria-hidden="true" />
+              <input
+                type="search"
+                value={launchQuery}
+                onChange={(event) => {
+                  setLaunchQuery(event.target.value);
+                  setLaunchPage(1);
+                }}
+                placeholder="Search token, name, chain, or deployer"
+                aria-label="Search launches"
+                className="min-w-0 flex-1 bg-transparent text-sm text-pink-900 outline-none placeholder:text-pink-300"
+              />
+            </div>
+            {launchesLoading ? (
+              <div className="flex flex-col gap-3 py-8" aria-label="Loading launches">
+                {[1, 2, 3].map((row) => <div key={row} className="h-10 animate-pulse rounded-lg bg-pink-50" />)}
+              </div>
+            ) : launchesError ? (
+              <div className="py-10 text-center text-sm text-rose-500">Unable to load launches. Try refreshing.</div>
+            ) : launches.length === 0 ? (
               <div className="text-center py-12">
                 <Rocket className="w-10 h-10 text-pink-200 mx-auto mb-3" />
                 <p className="text-pink-400 text-sm">No launches yet. They'll appear here once users launch tokens.</p>
@@ -619,7 +676,7 @@ export default function Admin() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-pink-50">
-                    {launches.map((l) => {
+                    {visibleLaunches.map((l) => {
                       const chainMeta = SUPPORTED_CHAINS.find((c) => c.id === l.chainId);
                       return (
                         <tr key={l.id} className="hover:bg-pink-50/40 transition-colors">
@@ -656,6 +713,19 @@ export default function Admin() {
                     })}
                   </tbody>
                 </table>
+                {filteredLaunches.length === 0 && (
+                  <p className="py-8 text-center text-sm text-pink-400">No launches match this search.</p>
+                )}
+                {filteredLaunches.length > 0 && (
+                  <div className="mt-4 flex flex-col gap-3 border-t border-pink-100 pt-4 text-xs text-pink-400 sm:flex-row sm:items-center sm:justify-between">
+                    <span>Showing {(launchPage - 1) * launchesPerPage + 1}–{Math.min(launchPage * launchesPerPage, filteredLaunches.length)} of {filteredLaunches.length}</span>
+                    <div className="flex items-center gap-2">
+                      <button type="button" onClick={() => setLaunchPage((page) => Math.max(1, page - 1))} disabled={launchPage === 1} className="rounded-lg border border-pink-200 px-3 py-1.5 font-semibold text-pink-600 disabled:cursor-not-allowed disabled:opacity-40">Previous</button>
+                      <span className="font-semibold text-pink-600">Page {launchPage} of {launchPageCount}</span>
+                      <button type="button" onClick={() => setLaunchPage((page) => Math.min(launchPageCount, page + 1))} disabled={launchPage === launchPageCount} className="rounded-lg border border-pink-200 px-3 py-1.5 font-semibold text-pink-600 disabled:cursor-not-allowed disabled:opacity-40">Next</button>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </CardContent>

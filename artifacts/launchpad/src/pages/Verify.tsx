@@ -37,8 +37,9 @@ const EVM_EXPLORERS: Record<number, string> = {
 };
 
 // SVM treasury address — set VITE_SOLANA_TREASURY_ADDRESS for real SOL payments
-const EVM_TREASURY   = import.meta.env.VITE_LAUNCH_FEE_TREASURY_ADDRESS as string | undefined;
-const SOL_TREASURY   = import.meta.env.VITE_SOLANA_TREASURY_ADDRESS as string | undefined;
+const EVM_TREASURY = (import.meta.env.VITE_LAUNCH_FEE_TREASURY_ADDRESS as string | undefined)?.trim();
+const SOL_TREASURY = (import.meta.env.VITE_SOLANA_TREASURY_ADDRESS as string | undefined)?.trim();
+const SVM_ADDRESS_PATTERN = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
 
 type SvmChainKey = "x1" | "solana";
 
@@ -88,6 +89,7 @@ export default function Verify() {
   const solPriceQuery = useNativeTokenPriceUsd("SOL");
   const solFee = useFeeNative(feeUsd, "SOL");
   const treasuryConfigured = !!EVM_TREASURY && isAddress(EVM_TREASURY);
+  const svmTreasuryConfigured = !!SOL_TREASURY && SVM_ADDRESS_PATTERN.test(SOL_TREASURY);
   const anySvmConnected = solana.connected;
 
   // EVM chain select
@@ -132,7 +134,10 @@ export default function Verify() {
     e.preventDefault();
     if (!selectedSvmMeta) return;
     if (!isValidSvmSig(svmTxSig)) return;
-    if (!SOL_TREASURY) return;
+    if (!svmTreasuryConfigured) {
+      setSvmVerifyError("The SVM treasury address is not configured correctly.");
+      return;
+    }
 
     setSvmSubmitting(true);
     setSvmVerifyError(null);
