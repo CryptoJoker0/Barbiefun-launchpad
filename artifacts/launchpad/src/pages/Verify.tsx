@@ -32,8 +32,7 @@ const EVM_EXPLORERS: Record<number, string> = {
   56:      "https://bscscan.com/tx/",
   8453:    "https://basescan.org/tx/",
   196:     "https://www.okx.com/explorer/xlayer/tx/",
-  4217:    "https://explore.tempo.xyz/tx/",
-  5042002: "https://testnet.arcscan.app/tx/",
+  369:     "https://scan.pulsechain.com/tx/",
   4663:    "https://robinhoodchain.blockscout.com/tx/",
 };
 
@@ -197,9 +196,7 @@ export default function Verify() {
             <div className="space-y-2">
               <h2 className="text-2xl font-bold tracking-tight">Application Submitted</h2>
               <p className="text-muted-foreground">
-                Your ${paidUsd} {successData.tier === "fast" ? "fast-track" : "standard"} verification fee has been paid on{" "}
-                {successData.chainName}. Our team will review your application{" "}
-                {successData.tier === "fast" ? "within a few hours" : "within 24-48 hours"}.
+                Your ${paidUsd} verification fee has been paid on {successData.chainName}. Our team will review your application within 24-48 hours.
               </p>
             </div>
             <div className="w-full bg-pink-50 border border-pink-200/60 p-4 rounded-2xl text-left">
@@ -710,7 +707,12 @@ export default function Verify() {
         </div>
       </div>
 
-      {walletOpen && <WalletModal onClose={() => setWalletOpen(false)} />}
+      {walletOpen && (
+        <WalletModal
+          initialSection={isSvmSelected ? "x1" : "evm"}
+          onClose={() => setWalletOpen(false)}
+        />
+      )}
     </div>
   );
 }

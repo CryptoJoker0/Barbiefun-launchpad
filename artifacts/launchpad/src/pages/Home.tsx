@@ -16,6 +16,7 @@ import { useLiveStream } from "@/hooks/useLiveStream";
 
 const TELEGRAM_URL = "https://t.me/barbiefunv2/65";
 const TWITTER_URL = "https://x.com/BARBIEFUNV2";
+const BARBIE_EXPLORER_URL = "https://barbie-vault-gamma.vercel.app/";
 const VALIDATOR_VOTE_ACCOUNT = "BhoHtTEp56AvhGM4qAe6rujVjYwVB8NGXE3z8CJFTBLE";
 const VALIDATOR_STAKING_URL = "https://app.xdex.xyz/valistake";
 
@@ -140,15 +141,21 @@ export default function Home() {
               Own by nobody &mdash; zero team, only Barbie&apos;s.
             </p>
 
-            <div className="relative inline-block mb-7">
+            <a
+              href={BARBIE_EXPLORER_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Open Barbie Explorer"
+              className="relative inline-block mb-7"
+            >
               <div className="absolute inset-0 bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 rounded-2xl blur-md opacity-40 scale-105" />
               <div className="relative bg-gradient-to-r from-pink-400 via-pink-500 to-pink-400 rounded-2xl px-5 py-2.5 shadow-lg flex items-center justify-center gap-2">
-                <Rocket className="w-5 h-5 text-white" />
+                <ExternalLink className="w-5 h-5 text-white" />
                 <span className="text-white font-black text-lg sm:text-xl tracking-widest uppercase drop-shadow">
-                  Start Launching
+                  Barbie Explorer
                 </span>
               </div>
-            </div>
+            </a>
 
             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3">
               <Link href="/launch">
@@ -621,7 +628,7 @@ export default function Home() {
               { icon: ShieldCheck, label: "Network",      value: "X1 Blockchain", sub: "SVM Mainnet" },
               { icon: Cpu,         label: "Role",         value: "Validator",      sub: "Block producer" },
               { icon: Globe,       label: "Status",       value: "Live",            sub: "Active on X1 network", green: true },
-              { icon: Zap,         label: "Commission",   value: "0%",             sub: "No fees to stakers" },
+              { icon: Zap,         label: "Commission",   value: "10%",            sub: "Validator commission" },
             ].map(({ icon: Icon, label, value, sub, green, amber }: { icon: React.ElementType; label: string; value: string; sub: string; green?: boolean; amber?: boolean }) => (
               <div key={label} className="bg-pink-50/70 border border-pink-100 rounded-2xl p-4 flex flex-col gap-1">
                 <div className="flex items-center gap-1.5 text-pink-400 mb-1">
@@ -664,7 +671,7 @@ export default function Home() {
             {[
               { icon: Heart,       title: "Community-run",  body: "BarbieFun runs its own validator to keep the X1 network decentralised and support the Barbie Fun ecosystem." },
               { icon: ShieldCheck, title: "Trusted & secure", body: "Operated with 24/7 monitoring, redundant infra, and slashing protection to keep your stake safe." },
-              { icon: Zap,         title: "0% commission",  body: "100% of staking rewards flow straight to delegators — zero fees taken by the validator operator." },
+              { icon: Zap,         title: "10% commission", body: "90% of staking rewards flow to delegators, while 10% supports validator operations." },
             ].map(({ icon: Icon, title, body }) => (
               <div key={title} className="bg-gradient-to-br from-white to-pink-50 border border-pink-100 rounded-2xl p-4">
                 <div className="w-8 h-8 rounded-xl bg-pink-100 flex items-center justify-center mb-3">

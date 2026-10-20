@@ -38,8 +38,7 @@ const EVM_EXPLORERS: Record<number, string> = {
   56:      "https://bscscan.com/tx/",
   8453:    "https://basescan.org/tx/",
   196:     "https://www.okx.com/explorer/xlayer/tx/",
-  4217:    "https://explore.tempo.xyz/tx/",
-  5042002: "https://testnet.arcscan.app/tx/",
+  369:     "https://scan.pulsechain.com/tx/",
   4663:    "https://robinhoodchain.blockscout.com/tx/",
 };
 
@@ -669,7 +668,12 @@ export default function Launch() {
         </div>
       )}
 
-      {walletOpen && <WalletModal onClose={() => setWalletOpen(false)} />}
+      {walletOpen && (
+        <WalletModal
+          initialSection={isSvmMode ? "x1" : "evm"}
+          onClose={() => setWalletOpen(false)}
+        />
+      )}
     </div>
   );
 }

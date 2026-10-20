@@ -63,14 +63,14 @@ const SWAPS = [
     button: "bg-[#00C805] hover:bg-[#00b304]",
   },
   {
-    id: "tempo",
-    name: "Tempo Swap",
-    icon: "tempo",
-    description: "Swap tokens on the Tempo network using its native exchange.",
-    chains: "Tempo",
-    url: "https://tempo.xyz/",
-    accent: "from-violet-500/15 to-violet-50",
-    button: "bg-violet-600 hover:bg-violet-700",
+    id: "pluschain",
+    name: "PulseX · PlusChain",
+    icon: "pluschain",
+    description: "Swap tokens on PlusChain through PulseX, its native decentralized exchange.",
+    chains: "PlusChain (PulseChain-compatible EVM)",
+    url: "https://pulsex.com/?utm_source=perplexity",
+    accent: "from-pink-500/15 to-rose-50",
+    button: "bg-pink-600 hover:bg-pink-700",
   },
 ];
 

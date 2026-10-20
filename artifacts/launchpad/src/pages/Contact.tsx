@@ -159,7 +159,7 @@ export default function Contact() {
             },
             {
               q: "What blockchains are supported?",
-              a: "BNB Smart Chain, Base, X Layer, Tempo, Arc Mainnet, Robinhood Chain, X1 Blockchain, and Solana.",
+              a: "BNB Smart Chain, Base, X Layer, PlusChain, Robinhood Chain, X1 Blockchain, and Solana.",
             },
           ].map((item) => (
             <div key={item.q} className="border-b border-pink-50 pb-4 last:border-0 last:pb-0">
