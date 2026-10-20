@@ -1,0 +1,4 @@
+{
+  "outputDirectory": "artifacts/launchpad/dist/public",
+  "buildCommand": "pnpm run build"
+}
