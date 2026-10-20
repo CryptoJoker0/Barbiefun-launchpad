@@ -30,6 +30,9 @@ function shortPk(pk: string) {
 
 export default function WalletModal({ onClose }: WalletModalProps) {
   const { connectors, connect, isPending, error } = useConnect();
+  const uniqueConnectors = connectors.filter(
+    (connector, index, all) => all.findIndex((candidate) => candidate.id === connector.id) === index,
+  );
   const { disconnect } = useDisconnect();
   const { address, isConnected, chain } = useAccount();
   const { switchChain } = useSwitchChain();
@@ -217,35 +220,41 @@ export default function WalletModal({ onClose }: WalletModalProps) {
                 Choose your wallet to connect to Barbie Fun
               </p>
 
-              {connectors.map((connector) => {
-                const meta = WALLET_META[connector.id] || {
-                  name: connector.name,
-                  icon: Briefcase,
-                };
-                return (
-                  <button
-                    key={connector.uid}
-                    onClick={() => connect({ connector })}
-                    disabled={isPending}
-                    className="w-full flex items-center justify-between px-4 py-3.5 bg-white hover:bg-pink-50 border border-pink-100 hover:border-pink-300/60 rounded-2xl transition-all group disabled:opacity-60"
-                  >
-                    <div className="flex items-center space-x-3">
-                      <div className="w-9 h-9 rounded-full bg-pink-50 flex items-center justify-center shrink-0">
-                        <meta.icon className="w-4.5 h-4.5 text-pink-500" />
+              {uniqueConnectors.length > 0 ? (
+                uniqueConnectors.map((connector) => {
+                  const meta = WALLET_META[connector.id] || {
+                    name: connector.name,
+                    icon: Briefcase,
+                  };
+                  return (
+                    <button
+                      key={connector.uid}
+                      onClick={() => connect({ connector })}
+                      disabled={isPending}
+                      className="w-full flex items-center justify-between px-4 py-3.5 bg-white hover:bg-pink-50 border border-pink-100 hover:border-pink-300/60 rounded-2xl transition-all group disabled:opacity-60"
+                    >
+                      <div className="flex items-center space-x-3">
+                        <div className="w-9 h-9 rounded-full bg-pink-50 flex items-center justify-center shrink-0">
+                          <meta.icon className="w-4.5 h-4.5 text-pink-500" />
+                        </div>
+                        <div className="text-left">
+                          <p className="font-bold text-pink-900 text-sm">{meta.name}</p>
+                          <p className="text-xs text-pink-400">
+                            {connector.id === "injected" ? "Browser extension" :
+                             connector.id === "walletConnect" ? "QR code / deep link" :
+                             "Connect securely"}
+                          </p>
+                        </div>
                       </div>
-                      <div className="text-left">
-                        <p className="font-bold text-pink-900 text-sm">{meta.name}</p>
-                        <p className="text-xs text-pink-400">
-                          {connector.id === "injected" ? "Browser extension" :
-                           connector.id === "walletConnect" ? "QR code / deep link" :
-                           "Connect securely"}
-                        </p>
-                      </div>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-pink-400 group-hover:text-pink-600 transition-colors" />
-                  </button>
-                );
-              })}
+                      <ChevronRight className="w-4 h-4 text-pink-400 group-hover:text-pink-600 transition-colors" />
+                    </button>
+                  );
+                })
+              ) : (
+                <p className="rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-700">
+                  No EVM wallet provider is available in this browser. Install MetaMask or use WalletConnect.
+                </p>
+              )}
 
               {error && (
                 <div className="flex items-center space-x-2 bg-rose-50 border border-rose-200 rounded-xl px-4 py-3 text-sm text-rose-600">
