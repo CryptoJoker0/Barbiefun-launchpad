@@ -49,7 +49,7 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className="border-b border-pink-200/60 bg-white/90 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+      <nav className="border-b border-border/80 bg-background/80 backdrop-blur-xl sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
 

@@ -84,6 +84,10 @@ export default function Home() {
       <section className="relative rounded-3xl overflow-hidden border border-pink-200/60 shadow-xl mt-4">
         <div className="absolute inset-0 bg-gradient-to-br from-pink-100 via-white to-rose-50" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(236,72,153,0.15)_0%,_transparent_60%)]" />
+        <div aria-hidden="true" className="absolute -right-24 -top-24 size-80 rounded-full border border-pink-300/30 bg-pink-400/10 blur-[1px] shadow-[0_0_100px_rgba(224,51,126,0.2)]" />
+        <div aria-hidden="true" className="absolute right-20 top-16 hidden size-44 rounded-full border border-violet-300/20 lg:block">
+          <div className="absolute left-1/2 top-1/2 size-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-pink-300 shadow-[0_0_24px_rgba(244,114,182,0.9)]" />
+        </div>
 
         <div className="relative z-10 p-6 sm:p-10 flex flex-col lg:flex-row items-start justify-between gap-8">
           <div className="w-full lg:max-w-md text-center lg:text-left shrink-0">
