@@ -39,6 +39,7 @@ const EVM_EXPLORERS: Record<number, string> = {
 // SVM treasury address — set VITE_SOLANA_TREASURY_ADDRESS for real SOL payments
 const EVM_TREASURY = (import.meta.env.VITE_LAUNCH_FEE_TREASURY_ADDRESS as string | undefined)?.trim();
 const SOL_TREASURY = (import.meta.env.VITE_SOLANA_TREASURY_ADDRESS as string | undefined)?.trim();
+const X1_TREASURY = (import.meta.env.VITE_X1_TREASURY_ADDRESS as string | undefined)?.trim();
 const SVM_ADDRESS_PATTERN = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
 
 type SvmChainKey = "x1" | "solana";
@@ -89,7 +90,8 @@ export default function Verify() {
   const solPriceQuery = useNativeTokenPriceUsd("SOL");
   const solFee = useFeeNative(feeUsd, "SOL");
   const treasuryConfigured = !!EVM_TREASURY && isAddress(EVM_TREASURY);
-  const svmTreasuryConfigured = !!SOL_TREASURY && SVM_ADDRESS_PATTERN.test(SOL_TREASURY);
+  const selectedSvmTreasury = selectedSvm === "x1" ? X1_TREASURY : SOL_TREASURY;
+  const svmTreasuryConfigured = !!selectedSvmTreasury && SVM_ADDRESS_PATTERN.test(selectedSvmTreasury);
   const anySvmConnected = solana.connected;
 
   // EVM chain select
@@ -162,7 +164,7 @@ export default function Verify() {
     const result = await verifySvmPayment(
       svmTxSig,
       rpcUrl,
-      SOL_TREASURY,
+      selectedSvmTreasury,
       minLamports,
     );
 

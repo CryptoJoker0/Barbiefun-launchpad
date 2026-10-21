@@ -42,8 +42,9 @@ const EVM_EXPLORERS: Record<number, string> = {
   4663:    "https://robinhoodchain.blockscout.com/tx/",
 };
 
-const EVM_TREASURY = import.meta.env.VITE_LAUNCH_FEE_TREASURY_ADDRESS as string | undefined;
-const SOL_TREASURY = import.meta.env.VITE_SOLANA_TREASURY_ADDRESS as string | undefined;
+const EVM_TREASURY = (import.meta.env.VITE_LAUNCH_FEE_TREASURY_ADDRESS as string | undefined)?.trim();
+const SOL_TREASURY = (import.meta.env.VITE_SOLANA_TREASURY_ADDRESS as string | undefined)?.trim();
+const X1_TREASURY = (import.meta.env.VITE_X1_TREASURY_ADDRESS as string | undefined)?.trim();
 
 const SVM_DISPLAY_CHAINS = DISPLAY_CHAINS.filter((c) => c.isSvm);
 
@@ -94,6 +95,8 @@ export default function Launch() {
   const isSvmMode        = selectedSvmId !== null;
   const evmFee = useLaunchFeeNative(selectedEvmChain?.symbol ?? "", selectedEvmChain?.isStableGas);
   const treasuryEvm = !!EVM_TREASURY && isAddress(EVM_TREASURY);
+  const selectedSvmTreasury = selectedSvmId === -1 ? X1_TREASURY : SOL_TREASURY;
+  const svmTreasuryConfigured = !!selectedSvmTreasury && /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(selectedSvmTreasury);
   const solPriceUsd = useNativeTokenPriceUsd("SOL");
   const addLaunchMutation = useAddLaunch();
 
@@ -186,7 +189,7 @@ export default function Launch() {
       const result = await verifySvmPayment(
         svmTxSig.trim(),
         (selectedSvmChain as any).rpc,
-        SOL_TREASURY ?? "",
+        selectedSvmTreasury ?? "",
         minLamports,
       );
 
