@@ -289,15 +289,6 @@ export default function Launch() {
         <p className="text-pink-600 font-medium">Fair launch, locked liquidity, zero team tokens.</p>
       </div>
 
-      {!treasuryEvm && !isSvmMode && (
-        <div className="mb-6 bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-start space-x-3">
-          <AlertCircle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
-          <p className="text-sm font-semibold text-amber-700">
-            EVM treasury not configured. Set <code className="bg-amber-100 px-1 rounded">VITE_LAUNCH_FEE_TREASURY_ADDRESS</code>.
-          </p>
-        </div>
-      )}
-
       {/* ── EVM wallet banner ── */}
       {!isSvmMode && !isConnected && (
         <div className="mb-6 bg-pink-50 border border-pink-200/60 rounded-2xl p-4 flex items-center justify-between gap-4">
@@ -580,28 +571,9 @@ export default function Launch() {
                     </p>
                   </div>
                 </div>
-                {SOL_TREASURY ? (
-                  <div>
-                    <p className="text-xs text-purple-500 font-semibold mb-1.5">Send {selectedSvmChain.symbol} to this treasury address</p>
-                    <div className="flex items-center gap-2 bg-white border border-purple-200 rounded-xl px-3 py-2">
-                      <span className="font-mono text-xs text-purple-800 truncate flex-1">{SOL_TREASURY}</span>
-                      <button type="button" onClick={() => { navigator.clipboard.writeText(SOL_TREASURY!); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
-                        className="shrink-0 text-purple-400 hover:text-purple-600 transition-colors">
-                        {copied ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                      </button>
-                    </div>
-                    <p className="text-xs text-purple-400 mt-1">
-                      Open your {solana.walletId === "phantom" ? "Phantom" : "Backpack"} wallet, send ${LAUNCH_FEE_USD} USD worth of {selectedSvmChain.symbol} to the address above, then paste the transaction signature below.
-                    </p>
-                  </div>
-                ) : (
-                  <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
-                    <AlertCircle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
-                    <p className="text-xs text-amber-700">
-                      Set <code className="bg-amber-100 px-1 rounded">VITE_SOLANA_TREASURY_ADDRESS</code> to display the {selectedSvmChain.symbol} treasury. Contact us at barbiefunlaunchpad@gmail.com to arrange {selectedSvmChain.name} payment.
-                    </p>
-                  </div>
-                )}
+                <p className="text-xs text-purple-400">
+                  Complete the payment using the connected wallet flow, then paste the transaction signature below.
+                </p>
               </div>
 
               {/* Transaction signature */}

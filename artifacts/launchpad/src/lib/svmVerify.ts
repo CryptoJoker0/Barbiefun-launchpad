@@ -114,10 +114,8 @@ export async function verifySvmPayment(
     return {
       ok: false,
       reason: "wrong_recipient",
-      message:
-        `Treasury address not found in this transaction. ` +
-        `Please send to ${treasuryAddress.slice(0, 8)}…${treasuryAddress.slice(-6)} ` +
-        `and paste the new signature.`,
+  message:
+    "Payment recipient could not be verified. Please confirm the payment details and paste the new transaction signature.",
     };
   }
 
