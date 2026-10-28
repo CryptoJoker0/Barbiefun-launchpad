@@ -1116,8 +1116,6 @@ export default function Admin() {
             </CardHeader>
             <CardContent className="space-y-4 text-sm">
               {[
-                { key: "VITE_LAUNCH_FEE_TREASURY_ADDRESS", label: "EVM Treasury Address", description: `Wallet that receives ${LAUNCH_FEE_USD} launch fees on EVM chains` },
-                { key: "VITE_SOLANA_TREASURY_ADDRESS", label: "Solana / X1 Treasury Address", description: `Wallet that receives ${LAUNCH_FEE_USD} launch fees on SVM chains` },
                 { key: "VITE_WALLETCONNECT_PROJECT_ID", label: "WalletConnect Project ID", description: "Enables WalletConnect QR modal" },
                 { key: "ADMIN_PASSWORD", label: "Server Admin Password", description: "Stored securely on the API server; never exposed to the browser", serverManaged: true },
               ].map((setting) => {

@@ -3,9 +3,8 @@
  * via a manual fee-payment flow identical in UX to the EVM flow.
  *
  * EVM chains: sendTransactionAsync → on-chain fee → auto-confirm
- * SVM chains: show treasury address → user sends from Phantom/Backpack → paste tx signature
- *
- * Both paths store the launch record in localStorage so it appears in the feed.
+ * SVM chains: user submits a transaction signature → the backend verifies the recipient.
+ * Both paths persist launch records through the shared API.
  */
 import { useState } from "react";
 import { Link } from "wouter";
@@ -27,7 +26,7 @@ import ChainIcon from "@/components/ChainIcon";
 import { SUPPORTED_CHAINS, DISPLAY_CHAINS } from "@/lib/wagmi";
 import { useLaunchFeeNative, formatNativeAmount, LAUNCH_FEE_USD, useNativeTokenPriceUsd } from "@/lib/pricing";
 import { useSolanaWallet } from "@/hooks/useSolanaWallet";
-import { verifySvmPayment } from "@/lib/svmVerify";
+import { getEvmTreasuryRecipient, verifySvmPaymentOnServer } from "@/lib/payments";
 import { useAddLaunch } from "@/hooks/useLaunches";
 import { getReferral } from "@/hooks/useReferral";
 
@@ -41,10 +40,6 @@ const EVM_EXPLORERS: Record<number, string> = {
   369:     "https://scan.pulsechain.com/tx/",
   4663:    "https://robinhoodchain.blockscout.com/tx/",
 };
-
-const EVM_TREASURY = (import.meta.env.VITE_LAUNCH_FEE_TREASURY_ADDRESS as string | undefined)?.trim();
-const SOL_TREASURY = (import.meta.env.VITE_SOLANA_TREASURY_ADDRESS as string | undefined)?.trim();
-const X1_TREASURY = (import.meta.env.VITE_X1_TREASURY_ADDRESS as string | undefined)?.trim();
 
 const SVM_DISPLAY_CHAINS = DISPLAY_CHAINS.filter((c) => c.isSvm);
 
@@ -71,6 +66,7 @@ export default function Launch() {
   const [svmTxSig,       setSvmTxSig]       = useState("");
   const [svmSubmitting,  setSvmSubmitting]  = useState(false);
   const [svmVerifyError, setSvmVerifyError] = useState<string | null>(null);
+  const [evmPaymentError, setEvmPaymentError] = useState<string | null>(null);
   const [successData,    setSuccessData]    = useState<{
     ticker: string; txHash: string; chainId: number; chainName: string; explorerBase: string;
   } | null>(null);
@@ -94,9 +90,6 @@ export default function Launch() {
   const selectedSvmChain = SVM_DISPLAY_CHAINS.find((c) => c.id === selectedSvmId);
   const isSvmMode        = selectedSvmId !== null;
   const evmFee = useLaunchFeeNative(selectedEvmChain?.symbol ?? "", selectedEvmChain?.isStableGas);
-  const treasuryEvm = !!EVM_TREASURY && isAddress(EVM_TREASURY);
-  const selectedSvmTreasury = selectedSvmId === -1 ? X1_TREASURY : SOL_TREASURY;
-  const svmTreasuryConfigured = !!selectedSvmTreasury && /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(selectedSvmTreasury);
   const solPriceUsd = useNativeTokenPriceUsd("SOL");
   const addLaunchMutation = useAddLaunch();
 
@@ -106,6 +99,7 @@ export default function Launch() {
     setSelectedEvmId(chainId);
     setSelectedSvmId(null);
     setSvmTxSig("");
+    setEvmPaymentError(null);
     if (isConnected && chain?.id !== chainId) switchChain({ chainId });
   };
 
@@ -113,6 +107,7 @@ export default function Launch() {
     setSelectedSvmId(id);
     setSelectedEvmId(null);
     setSvmTxSig("");
+    setEvmPaymentError(null);
   };
 
   const fd = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
@@ -132,15 +127,21 @@ export default function Launch() {
     if (!isConnected) { setWalletOpen(true); return; }
     if (!selectedEvmChain) return;
     if (chain?.id !== selectedEvmChain.id) { switchChain({ chainId: selectedEvmChain.id }); return; }
-    if (!treasuryEvm || evmFee.native === null) return;
+    if (evmFee.native === null) return;
 
+    setEvmPaymentError(null);
     try {
+      const recipient = await getEvmTreasuryRecipient();
+      if (!isAddress(recipient)) {
+        throw new Error("The EVM payment recipient is not configured correctly.");
+      }
+
       const decimals = selectedEvmChain.symbol === "USDC" ? 6 : 18;
       const value = selectedEvmChain.isStableGas
         ? parseUnits(evmFee.native.toFixed(decimals), decimals)
         : parseEther(evmFee.native.toFixed(18));
 
-      const txHash = await sendTransactionAsync({ to: EVM_TREASURY as `0x${string}`, value });
+      const txHash = await sendTransactionAsync({ to: recipient as `0x${string}`, value });
 
       await addLaunchMutation.mutateAsync({
         id: `${selectedEvmChain.id}-${txHash}`,
@@ -170,6 +171,9 @@ export default function Launch() {
       });
     } catch (err) {
       console.error("Launch fee payment failed", err);
+      setEvmPaymentError(
+        err instanceof Error ? err.message : "Launch fee payment failed. Please try again.",
+      );
     }
   };
 
@@ -182,20 +186,18 @@ export default function Launch() {
     try {
       // Compute minimum lamports for Solana (skip for X1 — no reliable price feed)
       let minLamports = 0;
-      if (selectedSvmChain.id === -2 && typeof solPriceUsd === "number" && solPriceUsd > 0) {
-        minLamports = Math.floor((LAUNCH_FEE_USD / solPriceUsd) * 1e9 * 0.95);
+      if (selectedSvmChain.id === -2 && typeof solPriceUsd.data === "number" && solPriceUsd.data > 0) {
+        minLamports = Math.floor((LAUNCH_FEE_USD / solPriceUsd.data) * 1e9 * 0.95);
       }
 
-      const result = await verifySvmPayment(
+      const result = await verifySvmPaymentOnServer(
         svmTxSig.trim(),
-        (selectedSvmChain as any).rpc,
-        selectedSvmTreasury ?? "",
+        selectedSvmChain.id === -2 ? "solana" : "x1",
         minLamports,
       );
 
       if (!result.ok) {
         setSvmVerifyError(result.message);
-        setSvmSubmitting(false);
         return;
       }
       const deployer = solana.publicKey ?? "unknown";
@@ -225,6 +227,10 @@ export default function Launch() {
         chainName: selectedSvmChain.name,
         explorerBase: explorer,
       });
+    } catch (err) {
+      setSvmVerifyError(
+        err instanceof Error ? err.message : "Payment verification failed. Please try again.",
+      );
     } finally {
       setSvmSubmitting(false);
     }
@@ -527,6 +533,11 @@ export default function Launch() {
                   {evmFee.isLive ? "● Live price" : "Est. price"}
                 </span>
               </div>
+              {evmPaymentError && (
+                <div role="alert" className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                  {evmPaymentError}
+                </div>
+              )}
               <div className="bg-pink-50 border border-pink-200/60 rounded-2xl p-5 flex items-start space-x-3">
                 <AlertCircle className="w-5 h-5 text-pink-500 mt-0.5 shrink-0" />
                 <p className="text-sm text-pink-700">
@@ -534,7 +545,7 @@ export default function Launch() {
                   100% of the initial supply mints to your wallet. This step records your request and charges the ${LAUNCH_FEE_USD} fee; contract deployment is the next step.
                 </p>
               </div>
-              <Button type="submit" size="lg" disabled={isSending || !treasuryEvm}
+              <Button type="submit" size="lg" disabled={isSending || evmFee.native === null}
                 className="w-full bg-gradient-to-r from-pink-500 via-pink-600 to-pink-700 hover:from-pink-600 hover:via-pink-700 hover:to-pink-800 text-white font-extrabold text-lg h-14 rounded-full shadow-lg hover:shadow-pink-300/60 disabled:opacity-50">
                 {isSending ? (
                   <span className="flex items-center space-x-2">

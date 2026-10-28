@@ -39,7 +39,7 @@ VITE_ADMIN_PASSWORD check is a UX deterrent only — VITE_ vars are in the clien
 
 ## Treasury address
 
-VITE_LAUNCH_FEE_TREASURY_ADDRESS is a plain env var (not a Replit Secret) since it's a public wallet address, not a credential.
+`TREASURY_EVM_ADDRESS` and `TREASURY_SVM_ADDRESS` are backend-only runtime variables; never expose them through `VITE_` variables or site UI. The EVM recipient is requested at payment time so the wallet can show the destination before signing. SVM payment verification runs on the backend and does not return the recipient to the browser.
 
 ---
 

@@ -5,10 +5,12 @@ import storageRouter from "./storage";
 import liveStreamRouter from "./live-stream";
 import adminAuthRouter from "./admin-auth";
 import x1Router from "./x1";
+import paymentsRouter from "./payments";
 
 const router: IRouter = Router();
 
 router.use(healthRouter);
+router.use(paymentsRouter);
 router.use(launchesRouter);
 router.use(storageRouter);
 router.use(liveStreamRouter);
