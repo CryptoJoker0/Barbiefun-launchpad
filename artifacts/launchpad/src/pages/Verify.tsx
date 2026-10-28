@@ -9,7 +9,7 @@ import {
   Wallet, ExternalLink, AlertCircle, Copy,
 } from "lucide-react";
 import ChainIcon from "@/components/ChainIcon";
-import { SUPPORTED_CHAINS, DISPLAY_CHAINS, X1_CHAIN_INFO, SOLANA_CHAIN_INFO } from "@/lib/wagmi";
+import { SUPPORTED_CHAINS, DISPLAY_CHAINS } from "@/lib/wagmi";
 import { useAccount, useSendTransaction, useSwitchChain } from "wagmi";
 import { parseEther, parseUnits, isAddress } from "viem";
 import WalletModal from "@/components/WalletModal";
@@ -23,7 +23,7 @@ import {
   VERIFICATION_FEE_FAST_USD,
   type VerificationTier,
 } from "@/lib/pricing";
-import { verifySvmPayment } from "@/lib/svmVerify";
+import { getEvmTreasuryRecipient, verifySvmPaymentOnServer } from "@/lib/payments";
 
 // ---------------------------------------------------------------------------
 // Chain explorer URLs
@@ -35,12 +35,6 @@ const EVM_EXPLORERS: Record<number, string> = {
   369:     "https://scan.pulsechain.com/tx/",
   4663:    "https://robinhoodchain.blockscout.com/tx/",
 };
-
-// SVM treasury address — set VITE_SOLANA_TREASURY_ADDRESS for real SOL payments
-const EVM_TREASURY = (import.meta.env.VITE_LAUNCH_FEE_TREASURY_ADDRESS as string | undefined)?.trim();
-const SOL_TREASURY = (import.meta.env.VITE_SOLANA_TREASURY_ADDRESS as string | undefined)?.trim();
-const X1_TREASURY = (import.meta.env.VITE_X1_TREASURY_ADDRESS as string | undefined)?.trim();
-const SVM_ADDRESS_PATTERN = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
 
 type SvmChainKey = "x1" | "solana";
 
@@ -74,13 +68,14 @@ export default function Verify() {
   const [svmTxSig,       setSvmTxSig]       = useState("");
   const [svmSubmitting,  setSvmSubmitting]  = useState(false);
   const [svmVerifyError, setSvmVerifyError] = useState<string | null>(null);
+  const [evmPaymentError, setEvmPaymentError] = useState<string | null>(null);
   const [successData,    setSuccessData]    = useState<{
     tier: VerificationTier;
     txHash: string;
     chainName: string;
     explorer: string;
   } | null>(null);
-  const [copied,         setCopied]         = useState(false);
+
 
   // derived
   const selectedEvmChain = SUPPORTED_CHAINS.find((c) => c.id === selectedEvmId);
@@ -89,15 +84,13 @@ export default function Verify() {
   const evmFee = useFeeNative(feeUsd, selectedEvmChain?.symbol ?? "", selectedEvmChain?.isStableGas);
   const solPriceQuery = useNativeTokenPriceUsd("SOL");
   const solFee = useFeeNative(feeUsd, "SOL");
-  const treasuryConfigured = !!EVM_TREASURY && isAddress(EVM_TREASURY);
-  const selectedSvmTreasury = selectedSvm === "x1" ? X1_TREASURY : SOL_TREASURY;
-  const svmTreasuryConfigured = !!selectedSvmTreasury && SVM_ADDRESS_PATTERN.test(selectedSvmTreasury);
   const anySvmConnected = solana.connected;
 
   // EVM chain select
   const handleEvmChainSelect = (chainId: number) => {
     setSelectedEvmId(chainId);
     setSelectedSvm(null);
+    setEvmPaymentError(null);
     if (isConnected && chain?.id !== chainId) switchChain({ chainId });
   };
 
@@ -105,6 +98,7 @@ export default function Verify() {
   const handleSvmSelect = (key: SvmChainKey) => {
     setSelectedSvm(key);
     setSelectedEvmId(null);
+    setEvmPaymentError(null);
     setSvmTxSig("");
     setSvmVerifyError(null);
   };
@@ -115,72 +109,70 @@ export default function Verify() {
     if (!isConnected) { setWalletOpen(true); return; }
     if (!selectedEvmChain) return;
     if (chain?.id !== selectedEvmChain.id) { switchChain({ chainId: selectedEvmChain.id }); return; }
-    if (!treasuryConfigured || evmFee.native === null) return;
+    if (evmFee.native === null) return;
 
+    setEvmPaymentError(null);
     try {
+      const recipient = await getEvmTreasuryRecipient();
+      if (!isAddress(recipient)) {
+        throw new Error("The EVM payment recipient is not configured correctly.");
+      }
+
       const decimals = selectedEvmChain.symbol === "USDC" ? 6 : 18;
       const value = selectedEvmChain.isStableGas
         ? parseUnits(evmFee.native.toFixed(decimals), decimals)
         : parseEther(evmFee.native.toFixed(18));
 
-      const txHash = await sendTransactionAsync({ to: EVM_TREASURY as `0x${string}`, value });
+      const txHash = await sendTransactionAsync({ to: recipient as `0x${string}`, value });
       const explorerBase = EVM_EXPLORERS[selectedEvmChain.id] ?? "";
       setSuccessData({ tier, txHash, chainName: selectedEvmChain.name, explorer: explorerBase });
     } catch (err) {
       console.error("Verification fee payment failed", err);
+      setEvmPaymentError(
+        err instanceof Error ? err.message : "Verification fee payment failed. Please try again.",
+      );
     }
   };
 
-  // SVM submit — real on-chain verification
+  // SVM submit — treasury lookup and transaction verification stay on the backend.
   const handleSvmSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!selectedSvmMeta) return;
-    if (!isValidSvmSig(svmTxSig)) return;
-    if (!svmTreasuryConfigured) {
-      setSvmVerifyError("The SVM treasury address is not configured correctly.");
-      return;
-    }
+    if (!selectedSvmMeta || !isValidSvmSig(svmTxSig)) return;
 
     setSvmSubmitting(true);
     setSvmVerifyError(null);
 
-    // Determine which RPC to call and how many lamports to expect.
-    // For Solana we have a live SOL/USD price; for X1 (XN) we skip the
-    // amount check since XN has no reliable public price feed.
-    const rpcUrl =
-      selectedSvm === "solana"
-        ? SOLANA_CHAIN_INFO.rpc
-        : X1_CHAIN_INFO.rpc;
-
     let minLamports = 0;
-    if (selectedSvm === "solana") {
-      const solPrice =
-        solPriceQuery.data ??
-        175; // static fallback — only used if CoinGecko is unreachable
-      // Require at least 95 % of the expected amount (5 % slippage buffer)
+    if (selectedSvmMeta.key === "solana") {
+      const solPrice = solPriceQuery.data ?? 175;
       minLamports = Math.floor((feeUsd / solPrice) * 1e9 * 0.95);
     }
 
-    const result = await verifySvmPayment(
-      svmTxSig,
-      rpcUrl,
-      selectedSvmTreasury,
-      minLamports,
-    );
+    try {
+      const result = await verifySvmPaymentOnServer(
+        svmTxSig.trim(),
+        selectedSvmMeta.key,
+        minLamports,
+      );
 
-    if (!result.ok) {
-      setSvmVerifyError(result.message);
+      if (!result.ok) {
+        setSvmVerifyError(result.message);
+        return;
+      }
+
+      setSuccessData({
+        tier,
+        txHash: svmTxSig.trim(),
+        chainName: selectedSvmMeta.name,
+        explorer: selectedSvmMeta.explorer,
+      });
+    } catch (err) {
+      setSvmVerifyError(
+        err instanceof Error ? err.message : "Payment verification failed. Please try again.",
+      );
+    } finally {
       setSvmSubmitting(false);
-      return;
     }
-
-    setSuccessData({
-      tier,
-      txHash: svmTxSig.trim(),
-      chainName: selectedSvmMeta.name,
-      explorer: selectedSvmMeta.explorer,
-    });
-    setSvmSubmitting(false);
   };
 
   // ---------------------------------------------------------------------------
@@ -238,15 +230,6 @@ export default function Verify() {
           Apply for the blue checkmark. Verified tokens stand out in the feed and build trust with the community.
         </p>
       </div>
-
-      {!treasuryConfigured && (
-        <div className="mb-6 bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-start space-x-3">
-          <AlertCircle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
-          <p className="text-sm font-semibold text-amber-700">
-            EVM treasury not configured. Set <code className="bg-amber-100 px-1 rounded">VITE_LAUNCH_FEE_TREASURY_ADDRESS</code> to enable real EVM payments.
-          </p>
-        </div>
-      )}
 
       {/* SVM wallet banner */}
       {isSvmSelected && !anySvmConnected && (
@@ -362,6 +345,11 @@ export default function Verify() {
                         </span>
                       </div>
                     )}
+                    {evmPaymentError && (
+                      <p role="alert" className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                        {evmPaymentError}
+                      </p>
+                    )}
                   </div>
 
                   {/* Project basics */}
@@ -416,7 +404,7 @@ export default function Verify() {
                 </CardContent>
                 <CardFooter className="bg-muted/10 border-t border-border mt-6 pt-6">
                   <Button type="submit" size="lg"
-                    disabled={isSending || !selectedEvmChain || !treasuryConfigured}
+                    disabled={isSending || !selectedEvmChain || evmFee.native === null}
                     className="w-full bg-gradient-to-r from-pink-500 via-pink-600 to-pink-700 hover:from-pink-600 hover:via-pink-700 hover:to-pink-800 text-white font-extrabold text-base h-12 rounded-full shadow-md disabled:opacity-50">
                     {isSending ? (
                       <span className="flex items-center justify-center space-x-2">
@@ -528,29 +516,9 @@ export default function Verify() {
                             )}
                           </div>
                         </div>
-                        {SOL_TREASURY ? (
-                          <div>
-                            <p className="text-xs text-purple-500 font-semibold mb-1">Treasury address ({selectedSvmMeta.symbol})</p>
-                            <div className="flex items-center gap-2 bg-white border border-purple-200 rounded-xl px-3 py-2">
-                              <span className="font-mono text-xs text-purple-800 truncate flex-1">{SOL_TREASURY}</span>
-                              <button type="button" onClick={() => { navigator.clipboard.writeText(SOL_TREASURY!); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
-                                className="shrink-0 text-purple-400 hover:text-purple-600">
-                                {copied ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                              </button>
-                            </div>
-                            <p className="text-xs text-purple-400 mt-1">
-                              Send from your {solana.walletId === "phantom" ? "Phantom" : "Backpack"} wallet to this address.
-                            </p>
-                          </div>
-                        ) : (
-                          <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
-                            <AlertCircle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
-                            <p className="text-xs text-amber-700">
-                              Set <code className="bg-amber-100 px-1 rounded">VITE_SOLANA_TREASURY_ADDRESS</code> to show the {selectedSvmMeta.symbol} treasury address.
-              Until then, contact us at barbiefunlaunchpad@gmail.com to arrange payment.
-                            </p>
-                          </div>
-                        )}
+                        <p className="text-xs text-purple-400">
+                          Complete the payment using the connected wallet flow, then paste the transaction signature below.
+                        </p>
                       </div>
 
                       <div className="space-y-2">

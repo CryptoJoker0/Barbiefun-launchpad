@@ -44,7 +44,9 @@ export default defineConfig({
   },
   server: {
     port,
-    strictPort: true,
+    // Let the preview choose the next available port when a stale Vite
+    // process is still shutting down after a file sync or restart.
+    strictPort: false,
     host: "0.0.0.0",
     allowedHosts: true,
     fs: {

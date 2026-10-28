@@ -21,10 +21,10 @@ description: How SVM chains (X1, Solana) are integrated in the Barbie Fun launch
 - Wrong (too permissive): `{44,90}` — also matches wallet addresses and public keys
 
 ## SVM fee payment flow (no @solana/web3.js)
-- EVM: sendTransactionAsync via wagmi → auto confirmation
-- SVM: show treasury address + fee amount → user sends from Phantom/Backpack → user pastes tx signature
-- Treasury: `VITE_SOLANA_TREASURY_ADDRESS` env var (separate from EVM `VITE_LAUNCH_FEE_TREASURY_ADDRESS`)
-- Submit gating: require `solana.connected && isValidSvmSig(sig)` (not just valid sig)
+- EVM: the client requests the recipient from `/api/payments/evm-recipient`, then wagmi asks the user to sign the transfer.
+- SVM: the user submits a transaction signature; `/api/payments/verify-svm` verifies it against the server-configured recipient.
+- Treasury configuration is server-side only: `TREASURY_EVM_ADDRESS` and `TREASURY_SVM_ADDRESS`. Never use a `VITE_` prefix or render the SVM recipient in the UI.
+- Submit gating: require `solana.connected && isValidSvmSig(sig)` (not just valid sig).
 
 ## Wallet connection
 - EVM: wagmi hooks (useAccount, useSendTransaction, etc.)
