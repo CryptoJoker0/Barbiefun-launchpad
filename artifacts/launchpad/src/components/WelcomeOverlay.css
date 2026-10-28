@@ -1,0 +1,282 @@
+.welcome-screen {
+  --welcome-black: #08050b;
+  --welcome-plum: #1d0b25;
+  --welcome-pink: #ff5fc1;
+  --welcome-light-pink: #ffd5ec;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  overflow-x: hidden;
+  overflow-y: auto;
+  isolation: isolate;
+  color: #fff;
+  background:
+    radial-gradient(ellipse at 12% 18%, rgba(255, 72, 181, 0.16), transparent 34rem),
+    radial-gradient(ellipse at 88% 82%, rgba(107, 26, 115, 0.3), transparent 38rem),
+    linear-gradient(140deg, var(--welcome-black) 0%, var(--welcome-plum) 55%, #0a060d 100%);
+}
+
+.welcome-screen::before {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  content: "";
+  background-image: radial-gradient(rgba(255, 255, 255, 0.17) 0.5px, transparent 0.5px);
+  background-size: 5px 5px;
+  opacity: 0.08;
+}
+
+.welcome-artwork {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  background: linear-gradient(135deg, rgba(255, 79, 185, 0.11), transparent 46%);
+}
+
+.welcome-artwork img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  opacity: 0.9;
+  animation: welcome-artwork-enter 850ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.welcome-artwork::after {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  content: "";
+  background:
+    linear-gradient(180deg, rgba(8, 5, 11, 0.12) 0%, rgba(8, 5, 11, 0.22) 28%, rgba(8, 5, 11, 0.76) 58%, #08050b 100%),
+    linear-gradient(90deg, rgba(8, 5, 11, 0.22) 0%, transparent 70%);
+}
+
+.welcome-art-fallback {
+  width: 100%;
+  height: 100%;
+  background:
+    radial-gradient(ellipse at 55% 35%, rgba(255, 83, 190, 0.38), transparent 38%),
+    linear-gradient(145deg, #210c28, #08050b 68%);
+}
+
+.welcome-layout {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  min-height: 100vh;
+  min-height: 100svh;
+}
+
+.welcome-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 2.5rem;
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100svh;
+  padding: max(1.25rem, env(safe-area-inset-top)) clamp(1.25rem, 5vw, 2rem) max(1.5rem, env(safe-area-inset-bottom));
+  animation: welcome-content-enter 560ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.welcome-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  width: fit-content;
+  max-width: 100%;
+}
+
+.welcome-logo {
+  width: 2.9rem;
+  height: 2.9rem;
+  flex: 0 0 auto;
+  border: 1px solid rgba(255, 182, 225, 0.55);
+  border-radius: 9999px;
+  background: #08050b;
+  object-fit: cover;
+  box-shadow: 0 0 24px rgba(255, 67, 181, 0.25);
+}
+
+.welcome-brand-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.welcome-kicker,
+.welcome-brand-caption,
+.welcome-overline,
+.welcome-footnote {
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.welcome-kicker {
+  color: var(--welcome-light-pink);
+  font-size: 0.69rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+}
+
+.welcome-brand-caption {
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.56rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+}
+
+.welcome-message {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.05rem;
+  width: 100%;
+  max-width: 38rem;
+  padding-bottom: 0.25rem;
+}
+
+.welcome-overline {
+  color: #ff9ed6;
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+}
+
+.welcome-title {
+  display: flex;
+  flex-direction: column;
+  gap: 0.02em;
+  margin: 0;
+  color: #fff;
+  font-size: clamp(2.1rem, 9.4vw, 3.45rem);
+  font-weight: 900;
+  letter-spacing: -0.045em;
+  line-height: 0.98;
+  text-wrap: balance;
+}
+
+.welcome-title-accent {
+  color: var(--welcome-pink);
+  text-shadow: 0 0 28px rgba(255, 75, 186, 0.3);
+}
+
+.welcome-description {
+  max-width: 36rem;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.84);
+  font-size: 0.96rem;
+  font-weight: 450;
+  line-height: 1.6;
+  text-wrap: pretty;
+}
+
+.welcome-connect-button {
+  justify-content: space-between;
+  box-shadow: 0 12px 40px rgba(255, 70, 180, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.12) inset;
+  transition: transform 180ms ease, box-shadow 180ms ease, filter 180ms ease;
+}
+
+.welcome-connect-button:not(:disabled):hover {
+  filter: saturate(1.08);
+  box-shadow: 0 14px 48px rgba(255, 70, 180, 0.48), 0 0 0 1px rgba(255, 255, 255, 0.18) inset;
+}
+
+.welcome-connect-button:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 4px;
+}
+
+.welcome-footnote {
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.59rem;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+}
+
+.welcome-frame {
+  position: fixed;
+  inset: 0.7rem;
+  z-index: 2;
+  border: 1px solid rgba(255, 133, 207, 0.21);
+  border-radius: 1.2rem;
+  box-shadow: 0 0 42px rgba(255, 58, 179, 0.06), inset 0 0 24px rgba(255, 58, 179, 0.025);
+  pointer-events: none;
+}
+
+@keyframes welcome-content-enter {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes welcome-artwork-enter {
+  from { opacity: 0; transform: scale(1.025); }
+  to { opacity: 0.9; transform: scale(1); }
+}
+
+@media (min-width: 768px) {
+  .welcome-artwork {
+    right: 0;
+    left: auto;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    width: 56%;
+    padding-right: clamp(1rem, 3.5vw, 3.5rem);
+  }
+
+  .welcome-artwork img {
+    width: auto;
+    height: 94svh;
+    max-width: 100%;
+    object-fit: contain;
+    object-position: center;
+    opacity: 1;
+  }
+
+  .welcome-artwork::after {
+    background:
+      linear-gradient(90deg, #08050b 0%, rgba(8, 5, 11, 0.92) 8%, rgba(8, 5, 11, 0.37) 39%, rgba(8, 5, 11, 0.04) 100%),
+      linear-gradient(0deg, rgba(8, 5, 11, 0.18), transparent 28%);
+  }
+
+  .welcome-content {
+    width: 59%;
+    max-width: 52rem;
+    padding: clamp(2rem, 5vw, 5rem);
+  }
+
+  .welcome-message {
+    max-width: 35rem;
+    gap: 1.25rem;
+  }
+
+  .welcome-title {
+    font-size: clamp(3rem, 5.7vw, 5.25rem);
+  }
+
+  .welcome-description {
+    font-size: clamp(1rem, 1.3vw, 1.125rem);
+  }
+
+  .welcome-frame {
+    inset: 1rem;
+    border-radius: 1.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .welcome-screen *,
+  .welcome-screen *::before,
+  .welcome-screen *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
