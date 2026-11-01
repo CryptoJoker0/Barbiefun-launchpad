@@ -5,21 +5,20 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  /* ── Premium Rose-Velvet Pink Scale ─────────────────────────────────────
-     Replaces Tailwind's default flat pink with a richer, jewel-toned rose.
-     Mid-tones are 6-8 pts darker and warmer (hue 333) for depth & sweetness.
+  /* ── Vibrant Barbie-Pink Scale ─────────────────────────────────────────
+     Higher-chroma hot pinks with a contrast-safe core for text and actions.
   ── */
-  --color-pink-50:  #fff1f6;
-  --color-pink-100: #ffe3ee;
-  --color-pink-200: #ffc4dc;
-  --color-pink-300: #ff95c3;
-  --color-pink-400: #f55fa5;
-  --color-pink-500: #e0337e;  /* primary rose — was #ec4899 */
-  --color-pink-600: #c41d65;
-  --color-pink-700: #a2134f;
-  --color-pink-800: #860d3e;
-  --color-pink-900: #5f0929;
-  --color-pink-950: #3c0318;
+  --color-pink-50:  #fff1f7;
+  --color-pink-100: #ffe2ef;
+  --color-pink-200: #ffc1de;
+  --color-pink-300: #ff8fc4;
+  --color-pink-400: #e11b76;
+  --color-pink-500: #d5006d;
+  --color-pink-600: #b8005f;
+  --color-pink-700: #97004e;
+  --color-pink-800: #79003f;
+  --color-pink-900: #5c0030;
+  --color-pink-950: #3d001f;
 
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));
@@ -110,43 +109,43 @@
 }
 
 :root {
-  --button-outline: rgba(224,51,126,0.22);
-  --badge-outline: rgba(224,51,126,0.10);
+  --button-outline: rgba(213,0,109,0.24);
+  --badge-outline: rgba(213,0,109,0.12);
   --opaque-button-border-intensity: 5;
-  --elevate-1: rgba(224,51,126,0.04);
-  --elevate-2: rgba(224,51,126,0.09);
+  --elevate-1: rgba(213,0,109,0.05);
+  --elevate-2: rgba(213,0,109,0.11);
 
   /* Warmer, richer blush background — less candy, more velvet */
-  --background: 338 55% 98.5%;
+  --background: 330 50% 98.5%;
   --foreground: 335 45% 13%;
 
-  --border: 334 45% 91%;
+  --border: 330 55% 91%;
 
   --card: 0 0% 100%;
   --card-foreground: 335 45% 13%;
-  --card-border: 334 45% 91%;
+  --card-border: 330 55% 91%;
 
   --sidebar: 0 0% 100%;
   --sidebar-foreground: 335 45% 13%;
-  --sidebar-border: 334 45% 91%;
-  --sidebar-primary: 333 82% 53%;
+  --sidebar-border: 330 55% 91%;
+  --sidebar-primary: 329 100% 42%;
   --sidebar-primary-foreground: 0 0% 100%;
   --sidebar-accent: 335 70% 96%;
   --sidebar-accent-foreground: 335 45% 13%;
-  --sidebar-ring: 333 82% 53%;
+  --sidebar-ring: 329 100% 42%;
 
   --popover: 0 0% 100%;
   --popover-foreground: 335 45% 13%;
-  --popover-border: 334 45% 91%;
+  --popover-border: 330 55% 91%;
 
-  --primary: 333 82% 53%;
+  --primary: 329 100% 42%;
   --primary-foreground: 0 0% 100%;
 
   --secondary: 335 70% 96%;
   --secondary-foreground: 335 45% 13%;
 
   --muted: 335 55% 96.5%;
-  --muted-foreground: 333 28% 46%;
+  --muted-foreground: 329 32% 44%;
 
   --accent: 335 65% 95%;
   --accent-foreground: 335 45% 13%;
@@ -154,28 +153,28 @@
   --destructive: 343 82% 57%;
   --destructive-foreground: 0 0% 100%;
 
-  --input: 334 45% 91%;
-  --ring: 333 82% 53%;
+  --input: 330 55% 91%;
+  --ring: 329 100% 42%;
 
-  --chart-1: 333 82% 53%;
+  --chart-1: 329 100% 42%;
   --chart-2: 0 84% 55%;
   --chart-3: 43 74% 55%;
   --chart-4: 283 39% 53%;
-  --chart-5: 333 55% 82%;
+  --chart-5: 329 65% 82%;
 
   --app-font-sans: 'Inter', sans-serif;
   --app-font-serif: Georgia, serif;
   --app-font-mono: 'Space Mono', 'Menlo', monospace;
   --radius: .75rem;
   /* Rose-velvet shadows — warmer, deeper */
-  --shadow-2xs: 0px 1px 3px 0px rgba(196,29,101,0.12);
-  --shadow-xs: 0px 2px 4px 0px rgba(196,29,101,0.18);
-  --shadow-sm: 0px 2px 8px 0px rgba(196,29,101,0.22), 0px 1px 2px -1px rgba(196,29,101,0.14);
-  --shadow: 0px 4px 12px 0px rgba(196,29,101,0.26), 0px 1px 2px -1px rgba(196,29,101,0.18);
-  --shadow-md: 0px 6px 18px 0px rgba(196,29,101,0.30), 0px 2px 4px -1px rgba(196,29,101,0.22);
-  --shadow-lg: 0px 10px 28px 0px rgba(196,29,101,0.35), 0px 4px 6px -1px rgba(196,29,101,0.26);
-  --shadow-xl: 0px 16px 40px 0px rgba(196,29,101,0.40), 0px 8px 10px -1px rgba(196,29,101,0.30);
-  --shadow-2xl: 0px 24px 60px 0px rgba(196,29,101,0.45);
+  --shadow-2xs: 0px 1px 3px 0px rgba(184,0,95,0.12);
+  --shadow-xs: 0px 2px 4px 0px rgba(184,0,95,0.18);
+  --shadow-sm: 0px 2px 8px 0px rgba(184,0,95,0.22), 0px 1px 2px -1px rgba(184,0,95,0.14);
+  --shadow: 0px 4px 12px 0px rgba(184,0,95,0.26), 0px 1px 2px -1px rgba(184,0,95,0.18);
+  --shadow-md: 0px 6px 18px 0px rgba(184,0,95,0.30), 0px 2px 4px -1px rgba(184,0,95,0.22);
+  --shadow-lg: 0px 10px 28px 0px rgba(184,0,95,0.35), 0px 4px 6px -1px rgba(184,0,95,0.26);
+  --shadow-xl: 0px 16px 40px 0px rgba(184,0,95,0.40), 0px 8px 10px -1px rgba(184,0,95,0.30);
+  --shadow-2xl: 0px 24px 60px 0px rgba(184,0,95,0.45);
   --tracking-normal: 0em;
   --spacing: 0.25rem;
 
@@ -222,19 +221,19 @@
   body {
     @apply font-sans antialiased bg-background text-foreground;
     background-image:
-      radial-gradient(circle at 12% 8%, rgba(224, 51, 126, 0.08), transparent 28rem),
+      radial-gradient(circle at 12% 8%, rgba(213, 0, 109, 0.08), transparent 28rem),
       radial-gradient(circle at 88% 18%, rgba(139, 92, 246, 0.06), transparent 24rem);
   }
 
   ::selection {
-    background: rgba(224, 51, 126, 0.3);
+    background: rgba(213, 0, 109, 0.3);
   }
 }
 
 .dark body {
   background-color: hsl(var(--background));
   background-image:
-    radial-gradient(circle at 8% 0%, rgba(224, 51, 126, 0.14), transparent 30rem),
+    radial-gradient(circle at 8% 0%, rgba(213, 0, 109, 0.14), transparent 30rem),
     radial-gradient(circle at 92% 10%, rgba(139, 92, 246, 0.12), transparent 26rem),
     linear-gradient(180deg, rgba(255,255,255,0.015), transparent 30%);
 }
@@ -245,9 +244,9 @@
 .dark .bg-pink-50 { background-color: hsl(var(--secondary)); }
 .dark .bg-pink-100 { background-color: hsl(var(--accent)); }
 .dark .text-pink-900, .dark .text-pink-800, .dark .text-pink-700 { color: hsl(var(--foreground)); }
-.dark .text-pink-600, .dark .text-pink-500 { color: hsl(333 82% 72%); }
+.dark .text-pink-600, .dark .text-pink-500 { color: hsl(329 100% 72%); }
 .dark .border-pink-100, .dark .border-pink-200\/60 { border-color: hsl(var(--border)); }
-.dark .border-pink-300\/60 { border-color: hsl(333 55% 38%); }
+.dark .border-pink-300\/60 { border-color: hsl(329 75% 40%); }
 .dark .from-pink-100 { --tw-gradient-from: hsl(335 34% 15%) var(--tw-gradient-from-position); }
 .dark .via-white { --tw-gradient-via: hsl(335 34% 13%) var(--tw-gradient-via-position); }
 .dark .to-rose-50 { --tw-gradient-to: hsl(283 24% 15%) var(--tw-gradient-to-position); }
@@ -270,17 +269,17 @@
   }
 
   .wallet-btn {
-    background: linear-gradient(135deg, #c41d65, #e0337e, #f9d4e6, #c41d65);
+    background: linear-gradient(135deg, #b8005f, #d5006d, #ffd0e5, #b8005f);
     background-size: 300% 300%;
     animation: wallet-shimmer 3s ease infinite;
-    color: #8a0d3e;
+    color: #79003f;
     font-weight: 700;
-    border: 2px solid #f5afd0;
+    border: 2px solid #ff8fc4;
   }
 
   .wallet-btn:hover {
     background-size: 200% 200%;
-    box-shadow: 0 0 20px rgba(236,72,153,0.5);
+    box-shadow: 0 0 20px rgba(213,0,109,0.55);
   }
 
   @keyframes shimmer {
