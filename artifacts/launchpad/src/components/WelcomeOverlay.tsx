@@ -108,10 +108,10 @@ export default function WelcomeOverlay({ onConnect }: WelcomeOverlayProps) {
               disabled={isEntering}
               aria-busy={isEntering}
               onClick={handleConnect}
-              className="welcome-connect-button w-full max-w-[24rem] min-h-14 rounded-full border border-white/40 bg-gradient-to-r from-pink-400 via-pink-300 to-pink-400 px-6 text-base font-extrabold tracking-[0.12em] text-[#170711] shadow-[0_12px_40px_rgba(255,70,180,0.35)] transition-transform hover:-translate-y-0.5 hover:shadow-[0_14px_48px_rgba(255,70,180,0.48)] focus-visible:ring-4 focus-visible:ring-pink-200 focus-visible:ring-offset-4 focus-visible:ring-offset-[#09050d] sm:w-auto"
+              className="welcome-connect-button w-full max-w-[24rem] min-h-14 rounded-full border border-white/40 bg-gradient-to-r from-pink-400 via-pink-300 to-pink-400 px-6 text-base font-extrabold tracking-[0.12em] text-[#170711] shadow-[0_12px_40px_rgba(255,45,142,0.42)] transition-transform hover:-translate-y-0.5 hover:shadow-[0_14px_48px_rgba(255,45,142,0.55)] focus-visible:ring-4 focus-visible:ring-pink-200 focus-visible:ring-offset-4 focus-visible:ring-offset-[#09050d] sm:w-auto"
               data-testid="connect-launchpad"
             >
-              <span>CONNECT LAUNCHPAD</span>
+              <span>GO TO LAUNCHPAD</span>
               <ArrowRight data-icon="inline-end" aria-hidden="true" />
             </Button>
             <p className="welcome-footnote">Your wallet connects inside the launchpad.</p>

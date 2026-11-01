@@ -14,7 +14,7 @@ import { useLiveStream, useUpdateLiveStream } from "@/hooks/useLiveStream";
 import { useUpload } from "@/hooks/useUpload";
 import { getAdminSession, loginAdmin, logoutAdmin } from "@/lib/adminAuth";
 
-const PIE_COLORS = ["#ec4899", "#db2777", "#f472b6", "#8b5cf6", "#3b82f6", "#14b8a6"];
+const PIE_COLORS = ["#d5006d", "#b8005f", "#ff8fc4", "#8b5cf6", "#3b82f6", "#14b8a6"];
 
 export default function Admin() {
   const [authenticated, setAuthenticated] = useState(false);

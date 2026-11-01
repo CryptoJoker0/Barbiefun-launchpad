@@ -84,7 +84,7 @@ export default function Home() {
       <section className="relative rounded-3xl overflow-hidden border border-pink-200/60 shadow-xl mt-4">
         <div className="absolute inset-0 bg-gradient-to-br from-pink-100 via-white to-rose-50" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(236,72,153,0.15)_0%,_transparent_60%)]" />
-        <div aria-hidden="true" className="absolute -right-24 -top-24 size-80 rounded-full border border-pink-300/30 bg-pink-400/10 blur-[1px] shadow-[0_0_100px_rgba(224,51,126,0.2)]" />
+        <div aria-hidden="true" className="absolute -right-24 -top-24 size-80 rounded-full border border-pink-300/30 bg-pink-400/10 blur-[1px] shadow-[0_0_100px_rgba(213,0,109,0.24)]" />
         <div aria-hidden="true" className="absolute right-20 top-16 hidden size-44 rounded-full border border-violet-300/20 lg:block">
           <div className="absolute left-1/2 top-1/2 size-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-pink-300 shadow-[0_0_24px_rgba(244,114,182,0.9)]" />
         </div>
@@ -116,11 +116,11 @@ export default function Home() {
                 <span
                   className="block"
                   style={{
-                    background: "linear-gradient(135deg, #ec4899 0%, #db2777 40%, #f472b6 70%, #db2777 100%)",
+                    background: "linear-gradient(135deg, #ff64ad 0%, #d5006d 40%, #ff8fc4 70%, #b8005f 100%)",
                     WebkitBackgroundClip: "text",
                     WebkitTextFillColor: "transparent",
                     backgroundClip: "text",
-                    filter: "drop-shadow(0 2px 8px rgba(236,72,153,0.35))",
+                    filter: "drop-shadow(0 2px 8px rgba(213,0,109,0.4))",
                   }}
                 >
                   BARBIE
@@ -128,11 +128,11 @@ export default function Home() {
                 <span
                   className="block"
                   style={{
-                    background: "linear-gradient(135deg, #be185d 0%, #ec4899 50%, #db2777 100%)",
+                    background: "linear-gradient(135deg, #b8005f 0%, #e11b76 50%, #d5006d 100%)",
                     WebkitBackgroundClip: "text",
                     WebkitTextFillColor: "transparent",
                     backgroundClip: "text",
-                    filter: "drop-shadow(0 2px 12px rgba(244,63,94,0.4))",
+                    filter: "drop-shadow(0 2px 12px rgba(213,0,109,0.45))",
                     letterSpacing: "0.08em",
                   }}
                 >

@@ -1,8 +1,8 @@
 .welcome-screen {
   --welcome-black: #08050b;
   --welcome-plum: #1d0b25;
-  --welcome-pink: #ff5fc1;
-  --welcome-light-pink: #ffd5ec;
+  --welcome-pink: #ff2d8e;
+  --welcome-light-pink: #ffc3df;
   position: fixed;
   inset: 0;
   z-index: 1000;
@@ -11,7 +11,7 @@
   isolation: isolate;
   color: #fff;
   background:
-    radial-gradient(ellipse at 12% 18%, rgba(255, 72, 181, 0.16), transparent 34rem),
+    radial-gradient(ellipse at 12% 18%, rgba(255, 45, 142, 0.22), transparent 34rem),
     radial-gradient(ellipse at 88% 82%, rgba(107, 26, 115, 0.3), transparent 38rem),
     linear-gradient(140deg, var(--welcome-black) 0%, var(--welcome-plum) 55%, #0a060d 100%);
 }
@@ -32,7 +32,7 @@
   inset: 0;
   z-index: 0;
   overflow: hidden;
-  background: linear-gradient(135deg, rgba(255, 79, 185, 0.11), transparent 46%);
+  background: linear-gradient(135deg, rgba(255, 45, 142, 0.14), transparent 46%);
 }
 
 .welcome-artwork img {
@@ -59,7 +59,7 @@
   width: 100%;
   height: 100%;
   background:
-    radial-gradient(ellipse at 55% 35%, rgba(255, 83, 190, 0.38), transparent 38%),
+    radial-gradient(ellipse at 55% 35%, rgba(255, 45, 142, 0.45), transparent 38%),
     linear-gradient(145deg, #210c28, #08050b 68%);
 }
 
@@ -96,11 +96,11 @@
   width: 2.9rem;
   height: 2.9rem;
   flex: 0 0 auto;
-  border: 1px solid rgba(255, 182, 225, 0.55);
+  border: 1px solid rgba(255, 143, 196, 0.65);
   border-radius: 9999px;
   background: #08050b;
   object-fit: cover;
-  box-shadow: 0 0 24px rgba(255, 67, 181, 0.25);
+  box-shadow: 0 0 24px rgba(255, 45, 142, 0.38);
 }
 
 .welcome-brand-copy {
@@ -142,7 +142,7 @@
 }
 
 .welcome-overline {
-  color: #ff9ed6;
+  color: #ff8fc4;
   font-size: 0.64rem;
   font-weight: 800;
   letter-spacing: 0.2em;
@@ -163,7 +163,7 @@
 
 .welcome-title-accent {
   color: var(--welcome-pink);
-  text-shadow: 0 0 28px rgba(255, 75, 186, 0.3);
+  text-shadow: 0 0 28px rgba(255, 45, 142, 0.42);
 }
 
 .welcome-description {
@@ -178,13 +178,13 @@
 
 .welcome-connect-button {
   justify-content: space-between;
-  box-shadow: 0 12px 40px rgba(255, 70, 180, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.12) inset;
+  box-shadow: 0 12px 40px rgba(255, 45, 142, 0.42), 0 0 0 1px rgba(255, 255, 255, 0.12) inset;
   transition: transform 180ms ease, box-shadow 180ms ease, filter 180ms ease;
 }
 
 .welcome-connect-button:not(:disabled):hover {
   filter: saturate(1.08);
-  box-shadow: 0 14px 48px rgba(255, 70, 180, 0.48), 0 0 0 1px rgba(255, 255, 255, 0.18) inset;
+  box-shadow: 0 14px 48px rgba(255, 45, 142, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.18) inset;
 }
 
 .welcome-connect-button:focus-visible {
@@ -203,9 +203,9 @@
   position: fixed;
   inset: 0.7rem;
   z-index: 2;
-  border: 1px solid rgba(255, 133, 207, 0.21);
+  border: 1px solid rgba(255, 143, 196, 0.32);
   border-radius: 1.2rem;
-  box-shadow: 0 0 42px rgba(255, 58, 179, 0.06), inset 0 0 24px rgba(255, 58, 179, 0.025);
+  box-shadow: 0 0 42px rgba(255, 45, 142, 0.1), inset 0 0 24px rgba(255, 45, 142, 0.04);
   pointer-events: none;
 }
 
