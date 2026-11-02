@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import "./WelcomeOverlay.css";
 
 const COVER_ART_SOURCE =
-  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/file_00000000fdf882119e952cb8becac9ad-XG5dcyB8nvI2vMgh1eOSjG9afcTscm.png";
+  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/file_00000000b7d48243aa0113c9730e94c0-zrUPgqQlFO7Kg5jlf4RFkEZONRpn18.png";
 const COVER_ART_FALLBACK = `${import.meta.env.BASE_URL}images/barbiefun-launchpad-cover.png`;
 const LOGO_SOURCE = `${import.meta.env.BASE_URL}logo.png`;
 
@@ -73,7 +73,7 @@ export default function WelcomeOverlay({ onConnect }: WelcomeOverlayProps) {
         ) : (
           <img
             src={coverSource}
-            alt="Official BarbieFun cover artwork featuring a crown and two characters in a neon-pink and black setting."
+            alt="BarbieFun Launchpad embroidered logo with a crown and plush white character on red textured fabric."
             onError={handleCoverError}
             decoding="async"
           />
