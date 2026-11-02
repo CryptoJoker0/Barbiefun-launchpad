@@ -176,13 +176,44 @@
   text-wrap: pretty;
 }
 
+.welcome-screen .welcome-connect-button {
+  background: var(--welcome-pink);
+}
+
 .welcome-connect-button {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   justify-content: space-between;
   box-shadow: 0 12px 40px rgba(255, 45, 142, 0.42), 0 0 0 1px rgba(255, 255, 255, 0.12) inset;
+  animation: welcome-cta-float 4.8s ease-in-out infinite;
   transition: transform 180ms ease, box-shadow 180ms ease, filter 180ms ease;
 }
 
+.welcome-connect-button::before {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  background: linear-gradient(110deg, transparent 36%, rgba(255, 195, 223, 0.06) 43%, rgba(255, 195, 223, 0.68) 50%, rgba(255, 195, 223, 0.06) 57%, transparent 64%);
+  content: "";
+  opacity: 0;
+  animation: welcome-cta-sheen 4s cubic-bezier(0.2, 0.7, 0.2, 1) infinite;
+  pointer-events: none;
+}
+
+.welcome-connect-button > * {
+  position: relative;
+  z-index: 1;
+}
+
+.welcome-connect-button:disabled,
+.welcome-connect-button:disabled::before {
+  animation-play-state: paused;
+}
+
 .welcome-connect-button:not(:disabled):hover {
+  transform: translateY(-2px);
   filter: saturate(1.08);
   box-shadow: 0 14px 48px rgba(255, 45, 142, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.18) inset;
 }
@@ -217,6 +248,18 @@
 @keyframes welcome-artwork-enter {
   from { opacity: 0; transform: scale(1.025); }
   to { opacity: 0.9; transform: scale(1); }
+}
+
+@keyframes welcome-cta-float {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -2px; }
+}
+
+@keyframes welcome-cta-sheen {
+  0%, 18% { opacity: 0; transform: translateX(-120%); }
+  26% { opacity: 0.9; }
+  58% { opacity: 0.75; transform: translateX(120%); }
+  68%, 100% { opacity: 0; transform: translateX(120%); }
 }
 
 @media (min-width: 768px) {
@@ -278,5 +321,15 @@
     animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
+  }
+
+  .welcome-connect-button {
+    animation: none !important;
+    translate: none;
+  }
+
+  .welcome-connect-button::before {
+    animation: none !important;
+    opacity: 0;
   }
 }
