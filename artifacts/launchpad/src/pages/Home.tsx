@@ -9,7 +9,6 @@ import { Input } from "@/components/ui/input";
 import RecentLaunches from "@/components/RecentLaunches";
 import TokenCard from "@/components/TokenCard";
 import NativeTokenPrices from "@/components/NativeTokenPrices";
-import X1TokenTracker from "@/components/X1TokenTracker";
 import ChainIcon from "@/components/ChainIcon";
 import { SUPPORTED_CHAINS, DISPLAY_CHAINS, robinhoodChain } from "@/lib/wagmi";
 import { useLaunches } from "@/hooks/useLaunches";
@@ -234,16 +233,6 @@ export default function Home() {
           </div>
         ))}
       </div>
-
-      {/* X1 Token Tracker */}
-      <section>
-        <div className="flex items-center gap-3 mb-4">
-          <ChainIcon chain="x1" size={20} />
-          <h2 className="text-xl font-extrabold text-pink-900">X1 Blockchain Tokens</h2>
-          <span className="text-[10px] font-bold bg-pink-100 text-pink-600 border border-pink-200/60 rounded-full px-2 py-0.5 uppercase tracking-widest">Live</span>
-        </div>
-        <X1TokenTracker />
-      </section>
 
       {/* African X1 NFT — Guardian Banner */}
       <motion.a
