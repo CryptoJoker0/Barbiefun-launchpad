@@ -6,11 +6,16 @@
 import { useQuery } from "@tanstack/react-query";
 import { TrendingUp, TrendingDown, RefreshCw, Wifi, WifiOff } from "lucide-react";
 import ChainIcon from "@/components/ChainIcon";
+import NativePriceCharts, {
+  fetchPulsechainHistory,
+  type PricePoint,
+  type XntMarketData,
+} from "@/components/NativePriceCharts";
 import { DISPLAY_CHAINS } from "@/lib/wagmi";
 
 type PriceMap = Record<string, { usd: number; usd_24h_change: number }>;
 
-const COINGECKO_IDS = ["binancecoin", "ethereum", "okb", "solana"];
+const COINGECKO_IDS = ["binancecoin", "ethereum", "okb", "pulsechain", "solana"];
 
 async function fetchPrices(): Promise<PriceMap> {
   const ids = COINGECKO_IDS.join(",");
@@ -21,18 +26,20 @@ async function fetchPrices(): Promise<PriceMap> {
   return res.json();
 }
 
-async function fetchXntPrice(): Promise<number | null> {
-  const res = await fetch("/api/x1/tokens", { signal: AbortSignal.timeout(8_000) });
-  if (!res.ok) return null;
-  const data = await res.json() as { xntUsd?: number | null };
-  return data.xntUsd ?? null;
+async function fetchXntMarket(): Promise<XntMarketData> {
+  const res = await fetch("/api/x1/market", { signal: AbortSignal.timeout(8_000) });
+  if (!res.ok) throw new Error("X1 price feed unavailable");
+  return res.json();
 }
 
 function formatPrice(n: number): string {
   if (n >= 10000) return `$${n.toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
   if (n >= 100) return `$${n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   if (n >= 1) return `$${n.toFixed(3)}`;
-  return `$${n.toFixed(6)}`;
+  if (n >= 0.01) return `$${n.toFixed(5)}`;
+  if (n >= 0.0001) return `$${n.toFixed(7)}`;
+  if (n >= 0.000001) return `$${n.toFixed(8)}`;
+  return `$${n.toExponential(2)}`;
 }
 
 const STABLE_TOKENS = new Set(["USD", "USDC"]);
@@ -52,15 +59,47 @@ export default function NativeTokenPrices() {
     retry: 2,
   });
 
-  const { data: xntUsd } = useQuery<number | null>({
-    queryKey: ["xnt-price"],
-    queryFn: fetchXntPrice,
+  const {
+    data: xntMarket,
+    isLoading: isXntLoading,
+    isError: isXntError,
+    refetch: refetchXnt,
+  } = useQuery<XntMarketData>({
+    queryKey: ["xnt-market"],
+    queryFn: fetchXntMarket,
     refetchInterval: 60_000,
     staleTime: 45_000,
     retry: 1,
   });
 
+  const {
+    data: pulseHistory = [],
+    isLoading: isPulseHistoryLoading,
+    isError: isPulseHistoryError,
+    dataUpdatedAt: pulseHistoryUpdatedAt,
+  } = useQuery<PricePoint[]>({
+    queryKey: ["pulsechain-price-history", "24h"],
+    queryFn: fetchPulsechainHistory,
+    refetchInterval: 5 * 60_000,
+    staleTime: 4 * 60_000,
+    retry: 1,
+  });
+
+  const pulseHistoryFirst = pulseHistory[0]?.price ?? null;
+  const pulseHistoryLatest = pulseHistory[pulseHistory.length - 1]?.price ?? null;
+  const pulseHistoryChange = pulseHistoryFirst && pulseHistoryLatest !== null
+    ? ((pulseHistoryLatest - pulseHistoryFirst) / pulseHistoryFirst) * 100
+    : null;
+  const pulsePriceValue = prices?.pulsechain?.usd ?? pulseHistoryLatest;
+  const pulseChangeValue = prices?.pulsechain?.usd_24h_change ?? pulseHistoryChange;
+  const pulsePrice = pulsePriceValue !== null
+    ? { usd: pulsePriceValue, usd_24h_change: pulseChangeValue }
+    : null;
+
   const lastUpdated = dataUpdatedAt ? new Date(dataUpdatedAt) : null;
+  const isFeedLoading = isLoading || isXntLoading || isPulseHistoryLoading;
+  const isFeedError = isError || isXntError || isPulseHistoryError;
+  const hasLiveFeed = Boolean(prices || xntMarket || pulsePrice);
 
   return (
     <div className="bg-white/80 backdrop-blur border border-pink-100 rounded-2xl shadow-lg overflow-hidden">
@@ -77,19 +116,20 @@ export default function NativeTokenPrices() {
           </span>
         </div>
         <div className="flex items-center space-x-2">
-          <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${isLoading ? "bg-yellow-400" : prices ? "bg-emerald-400" : "bg-gray-300"}`} />
+          <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${isFeedLoading ? "bg-yellow-400" : hasLiveFeed ? "bg-emerald-400" : "bg-gray-300"}`} />
           <span className="text-[10px] text-pink-400 font-semibold">
-            {isLoading ? "Loading…" : isError ? "Offline" : "CoinGecko LIVE"}
+            {isFeedLoading ? "Loading…" : isFeedError ? "Partial feed" : "CoinGecko · X1SCR"}
           </span>
-          {prices ? (
+          {hasLiveFeed ? (
             <Wifi className="w-3 h-3 text-emerald-400" />
           ) : (
             <WifiOff className="w-3 h-3 text-pink-300" />
           )}
           <button
-            onClick={() => refetch()}
+            onClick={() => { void refetch(); void refetchXnt(); }}
             className="text-pink-300 hover:text-pink-500 transition-colors"
             title="Refresh prices"
+            aria-label="Refresh live native-token prices"
           >
             <RefreshCw className="w-3 h-3" />
           </button>
@@ -109,11 +149,14 @@ export default function NativeTokenPrices() {
           const isStable = STABLE_TOKENS.has(chain.symbol);
           const cid = cgId(chain.symbol, chain.coingeckoId);
           const priceData = cid ? prices?.[cid] : null;
+          const isPulseChain = chain.coingeckoId === "pulsechain";
+          const effectivePriceData = isPulseChain ? pulsePrice : priceData;
 
           // X1 Blockchain (id -1) uses XNT price from x1scr.xyz proxy
           const isX1 = chain.id === -1;
-          const price = isStable ? 1 : isX1 ? (xntUsd ?? null) : priceData?.usd ?? null;
-          const change = isStable ? 0 : isX1 ? null : priceData?.usd_24h_change ?? null;
+          const displaySymbol = isX1 ? "XNT" : chain.symbol;
+          const price = isStable ? 1 : isX1 ? (xntMarket?.priceUsd ?? null) : effectivePriceData?.usd ?? null;
+          const change = isStable ? 0 : isX1 ? (xntMarket?.change24Pct ?? null) : effectivePriceData?.usd_24h_change ?? null;
           const up = change === null ? true : change >= 0;
 
           return (
@@ -126,7 +169,7 @@ export default function NativeTokenPrices() {
                 <ChainIcon chain={chain.icon} size={22} className="shrink-0" />
                 <div className="min-w-0">
                   <div className="font-bold text-pink-900 text-[11px] truncate flex items-center gap-1">
-                    {chain.symbol}
+                    {displaySymbol}
                     {chain.isSvm && (
                       <span className="text-[8px] bg-purple-100 text-purple-600 rounded px-1 font-bold leading-none py-0.5">SVM</span>
                     )}
@@ -167,6 +210,17 @@ export default function NativeTokenPrices() {
           );
         })}
       </div>
+
+      <NativePriceCharts
+        xntMarket={xntMarket ?? null}
+        isXntLoading={isXntLoading}
+        isXntError={isXntError}
+        pulsePrice={pulsePrice}
+        pulseHistory={pulseHistory}
+        isPulseLoading={isPulseHistoryLoading}
+        isPulseError={isPulseHistoryError}
+        pulseHistoryUpdatedAt={pulseHistoryUpdatedAt || null}
+      />
 
       {/* Footer */}
       <div className="border-t border-pink-50 px-3 py-1.5 flex items-center justify-between bg-pink-50/30">

@@ -66,6 +66,71 @@ router.get("/x1/tokens", async (req, res) => {
   }
 });
 
+type XNTMarketResponse = {
+  priceUsd: number | null;
+  change24Pct: number | null;
+  spark: number[];
+  ts: number | null;
+};
+
+let marketCache: CachedResponse | null = null;
+
+router.get("/x1/market", async (_req, res) => {
+  if (marketCache && Date.now() - marketCache.fetchedAt < 60_000) {
+    res.json(marketCache.data);
+    return;
+  }
+
+  try {
+    const upstream = await fetch("https://x1scr.xyz/api/xnt", {
+      headers: {
+        Accept: "application/json",
+        "User-Agent": "Mozilla/5.0 (compatible; BarbieFun/1.0)",
+        Referer: "https://x1scr.xyz/",
+      },
+      signal: AbortSignal.timeout(8_000),
+    });
+
+    if (!upstream.ok) {
+      if (marketCache) {
+        res.json(marketCache.data);
+        return;
+      }
+      res.status(502).json({ error: `x1scr.xyz returned ${upstream.status}` });
+      return;
+    }
+
+    const raw = (await upstream.json()) as {
+      priceUsd?: unknown;
+      change24Pct?: unknown;
+      spark?: unknown;
+      ts?: unknown;
+    };
+    const finiteNumber = (value: unknown) =>
+      typeof value === "number" && Number.isFinite(value) ? value : null;
+    const payload: XNTMarketResponse = {
+      priceUsd: finiteNumber(raw.priceUsd),
+      change24Pct: finiteNumber(raw.change24Pct),
+      spark: Array.isArray(raw.spark)
+        ? raw.spark.filter(
+            (value): value is number =>
+              typeof value === "number" && Number.isFinite(value) && value > 0,
+          )
+        : [],
+      ts: finiteNumber(raw.ts),
+    };
+
+    marketCache = { data: payload, fetchedAt: Date.now() };
+    res.json(payload);
+  } catch {
+    if (marketCache) {
+      res.json(marketCache.data);
+      return;
+    }
+    res.status(502).json({ error: "x1scr.xyz XNT market data unavailable" });
+  }
+});
+
 /** Proxy token logo images from x1scr.xyz (blocked by CORS client-side) */
 router.get("/x1/logo", async (req, res) => {
   const mint = req.query["mint"];

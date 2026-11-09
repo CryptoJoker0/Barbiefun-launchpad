@@ -48,6 +48,18 @@ export default defineConfig({
     // process is still shutting down after a file sync or restart.
     strictPort: false,
     host: "0.0.0.0",
+    proxy: {
+      "/api/x1/market": {
+        target: "https://x1scr.xyz",
+        changeOrigin: true,
+        rewrite: () => "/api/xnt",
+        headers: {
+          Accept: "application/json",
+          Referer: "https://x1scr.xyz/",
+          "User-Agent": "Mozilla/5.0 (compatible; BarbieFun/1.0)",
+        },
+      },
+    },
     allowedHosts: true,
     fs: {
       strict: true,
