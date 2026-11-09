@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Button } from "@/components/ui/button";
 import { Rocket, Clock, Trophy, ArrowLeftRight, Sparkles, DollarSign, Link2, Heart, BadgeCheck, Search, Radio, ShieldCheck, Cpu, Zap, Globe, Users, ExternalLink, Video, Clipboard, Check, Send } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -10,7 +11,7 @@ import TokenCard from "@/components/TokenCard";
 import NativeTokenPrices from "@/components/NativeTokenPrices";
 import X1TokenTracker from "@/components/X1TokenTracker";
 import ChainIcon from "@/components/ChainIcon";
-import { SUPPORTED_CHAINS, DISPLAY_CHAINS } from "@/lib/wagmi";
+import { SUPPORTED_CHAINS, DISPLAY_CHAINS, robinhoodChain } from "@/lib/wagmi";
 import { useLaunches } from "@/hooks/useLaunches";
 import { useLiveStream } from "@/hooks/useLiveStream";
 
@@ -22,9 +23,11 @@ const VALIDATOR_STAKING_URL = "https://app.xdex.xyz/valistake";
 
 export default function Home() {
   const [tab, setTab] = useState("new");
+  const [chainFilter, setChainFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [validatorCopied, setValidatorCopied] = useState(false);
   const { data: launches = [], isLoading } = useLaunches();
+  const eligibleLaunches = launches.filter((launch) => launch.chainId !== robinhoodChain.id);
   const { data: liveStream } = useLiveStream();
   // Use API-configured video/embed if available, otherwise fall back to the
   // locally-served video uploaded directly to the public folder.
@@ -49,15 +52,20 @@ export default function Home() {
   const getFiltered = () => {
     switch (tab) {
       case "new":
-        return [...launches].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-      case "chains":
-        return [...launches].sort((a, b) => a.chainName.localeCompare(b.chainName));
+        return [...eligibleLaunches].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      case "chains": {
+        const selectedChainId = DISPLAY_CHAINS.find((chain) => chain.icon === chainFilter)?.id;
+        const chainLaunches = selectedChainId === undefined
+          ? eligibleLaunches
+          : eligibleLaunches.filter((launch) => launch.chainId === selectedChainId);
+        return [...chainLaunches].sort((a, b) => a.chainName.localeCompare(b.chainName));
+      }
       case "verified":
-        return [...launches]
+        return [...eligibleLaunches]
           .filter((l) => l.verified)
           .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
       default:
-        return launches;
+        return eligibleLaunches;
     }
   };
 
@@ -301,7 +309,7 @@ export default function Home() {
       </motion.a>
 
       {/* Recently Launched */}
-      <RecentLaunches launches={launches} />
+      <RecentLaunches launches={eligibleLaunches} />
 
       {/* Token Feed */}
       <section>
@@ -334,6 +342,47 @@ export default function Home() {
             </TabsList>
           </div>
 
+          {tab === "chains" && (
+            <div className="mb-6 flex flex-col gap-2.5 sm:flex-row sm:items-center sm:gap-4">
+              <span className="text-xs font-bold uppercase tracking-wider text-pink-500">
+                Filter by chain
+              </span>
+              <ToggleGroup
+                type="single"
+                value={chainFilter}
+                onValueChange={(value) => {
+                  if (value) setChainFilter(value);
+                }}
+                aria-label="Filter discovery launches by chain"
+                className="flex flex-wrap justify-start gap-2"
+              >
+                <ToggleGroupItem
+                  value="all"
+                  variant="outline"
+                  className="h-9 rounded-full border-pink-200/70 bg-white px-4 text-xs font-semibold text-pink-700 shadow-sm hover:bg-pink-50 hover:text-pink-800 data-[state=on]:border-primary data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:hover:text-primary-foreground"
+                >
+                  All chains
+                </ToggleGroupItem>
+                <ToggleGroupItem
+                  value="x1"
+                  variant="outline"
+                  className="h-9 rounded-full border-pink-200/70 bg-white px-4 text-xs font-semibold text-pink-700 shadow-sm hover:bg-pink-50 hover:text-pink-800 data-[state=on]:border-primary data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:hover:text-primary-foreground"
+                >
+                  <span aria-hidden="true"><ChainIcon chain="x1" size={16} /></span>
+                  X1
+                </ToggleGroupItem>
+                <ToggleGroupItem
+                  value="solana"
+                  variant="outline"
+                  className="h-9 rounded-full border-pink-200/70 bg-white px-4 text-xs font-semibold text-pink-700 shadow-sm hover:bg-pink-50 hover:text-pink-800 data-[state=on]:border-primary data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:hover:text-primary-foreground"
+                >
+                  <span aria-hidden="true"><ChainIcon chain="solana" size={16} /></span>
+                  Solana
+                </ToggleGroupItem>
+              </ToggleGroup>
+            </div>
+          )}
+
           {isLoading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {Array.from({ length: 4 }).map((_, i) => (
@@ -359,6 +408,28 @@ export default function Home() {
                   <p className="text-sm text-pink-400 mb-5 max-w-sm mx-auto">
                     No tokens match &quot;{search}&quot; by name or contract address.
                   </p>
+                </>
+              ) : tab === "chains" && chainFilter !== "all" ? (
+                <>
+                  <div
+                    aria-hidden="true"
+                    className="mx-auto mb-3 flex size-10 items-center justify-center rounded-full bg-pink-50"
+                  >
+                    <ChainIcon chain={chainFilter} size={26} />
+                  </div>
+                  <h3 className="mb-1 text-lg font-bold text-pink-800">
+                    No {chainFilter === "x1" ? "X1" : "Solana"} launches yet
+                  </h3>
+                  <p className="mx-auto mb-5 max-w-sm text-sm text-pink-400">
+                    There are no projects on this chain yet. Choose another filter or view all chains.
+                  </p>
+                  <Button
+                    variant="outline"
+                    onClick={() => setChainFilter("all")}
+                    className="rounded-full border-pink-200 text-pink-700"
+                  >
+                    Show all chains
+                  </Button>
                 </>
               ) : tab === "verified" ? (
                 <>
